@@ -250,6 +250,37 @@
 
   <div data-include="site-footer"></div>
 
+  <script>
+  (function(){
+    var sel = document.querySelector('.bs-sort select');
+    if (!sel) return;
+    sel.addEventListener('change', function(){
+      var mode = this.selectedIndex; // 0=venduti,1=asc,2=desc,3=novita
+      var grid = document.querySelector('.bs-rest .product-grid');
+      if (!grid) return;
+      var items = Array.from(grid.querySelectorAll('a.product-card-link'));
+      items.sort(function(a, b){
+        function price(el){
+          return parseFloat((el.querySelector('.price-current')||{}).textContent||'0')
+            .replace ? parseFloat(((el.querySelector('.price-current')||{}).textContent||'0').replace(/[^\d,]/g,'').replace(',','.')) : 0;
+        }
+        var pa = parseFloat(((a.querySelector('.price-current')||{}).textContent||'0').replace(/[^\d,]/g,'').replace(',','.'));
+        var pb = parseFloat(((b.querySelector('.price-current')||{}).textContent||'0').replace(/[^\d,]/g,'').replace(',','.'));
+        var ra = parseInt(((a.querySelector('.rank-badge')||{}).textContent||'99').trim(), 10);
+        var rb = parseInt(((b.querySelector('.rank-badge')||{}).textContent||'99').trim(), 10);
+        if (mode === 1) return pa - pb;
+        if (mode === 2) return pb - pa;
+        if (mode === 3) {
+          var na = !!a.querySelector('.badge-new'), nb = !!b.querySelector('.badge-new');
+          if (na && !nb) return -1; if (!na && nb) return 1;
+          return ra - rb;
+        }
+        return ra - rb;
+      });
+      items.forEach(function(el){ grid.appendChild(el); });
+    });
+  })();
+  </script>
   <script src="api-client.js"></script>
   <script src="app.js?v=5"></script>
 </body>

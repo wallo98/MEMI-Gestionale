@@ -251,6 +251,12 @@
       });
       document.getElementById('collCount').textContent = n;
     }
+    // Initialise count to actual number of product cards
+    (function(){
+      var n = document.querySelectorAll('#collGrid .product-card-link').length;
+      var el = document.getElementById('collCount');
+      if (el) el.textContent = n;
+    })();
   </script>
 </body>
 </html>
