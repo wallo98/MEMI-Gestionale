@@ -29,8 +29,6 @@ services:
       MYSQL_PASSWORD:      ${DB_PASSWORD:-changeme_user}
     volumes:
       - mysql_data:/var/lib/mysql
-      # Auto-run schema on first start
-      - ./MEMI-Backend/src/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-changeme_root}"]
       interval: 10s
