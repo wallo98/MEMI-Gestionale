@@ -1,0 +1,147 @@
+/* ============================================================
+   TOKENS.CSS — Memi Abbigliamento
+   Single source of truth for the design system.
+   Link this BEFORE app.css and before each page's own <style>,
+   then delete the duplicated :root block from every page.
+   ============================================================ */
+
+:root {
+  /* ================================================================
+     BRAND PALETTE — Memi Abbigliamento
+     Viola #C5BEE2 · Verde #CCE2CB · Rosa #F3D1D6 · Bianco #FFFFFF
+     Source of truth: client Instagram / graphic design files
+     ================================================================ */
+
+  /* --- Surfaces --- */
+  --bg-base:        #FFFFFF;   /* Pure white canvas — no warm tint       */
+  --bg-soft:        #F3F1F9;   /* Ultra-light viola tint — hover/subtle  */
+  --bg-card:        #FFFFFF;   /* Product card surface                   */
+
+  /* --- Rosa (Accent Pink) — #F3D1D6 --- */
+  --blush:          #F3D1D6;   /* Rosa brand accent — announcement bars  */
+  --blush-light:    #FAE8EB;   /* Light rosa — announcement bar bg       */
+  --blush-dark:     #C4A8B0;   /* Muted rosa — badge / cart dot          */
+
+  /* --- Bianco Caldo (Soft Off-White) — #F7F5F0 --- */
+  --cream:          #F7F5F0;   /* Bianco Caldo — logo contrast, overlays */
+  --cream-dark:     #E6E2EF;   /* Viola-tinted cool divider              */
+
+  /* --- Verde (Supporting Green) — #CCE2CB --- */
+  --sage:           #CCE2CB;   /* Verde brand green — tags, pills        */
+  --sage-light:     #E5F1E4;   /* Light verde — chip backgrounds         */
+  --sage-dark:      #85A884;   /* Deeper verde — icon strokes            */
+
+  /* --- Viola (Dominant) — #C5BEE2 --- */
+  --lavender:       #C5BEE2;   /* Viola — hero bg, marquee, highlights   */
+  --lavender-light: #EAE7F4;   /* Light viola — hover surfaces           */
+
+  /* --- Cool-toned Borders / Dividers --- */
+  --beige:          #DDD9EC;   /* Cool viola-tinted border               */
+  --beige-dark:     #C0B9D9;   /* Slightly deeper viola border           */
+
+  /* --- Typography (unchanged — works over all pastels) --- */
+  --espresso:       #3B2B2B;   /* Rich dark — primary body text          */
+  --ink:            #2F3438;   /* Charcoal — editorial headings          */
+  --brown-mid:      #6B5050;   /* Secondary text                         */
+  --brown-light:    #9E8A8A;   /* Placeholder / meta                     */
+  --white:          #FFFFFF;   /* Pure white                             */
+
+  /* --- Typography --- */
+  --font-serif:     'Cormorant Garamond', Georgia, serif;
+  --font-sans:      'DM Sans', system-ui, sans-serif;
+
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+  --text-4xl:  2.25rem;
+  --text-5xl:  3rem;
+  --text-6xl:  3.75rem;
+
+  /* New: fluid hero size — replaces fixed --text-4xl on .hero-title */
+  --text-hero: clamp(2.25rem, 4vw + 1.5rem, 4.75rem);
+
+  --leading-tight:  1.15;
+  --leading-snug:   1.35;
+  --leading-normal: 1.6;
+
+  --tracking-tight:  -0.02em;
+  --tracking-wide:   0.08em;
+  --tracking-wider:  0.14em;
+
+  /* --- Spacing (8-pt scale) --- */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* --- Radii --- */
+  --radius-sm:   4px;
+  --radius-md:   10px;
+  --radius-lg:   18px;
+  --radius-xl:   28px;
+  --radius-full: 9999px;
+
+  /* --- Shadows (cool-toned viola base) --- */
+  --shadow-xs:  0 1px 3px rgba(48,40,70,.06);
+  --shadow-sm:  0 2px 8px rgba(48,40,70,.08);
+  --shadow-md:  0 4px 20px rgba(48,40,70,.10);
+  --shadow-lg:  0 8px 40px rgba(48,40,70,.12);
+  --shadow-card-hover: 0 12px 40px rgba(48,40,70,.14);
+
+  /* --- Transitions --- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 180ms;
+  --dur-med:  300ms;
+
+  /* New: motion tokens for the micro-interaction upgrades */
+  --dur-slow:    650ms;
+  --ease-magnet: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* --- Legacy aliases ---
+     404.html / privacy.html / returns.html / order-confirm.html used to
+     run their own drifted palette with these token names. Mapped onto
+     the canonical tokens above so those pages render the same palette
+     as the rest of the site without any var() reference breaking. */
+  --border:         var(--beige);
+  --cream-warm:     var(--bg-soft);
+  --espresso-light: var(--brown-mid);
+  --text-body:      var(--brown-mid);
+  --text-muted:     var(--brown-light);
+  --blush-mid:      var(--blush);
+  --lavender-dark:  #A89BC4; /* no canonical dark-lavender existed; derived to match the sage-dark/blush-dark contrast pattern */
+}
+
+/* ============================================================
+   Placeholder helpers — kept here so every page shares one
+   definition instead of redefining .ph-* per file.
+   ============================================================ */
+.ph-blush    { background: linear-gradient(145deg, #FAE8EB, #F3D1D6); }  /* Rosa */
+.ph-sage     { background: linear-gradient(145deg, #E5F1E4, #CCE2CB); }  /* Verde */
+.ph-lavender { background: linear-gradient(145deg, #EAE7F4, #C5BEE2); }  /* Viola */
+.ph-cream    { background: linear-gradient(145deg, #F7F5F0, #E6E2EF); }  /* Bianco Caldo → cool */
+.ph-peach    { background: linear-gradient(145deg, #FAE8EB, #F3D1D6); }  /* Remapped → Rosa */
+.ph-mint     { background: linear-gradient(145deg, #E5F1E4, #CCE2CB); }  /* Remapped → Verde */
+
+/* Ghost-mannequin tier: flat, neutral, no gradient */
+.ph-flat        { background: var(--bg-soft); }
+.ph-shimmer     { position: relative; overflow: hidden; background: var(--bg-soft); }
+.ph-shimmer::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.35) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: shimmerSweep 2.2s ease-in-out infinite;
+}
+@keyframes shimmerSweep { from { background-position: 200% 0; } to { background-position: -50% 0; } }

@@ -1,0 +1,237 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resi & Rimborsi · Memi Abbigliamento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    /* Tokens now live in tokens.css (linked above), unified with the
+       rest of the site instead of this page's own drifted palette. */
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--font-sans);background:var(--cream);color:var(--espresso);line-height:1.65;-webkit-font-smoothing:antialiased;}
+    a{color:var(--blush-dark);}
+
+    .simple-header{background:var(--cream);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;}
+    .simple-header .logo{font-family:var(--font-serif);font-size:1.4rem;font-weight:400;letter-spacing:.06em;color:var(--espresso);text-decoration:none;}
+    .simple-header .logo span{color:var(--blush-dark);}
+    .simple-header .back{font-size:.8rem;color:var(--text-muted);text-decoration:underline;text-underline-offset:3px;transition:color 150ms;}
+    .simple-header .back:hover{color:var(--espresso);}
+
+    .doc-wrap{max-width:720px;margin:0 auto;padding:48px 24px 80px;}
+
+    .doc-eyebrow{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);font-weight:500;margin-bottom:.75rem;}
+    .doc-title{font-family:var(--font-serif);font-size:clamp(2rem,5vw,3rem);font-weight:300;line-height:1.1;margin-bottom:.5rem;}
+    .doc-title em{font-style:italic;}
+    .doc-updated{font-size:.8rem;color:var(--text-muted);margin-bottom:2.5rem;padding-bottom:2rem;border-bottom:1px solid var(--border);}
+
+    /* Steps */
+    .steps{display:flex;flex-direction:column;gap:0;margin-bottom:3rem;}
+    .step{display:flex;gap:1.25rem;align-items:flex-start;padding-bottom:1.75rem;position:relative;}
+    .step:not(:last-child)::before{content:'';position:absolute;left:19px;top:40px;bottom:0;width:2px;background:var(--border);}
+    .step-num{width:40px;height:40px;border-radius:50%;background:var(--blush);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:1.125rem;font-weight:400;color:var(--espresso);flex-shrink:0;}
+    .step-body h3{font-size:.9rem;font-weight:600;margin-bottom:.3rem;color:var(--espresso);}
+    .step-body p{font-size:.875rem;color:var(--text-body);line-height:1.65;}
+
+    /* Policy cards */
+    .policy-grid{display:grid;gap:1rem;margin-bottom:3rem;}
+    @media(min-width:600px){.policy-grid{grid-template-columns:1fr 1fr;}}
+    .policy-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:1.5rem;}
+    .policy-card-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;}
+    .policy-card-icon svg{width:20px;height:20px;stroke:var(--espresso);fill:none;stroke-width:1.8;}
+    .policy-card h3{font-size:.9rem;font-weight:600;margin-bottom:.4rem;color:var(--espresso);}
+    .policy-card p{font-size:.825rem;color:var(--text-body);line-height:1.6;}
+    .policy-card .tag{display:inline-block;margin-top:.75rem;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:9999px;}
+    .tag-ok{background:var(--sage);color:var(--espresso);}
+    .tag-no{background:var(--blush);color:var(--espresso);}
+
+    .doc-section{margin-bottom:2.5rem;}
+    .doc-section h2{font-family:var(--font-serif);font-size:1.375rem;font-weight:400;margin-bottom:.875rem;color:var(--espresso);}
+    .doc-section p{font-size:.9rem;color:var(--text-body);margin-bottom:.75rem;line-height:1.7;}
+
+    .faq{margin-bottom:3rem;}
+    .faq-item{border-bottom:1px solid var(--border);}
+    .faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;padding:1rem 0;font-size:.9rem;font-weight:500;cursor:pointer;border:none;background:none;font-family:inherit;color:var(--espresso);text-align:left;gap:1rem;}
+    .faq-q svg{width:18px;height:18px;stroke:var(--text-muted);flex-shrink:0;transition:transform 250ms;}
+    .faq-a{font-size:.875rem;color:var(--text-body);line-height:1.7;max-height:0;overflow:hidden;transition:max-height 350ms ease,padding 250ms;}
+    .faq-item.open .faq-q svg{transform:rotate(45deg);}
+    .faq-item.open .faq-a{max-height:400px;padding-bottom:1rem;}
+
+    .contact-box{background:linear-gradient(135deg,var(--blush),var(--lavender));border-radius:20px;padding:2rem;text-align:center;}
+    .contact-box h3{font-family:var(--font-serif);font-size:1.5rem;font-weight:300;margin-bottom:.5rem;}
+    .contact-box h3 em{font-style:italic;}
+    .contact-box p{font-size:.875rem;color:var(--text-body);margin-bottom:1.5rem;}
+    .contact-btns{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;}
+    .contact-btns a{padding:.75rem 1.5rem;border-radius:9999px;font-size:.85rem;font-weight:500;text-decoration:none;transition:transform 150ms,background 200ms;}
+    .contact-btns a:hover{transform:translateY(-1px);}
+    .btn-dark{background:var(--espresso);color:var(--cream);}
+    .btn-ghost{background:rgba(255,255,255,.6);color:var(--espresso);border:1px solid rgba(59,43,43,.15);}
+
+    .simple-footer{border-top:1px solid var(--border);padding:20px 24px;text-align:center;font-size:.75rem;color:var(--text-muted);}
+    .simple-footer a{color:var(--text-muted);text-decoration:underline;text-underline-offset:3px;}
+  </style>
+</head>
+<body>
+  <header class="simple-header">
+    <a href="index.html" class="logo">Memi<span>.</span></a>
+    <a href="javascript:history.back()" class="back">← Indietro</a>
+  </header>
+
+  <div class="doc-wrap">
+    <p class="doc-eyebrow">Assistenza clienti</p>
+    <h1 class="doc-title">Resi &amp; <em>Rimborsi</em></h1>
+    <p class="doc-updated">Politica valida per acquisti effettuati su memiabbigliamento.it · Aggiornata il 1 gennaio 2026</p>
+
+    <!-- Policy overview cards -->
+    <div class="policy-grid">
+      <div class="policy-card">
+        <div class="policy-card-icon" style="background:var(--sage);">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3>30 giorni per il reso</h3>
+        <p>Hai 30 giorni dalla ricezione del pacco per restituire qualsiasi articolo.</p>
+        <span class="tag tag-ok">Gratuito</span>
+      </div>
+      <div class="policy-card">
+        <div class="policy-card-icon" style="background:var(--lavender);">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        </div>
+        <h3>Rimborso in 5–7 giorni</h3>
+        <p>Il rimborso viene elaborato entro 5–7 giorni lavorativi dal ricevimento del reso.</p>
+        <span class="tag tag-ok">Rapido</span>
+      </div>
+      <div class="policy-card">
+        <div class="policy-card-icon" style="background:var(--blush);">
+          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <h3>Articoli idonei</h3>
+        <p>Capi non indossati, con etichette originali, nella confezione originale.</p>
+        <span class="tag tag-ok">Facile</span>
+      </div>
+      <div class="policy-card">
+        <div class="policy-card-icon" style="background:var(--beige);">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+        <h3>Articoli esclusi</h3>
+        <p>Articoli in saldo finale, bigiotteria, articoli personalizzati e prodotti igienici.</p>
+        <span class="tag tag-no">Non rimborsabili</span>
+      </div>
+    </div>
+
+    <!-- How to return -->
+    <div class="doc-section">
+      <h2>Come effettuare un reso</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Contattaci entro 30 giorni</h3>
+          <p>Scrivi a <a href="mailto:resi@memiabbigliamento.it">resi@memiabbigliamento.it</a> con il numero d'ordine e il motivo del reso. Riceverai risposta entro 24 ore lavorative.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Ricevi l'etichetta di reso</h3>
+          <p>Ti invieremo un'etichetta prepagata BRT via email. Il reso è completamente gratuito per ordini in Italia.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Imballa e spedisci</h3>
+          <p>Rimetti gli articoli nella confezione originale (o in un imballo sicuro), applica l'etichetta e consegna al punto di ritiro BRT più vicino entro 5 giorni.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Ricevi il rimborso</h3>
+          <p>Una volta ricevuto e verificato il pacco, processiamo il rimborso sul metodo di pagamento originale entro 5–7 giorni lavorativi. Riceverai una email di conferma.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="doc-section">
+      <h2>Domande frequenti</h2>
+    </div>
+    <div class="faq">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Posso cambiare taglia invece di fare un reso?
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-a">
+          Sì! Effettua un reso normale e fai un nuovo ordine per la taglia desiderata. In questo modo la disponibilità è garantita. Se preferisci uno scambio diretto, scrivici e valutiamo insieme.
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Cosa faccio se ho ricevuto un articolo difettoso?
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-a">
+          Ci dispiace! Fotografa il difetto e scrivici entro 48 ore dalla ricezione. Provvederemo immediatamente alla sostituzione o al rimborso completo, spese di spedizione incluse.
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Posso restituire articoli acquistati in saldo?
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-a">
+          Gli articoli contrassegnati come "Saldi" sono rimborsabili con credito store, non con rimborso in denaro. Le ultime taglie ("saldo finale") non sono rimborsabili.
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Quanto tempo impiega il rimborso ad apparire sul conto?
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-a">
+          Dopo che il rimborso viene processato da noi (5–7 giorni lavorativi), il tuo istituto bancario può impiegare ulteriori 3–5 giorni lavorativi. PayPal è generalmente più veloce (1–2 giorni).
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Il reso è gratuito anche dall'estero?
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-a">
+          Il reso gratuito è disponibile per spedizioni in Italia. Per ordini internazionali, le spese di reso sono a carico del cliente. Contattateci per maggiori informazioni sui paesi disponibili.
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact CTA -->
+    <div class="contact-box">
+      <h3>Hai bisogno di <em>aiuto?</em></h3>
+      <p>Il nostro team risponde entro 24 ore lavorative.</p>
+      <div class="contact-btns">
+        <a href="mailto:resi@memiabbigliamento.it" class="btn-dark">Email per resi</a>
+        <a href="mailto:info@memiabbigliamento.it" class="btn-ghost">Assistenza generale</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="simple-footer">
+    <p>© 2026 Memi Abbigliamento · <a href="privacy.html">Privacy Policy</a> · <a href="about.html">Chi siamo</a> · <a href="collections/shop-all/index.html">Shop</a></p>
+  </footer>
+
+  <script src="app.js?v=3"></script>
+  <script>
+    function toggleFaq(btn) {
+      const item = btn.closest('.faq-item');
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    }
+  </script>
+</body>
+</html>

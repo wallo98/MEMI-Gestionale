@@ -1,0 +1,188 @@
+/**
+ * api-client.js  —  Memi Abbigliamento
+ * ──────────────────────────────────────
+ * Thin wrapper around the MEMI Backend REST API.
+ *
+ * Usage:
+ *   <script src="/api-client.js"></script>
+ *   // window.MemiAPI is then available everywhere
+ *
+ * Configuration:
+ *   Set window.MEMI_API_URL before loading this script, or it defaults to
+ *   the same origin + /api.  In production Coolify will inject the env var
+ *   as a meta tag (see index.html head comment).
+ *
+ * Token storage:
+ *   Customer JWT lives in localStorage under 'memi_token'.
+ *   Admin JWT lives in localStorage under 'memi_admin_token' (used by admin panel only).
+ */
+
+(function (root) {
+  'use strict';
+
+  /* ── Config ─────────────────────────────────────────── */
+  // Detect API base URL:
+  // 1. window.MEMI_API_URL if set by the page
+  // 2. data-api attribute on the <script> tag itself
+  // 3. /api on the current origin
+  var scriptEl = document.currentScript || (function () {
+    var s = document.querySelectorAll('script[src*="api-client"]');
+    return s[s.length - 1];
+  })();
+  var API_BASE = root.MEMI_API_URL
+    || (scriptEl && scriptEl.dataset.api)
+    || '/api';
+
+  /* ── Token helpers ───────────────────────────────────── */
+  function getToken()      { try { return localStorage.getItem('memi_token');  } catch(_){ return null; } }
+  function setToken(t)     { try { localStorage.setItem('memi_token', t);      } catch(_){} }
+  function clearToken()    { try { localStorage.removeItem('memi_token');       } catch(_){} }
+
+  /* ── Core fetch wrapper ──────────────────────────────── */
+  /**
+   * request(method, path, body?)
+   * Returns the parsed JSON response or throws {error: string}.
+   */
+  async function request(method, path, body) {
+    var headers = { 'Content-Type': 'application/json' };
+    var token = getToken();
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+
+    var opts = { method: method, headers: headers };
+    if (body !== undefined) opts.body = JSON.stringify(body);
+
+    var url = API_BASE + path;
+    try {
+      var res = await fetch(url, opts);
+      var json = await res.json().catch(function() { return { error: 'Risposta non valida dal server' }; });
+      if (!res.ok) throw json;
+      return json;
+    } catch (err) {
+      // Network error (server offline, CORS, etc.)
+      if (err instanceof TypeError) {
+        throw { error: 'Impossibile contattare il server. Riprova tra poco.' };
+      }
+      throw err;
+    }
+  }
+
+  var get  = function(path)        { return request('GET',    path); };
+  var post = function(path, body)  { return request('POST',   path, body); };
+  var put  = function(path, body)  { return request('PUT',    path, body); };
+  var del  = function(path)        { return request('DELETE', path); };
+
+  /* ═══════════════════════════════════════════════════════
+     AUTH
+     ═══════════════════════════════════════════════════════ */
+  var auth = {
+    /**
+     * Register a new customer.
+     * On success: saves JWT, returns {token, user}.
+     */
+    register: async function(nome, email, password) {
+      var data = await post('/auth/register', { nome: nome, email: email, password: password });
+      if (data.token) setToken(data.token);
+      return data;
+    },
+
+    /**
+     * Login.
+     * On success: saves JWT, returns {token, user}.
+     */
+    login: async function(email, password) {
+      var data = await post('/auth/login', { email: email, password: password });
+      if (data.token) setToken(data.token);
+      return data;
+    },
+
+    /** Logout — clears local token. */
+    logout: function() {
+      clearToken();
+      try { localStorage.removeItem('memi_session'); } catch(_) {}
+    },
+
+    /** Returns current user profile from the API (requires valid token). */
+    me: function() { return get('/auth/me'); },
+
+    /** Update profile. */
+    updateMe: function(data) { return put('/auth/me', data); },
+
+    /** True if a token exists in localStorage (doesn't verify it). */
+    isLoggedIn: function() { return !!getToken(); },
+  };
+
+  /* ═══════════════════════════════════════════════════════
+     PRODUCTS
+     ═══════════════════════════════════════════════════════ */
+  var products = {
+    /**
+     * List products.
+     * @param {object} filters  { categoria, colore, saldi, novita, q, collection }
+     */
+    list: function(filters) {
+      var qs = '';
+      if (filters) {
+        var parts = [];
+        Object.keys(filters).forEach(function(k) {
+          if (filters[k] !== undefined && filters[k] !== null)
+            parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(filters[k]));
+        });
+        if (parts.length) qs = '?' + parts.join('&');
+      }
+      return get('/products' + qs);
+    },
+
+    /** Single product with sizes + stock. */
+    get: function(id) { return get('/products/' + encodeURIComponent(id)); },
+
+    /** Stock per size (lightweight, for cart / checkout). */
+    stock: function(id) { return get('/products/' + encodeURIComponent(id) + '/stock'); },
+  };
+
+  /* ═══════════════════════════════════════════════════════
+     ORDERS
+     ═══════════════════════════════════════════════════════ */
+  var orders = {
+    /**
+     * Place a new order.
+     * @param {object} orderData  { nome, cognome, email, telefono, indirizzo, citta, cap, paese,
+     *                              items, discount_code, payment_method }
+     */
+    place: function(orderData) { return post('/orders', orderData); },
+
+    /** Validate a discount code before checkout. */
+    validateDiscount: function(code, subtotal) {
+      return post('/orders/validate-discount', { code: code, subtotal: subtotal });
+    },
+
+    /** Customer's own order history (requires login). */
+    myOrders: function() { return get('/orders/my'); },
+
+    /** Single order detail. */
+    myOrder: function(id) { return get('/orders/my/' + id); },
+  };
+
+  /* ═══════════════════════════════════════════════════════
+     SHIPPING
+     ═══════════════════════════════════════════════════════ */
+  var shipping = {
+    zones:    function() { return get('/shipping/zones'); },
+    couriers: function() { return get('/shipping/couriers'); },
+  };
+
+  /* ── Expose public API ──────────────────────────────────── */
+  root.MemiAPI = {
+    auth:     auth,
+    products: products,
+    orders:   orders,
+    shipping: shipping,
+
+    // Expose low-level request for custom calls
+    _request: request,
+    _base:    API_BASE,
+  };
+
+  // Backwards compat: also fire a custom event so other scripts know the API is ready
+  document.dispatchEvent(new CustomEvent('memi:api:ready'));
+
+})(typeof window !== 'undefined' ? window : global);

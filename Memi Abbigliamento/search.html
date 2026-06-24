@@ -1,0 +1,314 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ricerca — Memi Abbigliamento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="shop.css" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg-base); color: var(--espresso); font-family: var(--font-sans);
+           line-height: var(--leading-normal); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    img { display: block; width: 100%; object-fit: cover; }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+    ul { list-style: none; }
+
+    /* ── Breadcrumb ── */
+    .search-breadcrumb {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1.25rem var(--space-6) 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--brown-light);
+      letter-spacing: 0.04em;
+    }
+    .search-breadcrumb a { color: var(--brown-light); transition: color 150ms; }
+    .search-breadcrumb a:hover { color: var(--espresso); }
+    .search-breadcrumb span { color: var(--brown-light); }
+
+    /* ── Hero ── */
+    .search-hero {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 3rem var(--space-6) 2.5rem;
+      text-align: center;
+    }
+    .search-heading {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 5vw, 3.25rem);
+      font-weight: 300;
+      letter-spacing: 0.02em;
+      color: var(--espresso);
+      margin-bottom: 1.75rem;
+      line-height: 1.1;
+    }
+    .search-heading em { font-style: italic; }
+
+    .search-form {
+      position: relative;
+      margin-bottom: 1.25rem;
+    }
+    .search-form svg {
+      position: absolute;
+      left: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      stroke: var(--brown-light);
+      fill: none;
+      stroke-width: 1.8;
+      pointer-events: none;
+    }
+    .search-form input {
+      width: 100%;
+      padding: 0.875rem 3rem 0.875rem 3rem;
+      background: var(--white);
+      border: 1.5px solid var(--beige);
+      border-radius: 9999px;
+      font-family: var(--font-sans);
+      font-size: 0.9375rem;
+      color: var(--espresso);
+      outline: none;
+      transition: border-color 180ms, box-shadow 180ms;
+    }
+    .search-form input:focus {
+      border-color: var(--blush-dark);
+      box-shadow: 0 0 0 3px var(--blush-light);
+    }
+    .search-form input::placeholder { color: var(--brown-light); }
+    .search-form button[type=submit] {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      border-radius: 9999px;
+      background: var(--espresso);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 150ms;
+    }
+    .search-form button[type=submit]:hover { background: var(--brown-mid); }
+    .search-form button[type=submit] svg {
+      position: static;
+      transform: none;
+      width: 15px;
+      height: 15px;
+      stroke: var(--white);
+      stroke-width: 2;
+    }
+
+    .search-count {
+      font-size: 0.8125rem;
+      color: var(--brown-light);
+      letter-spacing: 0.04em;
+    }
+    .search-count strong { color: var(--espresso); font-weight: 500; }
+
+    /* ── Divider ── */
+    .search-divider {
+      max-width: 1280px;
+      margin: 0 auto 1.5rem;
+      padding: 0 var(--space-6);
+      border-top: 1px solid var(--beige);
+    }
+
+    /* ── Grid ── */
+    .search-grid-wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 var(--space-6) var(--space-16);
+    }
+
+    /* ── Empty state ── */
+    .search-empty {
+      text-align: center;
+      padding: 4rem 1.5rem;
+    }
+    .search-empty-title {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 300;
+      margin-bottom: 0.75rem;
+    }
+    .search-empty-sub {
+      font-size: 0.875rem;
+      color: var(--brown-light);
+      margin-bottom: 2rem;
+    }
+    .search-empty-cta {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      background: var(--espresso);
+      color: var(--white);
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      transition: background 150ms;
+    }
+    .search-empty-cta:hover { background: var(--brown-mid); }
+  </style>
+</head>
+<body>
+
+<div class="announcement-bar">✦ &nbsp;Spedizione gratuita su ordini superiori a €50 &nbsp;✦&nbsp; Reso gratuito entro 30 giorni &nbsp;✦</div>
+<div data-include="site-header"></div>
+
+<main>
+  <nav class="search-breadcrumb" aria-label="Breadcrumb">
+    <a href="/">Home</a>
+    <span>/</span>
+    <span>Ricerca</span>
+  </nav>
+
+  <div class="search-hero">
+    <h1 class="search-heading">Risultati di <em>Ricerca</em></h1>
+    <form class="search-form" id="searchPageForm" action="/search" method="get">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" name="q" id="searchPageInput" placeholder="Cerca vestiti, blazer, gonne…" autocomplete="off" />
+      <button type="submit" aria-label="Cerca">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+    </form>
+    <p class="search-count" id="searchCount"></p>
+  </div>
+
+  <div class="search-divider"></div>
+
+  <div class="search-grid-wrap">
+    <div class="product-grid view-4col" id="productGrid"></div>
+  </div>
+</main>
+
+<script src="productsData.js"></script>
+<script src="api-client.js"></script>
+  <script src="app.js?v=3"></script>
+<script>
+(function () {
+  var ICONS = {
+    dress: '<ellipse cx="60" cy="38" rx="20" ry="22" fill="white" opacity=".45"/><path d="M18 200 C18 140 102 140 102 200" fill="white" opacity=".45"/><rect x="28" y="62" width="64" height="86" rx="10" fill="white" opacity=".45"/>',
+    bag:   '<path d="M42 72 Q42 42 60 42 Q78 42 78 72" stroke="white" stroke-width="6" opacity=".45"/><rect x="26" y="72" width="68" height="78" rx="10" fill="white" opacity=".45"/>',
+    ring:  '<circle cx="60" cy="115" r="32" stroke="white" stroke-width="7" opacity=".45"/><polygon points="60,68 73,90 47,90" fill="white" opacity=".45"/>',
+    shoe:  '<ellipse cx="60" cy="140" rx="44" ry="18" fill="white" opacity=".45"/><path d="M16 140 Q16 90 40 80 Q60 72 84 82 L84 120 Q60 112 40 120 Z" fill="white" opacity=".45"/>',
+    belt:  '<rect x="14" y="90" width="92" height="22" rx="6" fill="white" opacity=".45"/><rect x="52" y="82" width="16" height="38" rx="3" fill="white" opacity=".45"/>'
+  };
+  var W = '<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+
+  function norm(s) {
+    return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  }
+
+  function renderCard(p, idx) {
+    var icon = ICONS[p.icon] || ICONS.dress;
+    var badges = '';
+    if (p.isNew) badges += '<span class="badge badge-new">New</span>';
+    if (p.discountPct) badges += '<span class="badge badge-sale">−' + p.discountPct + '%</span>';
+    var badgesHtml = badges ? '<div class="product-badges">' + badges + '</div>' : '';
+
+    var pricing = '<span class="price-current">€' + p.price.toFixed(2).replace('.', ',') + '</span>';
+    if (p.originalPrice) {
+      pricing += '<span class="price-original">€' + p.originalPrice.toFixed(2).replace('.', ',') + '</span>' +
+                 '<span class="price-discount">−' + p.discountPct + '%</span>';
+    }
+    var sizeChips = p.taglie.map(function(t) {
+      return '<button class="size-chip">' + (t === 'unica' ? 'Unica' : t.toUpperCase()) + '</button>';
+    }).join('');
+
+    return '<a class="product-card-link" href="/products/' + p.id + '/">' +
+      '<article class="product-card" style="--i:' + idx + '" ' +
+        'data-categoria="' + p.categoria + '" data-colore="' + p.colore + '" ' +
+        'data-prezzo="' + p.price + '" data-popularity="' + (p.popularity || 999) + '">' +
+        '<div class="product-img-wrap">' +
+          '<div class="product-img-main ph-fig ph-flat ph-shimmer">' +
+            '<svg viewBox="0 0 120 200" fill="none" class="fig-svg">' + icon + '</svg></div>' +
+          '<div class="product-img-alt ph-fig ' + p.altColor + '">' +
+            '<svg viewBox="0 0 120 200" fill="none" class="fig-svg">' + icon + '</svg></div>' +
+          badgesHtml +
+          '<button class="product-wishlist" aria-label="Wishlist" onclick="event.preventDefault();event.stopPropagation();">' + W + '</button>' +
+          '<div class="product-quick-add" onclick="event.preventDefault();"><div class="size-chips">' + sizeChips + '</div></div>' +
+        '</div>' +
+        '<div class="product-info">' +
+          '<p class="product-name">' + p.name + '</p>' +
+          '<p class="product-color">' + p.colorLabel + '</p>' +
+          '<div class="product-pricing">' + pricing + '</div>' +
+        '</div>' +
+      '</article></a>';
+  }
+
+  function runSearch(q) {
+    var input = document.getElementById('searchPageInput');
+    var count = document.getElementById('searchCount');
+    var grid  = document.getElementById('productGrid');
+    if (input) input.value = q;
+    document.title = q ? ('Ricerca: ' + q + ' — Memi Abbigliamento') : 'Ricerca — Memi Abbigliamento';
+
+    if (!q) {
+      if (count) count.innerHTML = '';
+      if (grid) grid.innerHTML = '';
+      return;
+    }
+
+    var words = norm(q).split(/\s+/).filter(Boolean);
+    var results = (window.PRODUCTS || []).filter(function(p) {
+      var hay = norm(p.name + ' ' + p.colorLabel + ' ' + p.categoria + ' ' + p.collections.join(' '));
+      return words.every(function(w) { return hay.includes(w); });
+    });
+
+    if (count) {
+      if (results.length === 0) {
+        count.innerHTML = 'Nessun risultato per <strong>&ldquo;' + q + '&rdquo;</strong>';
+      } else {
+        count.innerHTML = '<strong>' + results.length + '</strong> risultat' + (results.length === 1 ? 'o' : 'i') + ' per <strong>&ldquo;' + q + '&rdquo;</strong>';
+      }
+    }
+
+    if (!grid) return;
+    if (results.length === 0) {
+      grid.innerHTML = '<div class="search-empty">' +
+        '<p class="search-empty-title">Nessun prodotto trovato</p>' +
+        '<p class="search-empty-sub">Prova con termini diversi o esplora il catalogo.</p>' +
+        '<a href="/collections/shop-all/" class="search-empty-cta">Sfoglia il Catalogo</a>' +
+        '</div>';
+      return;
+    }
+
+    grid.innerHTML = results.map(renderCard).join('');
+    if (typeof window.wireProductCards === 'function') window.wireProductCards();
+  }
+
+  // Read q from URL and run
+  var params = new URLSearchParams(window.location.search);
+  var q = (params.get('q') || '').trim();
+  runSearch(q);
+
+  // Re-run on form submit (page reload with new q)
+  var form = document.getElementById('searchPageForm');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var val = document.getElementById('searchPageInput').value.trim();
+      if (val) {
+        history.pushState({}, '', '/search?q=' + encodeURIComponent(val));
+        runSearch(val);
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>

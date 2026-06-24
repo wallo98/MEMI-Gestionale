@@ -1,0 +1,682 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ordine Confermato · Memi Abbigliamento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    /* Tokens now live in tokens.css (linked above), unified with the
+       rest of the site instead of this page's own drifted palette. */
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--cream);
+      color: var(--espresso);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Minimal Header ────────────────────────────────── */
+    .confirm-header {
+      background: var(--cream);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .confirm-header a {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 500;
+      letter-spacing: .04em;
+      color: var(--espresso);
+      text-decoration: none;
+    }
+
+    /* ── Main Content ──────────────────────────────────── */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 80px;
+      gap: 32px;
+    }
+
+    /* ── Animated Checkmark ────────────────────────────── */
+    .check-wrap {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: var(--sage);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: popIn 500ms cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .check-wrap svg {
+      width: 44px;
+      height: 44px;
+      stroke: var(--espresso);
+      stroke-width: 2.5;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .check-wrap svg path {
+      stroke-dasharray: 60;
+      stroke-dashoffset: 60;
+      animation: drawCheck 500ms 350ms ease forwards;
+    }
+    @keyframes drawCheck {
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* ── Hero Text ─────────────────────────────────────── */
+    .confirm-hero {
+      text-align: center;
+      max-width: 480px;
+      animation: fadeUp 500ms 200ms both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .confirm-hero h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 6vw, 2.75rem);
+      font-weight: 400;
+      line-height: 1.2;
+      color: var(--espresso);
+      margin-bottom: 12px;
+    }
+    .confirm-hero p {
+      color: var(--text-body);
+      font-size: .95rem;
+      line-height: 1.6;
+    }
+    .order-num {
+      display: inline-block;
+      margin-top: 16px;
+      background: var(--blush);
+      color: var(--espresso);
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 9999px;
+    }
+
+    /* ── Cards Container ───────────────────────────────── */
+    .cards {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeUp 500ms 350ms both;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .card-title {
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* ── Order Items ───────────────────────────────────── */
+    .order-items {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .order-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .item-thumb {
+      width: 56px;
+      height: 64px;
+      border-radius: var(--radius-sm);
+      flex-shrink: 0;
+    }
+    .ph-blush  { background: linear-gradient(135deg, var(--blush), var(--blush-mid)); }
+    .ph-sage   { background: linear-gradient(135deg, var(--sage), var(--sage-dark)); }
+    .ph-lav    { background: linear-gradient(135deg, var(--lavender), var(--lavender-dark)); }
+
+    .item-info { flex: 1; min-width: 0; }
+    .item-name {
+      font-size: .9rem;
+      font-weight: 500;
+      color: var(--espresso);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-variant {
+      font-size: .8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .item-price {
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--espresso);
+      flex-shrink: 0;
+    }
+
+    .order-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 14px 0;
+    }
+    .order-totals {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: .875rem;
+      color: var(--text-body);
+    }
+    .total-row.grand {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--espresso);
+      margin-top: 4px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Delivery Card ─────────────────────────────────── */
+    .delivery-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .delivery-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--lavender);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .delivery-icon svg {
+      width: 22px; height: 22px;
+      stroke: var(--espresso); fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .delivery-text strong {
+      display: block;
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--espresso);
+      margin-bottom: 4px;
+    }
+    .delivery-text span {
+      font-size: .825rem;
+      color: var(--text-body);
+      line-height: 1.5;
+    }
+
+    /* ── Timeline ──────────────────────────────────────── */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .tl-step {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      position: relative;
+    }
+    .tl-step:not(:last-child) .tl-dot::after {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 22px;
+      width: 2px;
+      height: calc(100% + 2px);
+      background: var(--border);
+    }
+    .tl-dot {
+      position: relative;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--cream);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .tl-dot.done {
+      background: var(--sage);
+      border-color: var(--sage-dark);
+    }
+    .tl-dot.active {
+      background: var(--blush);
+      border-color: var(--blush-dark);
+      box-shadow: 0 0 0 4px rgba(201,137,122,.18);
+    }
+    .tl-body {
+      padding-bottom: 20px;
+    }
+    .tl-label {
+      font-size: .875rem;
+      font-weight: 500;
+      color: var(--espresso);
+    }
+    .tl-sub {
+      font-size: .8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ── Email Note ────────────────────────────────────── */
+    .email-note {
+      background: var(--cream-warm);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      max-width: 560px;
+      width: 100%;
+      animation: fadeUp 500ms 450ms both;
+    }
+    .email-note svg {
+      width: 20px; height: 20px;
+      stroke: var(--blush-dark); fill: none;
+      stroke-width: 2; stroke-linecap: round;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .email-note p {
+      font-size: .825rem;
+      color: var(--text-body);
+      line-height: 1.5;
+    }
+    .email-note strong { color: var(--espresso); }
+
+    /* ── CTAs ──────────────────────────────────────────── */
+    .cta-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 560px;
+      animation: fadeUp 500ms 500ms both;
+    }
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 15px 24px;
+      background: var(--espresso);
+      color: var(--cream);
+      border: none;
+      border-radius: 9999px;
+      font-family: var(--font-sans);
+      font-size: .9rem;
+      font-weight: 500;
+      letter-spacing: .04em;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 200ms, transform 150ms;
+    }
+    .btn-primary:hover {
+      background: var(--espresso-light);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px 24px;
+      background: transparent;
+      color: var(--espresso);
+      border: 1.5px solid var(--border);
+      border-radius: 9999px;
+      font-family: var(--font-sans);
+      font-size: .9rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 200ms, background 200ms;
+    }
+    .btn-secondary:hover {
+      border-color: var(--blush-dark);
+      background: var(--blush);
+    }
+
+    /* ── Confetti ──────────────────────────────────────── */
+    .confetti-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── Minimal Footer ────────────────────────────────── */
+    .confirm-footer {
+      border-top: 1px solid var(--border);
+      padding: 20px 24px;
+      text-align: center;
+      font-size: .75rem;
+      color: var(--text-muted);
+    }
+    .confirm-footer a {
+      color: var(--text-muted);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Minimal Header -->
+  <header class="confirm-header">
+    <a href="index.html">Memi Abbigliamento</a>
+  </header>
+
+  <!-- Confetti Canvas -->
+  <canvas class="confetti-canvas" id="confettiCanvas" aria-hidden="true"></canvas>
+
+  <main>
+
+    <!-- Animated checkmark -->
+    <div class="check-wrap" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
+        <path d="M5 12l4 4L19 7" />
+      </svg>
+    </div>
+
+    <!-- Hero text -->
+    <div class="confirm-hero">
+      <h1>Grazie per il tuo ordine!</h1>
+      <p>Il tuo look è in ottime mani. Stiamo preparando tutto con cura — riceverai una email di conferma tra poco.</p>
+      <span class="order-num" id="orderNum">Ordine #MEM-000000</span>
+    </div>
+
+    <!-- Cards -->
+    <div class="cards">
+
+      <!-- Order Summary -->
+      <div class="card">
+        <p class="card-title">Riepilogo ordine</p>
+        <div class="order-items" id="orderItemsList">
+          <!-- Populated by JS from sessionStorage cart -->
+        </div>
+        <hr class="order-divider" />
+        <div class="order-totals">
+          <div class="total-row">
+            <span>Subtotale</span>
+            <span id="subtotalVal">—</span>
+          </div>
+          <div class="total-row">
+            <span>Spedizione</span>
+            <span id="shippingVal">Gratuita</span>
+          </div>
+          <div class="total-row grand">
+            <span>Totale</span>
+            <span id="totalVal">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delivery & Timeline -->
+      <div class="card">
+        <p class="card-title">Consegna stimata</p>
+        <div class="delivery-row" style="margin-bottom:20px;">
+          <div class="delivery-icon">
+            <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          </div>
+          <div class="delivery-text">
+            <strong id="deliveryDate">Tra 3–5 giorni lavorativi</strong>
+            <span>Spedizione Standard Gratuita · BRT Express<br/>Riceverai il numero di tracciamento via email.</span>
+          </div>
+        </div>
+
+        <!-- Status Timeline -->
+        <div class="timeline">
+          <div class="tl-step">
+            <div class="tl-dot done"></div>
+            <div class="tl-body">
+              <p class="tl-label">Ordine ricevuto</p>
+              <p class="tl-sub" id="orderDateLabel">Oggi</p>
+            </div>
+          </div>
+          <div class="tl-step">
+            <div class="tl-dot active"></div>
+            <div class="tl-body">
+              <p class="tl-label">In preparazione</p>
+              <p class="tl-sub">Il tuo pacco verrà preparato domani</p>
+            </div>
+          </div>
+          <div class="tl-step">
+            <div class="tl-dot"></div>
+            <div class="tl-body">
+              <p class="tl-label">Spedito</p>
+              <p class="tl-sub">Entro 1–2 giorni lavorativi</p>
+            </div>
+          </div>
+          <div class="tl-step">
+            <div class="tl-dot"></div>
+            <div class="tl-body">
+              <p class="tl-label">Consegnato</p>
+              <p class="tl-sub" id="estimatedDelivery">—</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /cards -->
+
+    <!-- Email note -->
+    <div class="email-note">
+      <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <p>Una conferma d'ordine è stata inviata a <strong id="emailDisplay">krsiti.komini@gmail.com</strong>. Controlla la cartella spam se non la vedi entro qualche minuto.</p>
+    </div>
+
+    <!-- CTAs -->
+    <div class="cta-group">
+      <a href="collections/shop-all/index.html" class="btn-primary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Continua a fare shopping
+      </a>
+      <a href="look.html" class="btn-secondary">
+        Scopri i nuovi look →
+      </a>
+    </div>
+
+  </main>
+
+  <footer class="confirm-footer">
+    <p>Hai bisogno di aiuto? <a href="mailto:info@memiabbigliamento.it">info@memiabbigliamento.it</a> · <a href="returns.html">Politica dei resi</a></p>
+    <p style="margin-top:6px;">© 2026 Memi Abbigliamento · Fatto con ♥ in Italia</p>
+  </footer>
+
+  <script src="api-client.js"></script>
+  <script src="app.js?v=3"></script>
+  <script>
+    // ── Order number ──────────────────────────────────────
+    function genOrderNum() {
+      const n = Math.floor(100000 + Math.random() * 900000);
+      return 'MEM-' + n;
+    }
+    const ORDER_KEY = 'memi_last_order';
+    let orderNum = sessionStorage.getItem(ORDER_KEY);
+    if (!orderNum) {
+      orderNum = genOrderNum();
+      sessionStorage.setItem(ORDER_KEY, orderNum);
+    }
+    document.getElementById('orderNum').textContent = 'Ordine #' + orderNum;
+
+    // ── Dates ─────────────────────────────────────────────
+    const italianDays   = ['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
+    const italianMonths = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+
+    function addWorkdays(date, days) {
+      let d = new Date(date);
+      let added = 0;
+      while (added < days) {
+        d.setDate(d.getDate() + 1);
+        const dow = d.getDay();
+        if (dow !== 0 && dow !== 6) added++;
+      }
+      return d;
+    }
+
+    const today = new Date();
+    const minDelivery = addWorkdays(today, 3);
+    const maxDelivery = addWorkdays(today, 5);
+
+    function fmt(d) {
+      return italianDays[d.getDay()] + ' ' + d.getDate() + ' ' + italianMonths[d.getMonth()];
+    }
+
+    document.getElementById('orderDateLabel').textContent =
+      'Oggi, ' + italianDays[today.getDay()] + ' ' + today.getDate() + ' ' + italianMonths[today.getMonth()];
+
+    document.getElementById('estimatedDelivery').textContent =
+      fmt(minDelivery) + ' – ' + fmt(maxDelivery);
+
+    document.getElementById('deliveryDate').textContent =
+      'Tra il ' + minDelivery.getDate() + ' e il ' + maxDelivery.getDate() + ' ' + italianMonths[maxDelivery.getMonth()];
+
+    // ── Order items from cart ─────────────────────────────
+    const CART_KEY = 'memi_cart';
+    let cart = [];
+    try { cart = JSON.parse(sessionStorage.getItem(CART_KEY)) || []; } catch(e) {}
+
+    // If cart is empty, show demo items
+    if (!cart.length) {
+      cart = [
+        { id:'cannes-rosa-s', name:'Vestito Lino Cannes', variant:'Rosa cipria · S', price:89, qty:1, color:'ph-blush' },
+        { id:'blazer-salvia-m', name:'Blazer Sartoriale Mia', variant:'Verde salvia · M', price:105, qty:1, color:'ph-sage' }
+      ];
+    }
+
+    const itemsList = document.getElementById('orderItemsList');
+    let subtotal = 0;
+
+    cart.forEach(item => {
+      const lineTotal = item.price * item.qty;
+      subtotal += lineTotal;
+      itemsList.insertAdjacentHTML('beforeend', `
+        <div class="order-item">
+          <div class="item-thumb ${item.color || 'ph-blush'}"></div>
+          <div class="item-info">
+            <p class="item-name">${item.name}</p>
+            <p class="item-variant">${item.variant}${item.qty > 1 ? ' · ×' + item.qty : ''}</p>
+          </div>
+          <span class="item-price">€${lineTotal.toFixed(2).replace('.',',')}</span>
+        </div>
+      `);
+    });
+
+    const shipping = subtotal >= 60 ? 0 : 4.99;
+    const total = subtotal + shipping;
+
+    document.getElementById('subtotalVal').textContent  = '€' + subtotal.toFixed(2).replace('.',',');
+    document.getElementById('shippingVal').textContent  = shipping === 0 ? 'Gratuita' : '€' + shipping.toFixed(2).replace('.',',');
+    document.getElementById('totalVal').textContent     = '€' + total.toFixed(2).replace('.',',');
+
+    // Clear cart after order
+    sessionStorage.removeItem(CART_KEY);
+    sessionStorage.removeItem('memi_last_order'); // regenerate next visit
+
+    // ── Confetti ──────────────────────────────────────────
+    (function confetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx    = canvas.getContext('2d');
+
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const COLORS = ['#C5BEE2','#CCE2CB','#F3D1D6','#EAE7F4','#E5F1E4','#FAE8EB','#FFFFFF','#A89BC4'];
+      const PIECES = 120;
+
+      const particles = Array.from({ length: PIECES }, () => ({
+        x:     Math.random() * canvas.width,
+        y:     Math.random() * -canvas.height,
+        w:     6 + Math.random() * 8,
+        h:     8 + Math.random() * 12,
+        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        rot:   Math.random() * Math.PI * 2,
+        vx:    (Math.random() - 0.5) * 2,
+        vy:    2 + Math.random() * 3,
+        vr:    (Math.random() - 0.5) * 0.15,
+        alpha: 1,
+      }));
+
+      let frame;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let alive = false;
+        particles.forEach(p => {
+          p.x  += p.vx;
+          p.y  += p.vy;
+          p.rot += p.vr;
+          if (p.y > canvas.height * 0.7) p.alpha -= 0.015;
+          if (p.alpha > 0 && p.y < canvas.height + 20) {
+            alive = true;
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, p.alpha);
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rot);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+            ctx.restore();
+          }
+        });
+        if (alive) frame = requestAnimationFrame(draw);
+        else canvas.style.display = 'none';
+      }
+
+      // Start after a brief delay so the user sees the page first
+      setTimeout(() => requestAnimationFrame(draw), 400);
+      window.addEventListener('resize', () => {
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+    })();
+  </script>
+</body>
+</html>

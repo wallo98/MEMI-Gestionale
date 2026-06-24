@@ -1,0 +1,1064 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chi Siamo — Memi Abbigliamento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="tokens.css" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg-base);color:var(--espresso);font-family:var(--font-sans);
+         line-height:var(--leading-normal);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+    img{display:block;width:100%;object-fit:cover;}
+    a{color:inherit;text-decoration:none;}
+    button{cursor:pointer;border:none;background:none;font-family:inherit;}
+
+    /* ── Announcement ── */
+    .announcement-bar{background:var(--blush-light);color:var(--brown-mid);text-align:center;
+      padding:var(--space-2) var(--space-4);font-size:var(--text-xs);
+      letter-spacing:var(--tracking-wider);text-transform:uppercase;font-weight:500;
+      border-bottom:1px solid var(--blush);}
+
+    /* ── Header stubs (app.js injects real header) ── */
+    .site-header{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.92);
+      backdrop-filter:blur(12px);border-bottom:1px solid var(--beige);}
+    .header-inner{max-width:1280px;margin:0 auto;padding:0 var(--space-4);height:64px;
+      display:flex;align-items:center;gap:var(--space-4);}
+    .logo{flex:1;text-align:center;font-family:var(--font-serif);font-size:var(--text-xl);
+      font-weight:400;letter-spacing:var(--tracking-wide);text-transform:uppercase;}
+    .logo span{color:var(--blush-dark);}
+    .icon-btn{position:relative;width:40px;height:40px;display:flex;align-items:center;
+      justify-content:center;border-radius:var(--radius-full);transition:background var(--dur-fast);}
+    .icon-btn:hover{background:var(--bg-soft);}
+    .icon-btn svg{width:20px;height:20px;stroke:var(--espresso);fill:none;stroke-width:1.6;}
+    .cart-badge{position:absolute;top:4px;right:4px;min-width:16px;height:16px;
+      background:var(--blush-dark);color:var(--white);border-radius:var(--radius-full);
+      font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+    .header-actions{display:flex;align-items:center;gap:var(--space-3);flex-shrink:0;}
+    .burger{display:flex;flex-direction:column;gap:5px;width:24px;padding:var(--space-1);flex-shrink:0;}
+    .burger span{display:block;height:1.5px;background:var(--espresso);border-radius:2px;}
+    .desktop-nav{display:none;}
+    @media(min-width:900px){
+      .burger{display:none;}
+      .logo{flex:unset;font-size:var(--text-2xl);}
+      .desktop-nav{display:flex;align-items:center;gap:var(--space-8);font-size:var(--text-sm);
+        letter-spacing:var(--tracking-wide);text-transform:uppercase;font-weight:500;
+        flex:1;justify-content:center;}
+      .desktop-nav a{color:var(--brown-mid);transition:color var(--dur-fast);}
+      .desktop-nav a.active,.desktop-nav a:hover{color:var(--espresso);}
+    }
+
+    /* ══════════════════════════════════════════════
+       HERO
+       ══════════════════════════════════════════════ */
+    .about-hero {
+      position: relative;
+      height: 100svh;
+      min-height: 600px;
+      overflow: hidden;
+      background: #1a1210;
+    }
+    .about-hero-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center 30%;
+    }
+    .about-hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(10,4,4,.15) 0%,
+        rgba(10,4,4,.35) 50%,
+        rgba(10,4,4,.75) 100%
+      );
+    }
+    .about-hero-content {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      text-align: center;
+      padding: 0 var(--space-6) var(--space-16);
+    }
+    .about-hero-eyebrow {
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+      color: rgba(255,255,255,.55);
+      font-weight: 500;
+      margin-bottom: var(--space-4);
+      opacity: 0;
+      animation: fadeUp 0.8s ease-out 0.3s forwards;
+    }
+    .about-hero-title {
+      font-family: var(--font-serif);
+      font-size: clamp(3rem, 7vw, 7rem);
+      font-weight: 300;
+      line-height: 1.0;
+      color: var(--white);
+      letter-spacing: -0.04em;
+      margin-bottom: var(--space-6);
+      opacity: 0;
+      animation: fadeUp 0.9s ease-out 0.45s forwards;
+    }
+    .about-hero-title em { font-style: italic; }
+    .about-hero-sub {
+      font-size: var(--text-sm);
+      color: rgba(255,255,255,.55);
+      max-width: 520px;
+      line-height: 1.8;
+      opacity: 0;
+      animation: fadeUp 0.7s ease-out 0.65s forwards;
+    }
+    @keyframes fadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: none; } }
+
+    /* Scroll indicator */
+    .scroll-hint {
+      position: absolute;
+      z-index: 2;
+      bottom: var(--space-8);
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      opacity: 0;
+      animation: fadeUp 0.6s ease-out 1.2s forwards;
+    }
+    .scroll-hint span {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.4);
+    }
+    .scroll-line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, rgba(255,255,255,.4), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+    @keyframes scrollPulse { 0%,100%{opacity:.4;transform:scaleY(1);} 50%{opacity:.8;transform:scaleY(1.1);} }
+
+    /* ══════════════════════════════════════════════
+       INTRO MANIFESTO
+       ══════════════════════════════════════════════ */
+    .manifesto-section {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: clamp(5rem, 10vw, 9rem) var(--space-6);
+      text-align: center;
+    }
+    .manifesto-eyebrow {
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+      color: var(--brown-light);
+      font-weight: 500;
+      margin-bottom: var(--space-5);
+    }
+    .manifesto-quote {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 300;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+      color: var(--espresso);
+      margin-bottom: var(--space-8);
+    }
+    .manifesto-quote em { font-style: italic; color: var(--lavender-dark,#8A7BB5); }
+    .manifesto-body {
+      font-size: var(--text-base);
+      color: var(--brown-mid);
+      line-height: 2;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ══════════════════════════════════════════════
+       STORY — EDITORIAL SPLIT
+       ══════════════════════════════════════════════ */
+    .story-section {
+      background: var(--cream);
+      padding: clamp(4rem, 8vw, 8rem) 0;
+    }
+    .story-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 var(--space-6);
+    }
+    .story-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: clamp(3rem, 6vw, 5rem);
+      gap: var(--space-8);
+      flex-wrap: wrap;
+    }
+    .story-header-left {}
+    .story-header-eyebrow {
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+      color: var(--brown-light);
+      font-weight: 500;
+      margin-bottom: var(--space-3);
+    }
+    .story-header-title {
+      font-family: var(--font-serif);
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 300;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+    .story-header-title em { font-style: italic; }
+    .story-header-right {
+      max-width: 400px;
+      font-size: var(--text-sm);
+      color: var(--brown-mid);
+      line-height: 2;
+    }
+
+    /* 2-col editorial layout */
+    .story-split {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-8);
+      margin-bottom: clamp(4rem, 8vw, 7rem);
+    }
+    @media (min-width: 768px) {
+      .story-split { grid-template-columns: 1fr 1fr; gap: var(--space-12); align-items: center; }
+      .story-split.reverse { direction: rtl; }
+      .story-split.reverse > * { direction: ltr; }
+    }
+    .story-img {
+      position: relative;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      aspect-ratio: 4/5;
+      box-shadow: 0 20px 60px rgba(59,43,43,.12);
+    }
+    .story-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 8s ease-out;
+    }
+    .story-img:hover img { transform: scale(1.04); }
+    .story-img-caption {
+      position: absolute;
+      bottom: var(--space-5);
+      left: var(--space-5);
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.55);
+    }
+
+    .story-text {}
+    .story-text-label {
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--brown-light);
+      margin-bottom: var(--space-4);
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+    .story-text-label::before {
+      content: '';
+      display: block;
+      width: 24px;
+      height: 1px;
+      background: var(--beige-dark);
+    }
+    .story-text h3 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.75rem, 3vw, 2.75rem);
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: var(--space-5);
+    }
+    .story-text h3 em { font-style: italic; }
+    .story-text p {
+      font-size: var(--text-sm);
+      color: var(--brown-mid);
+      line-height: 2;
+      margin-bottom: var(--space-5);
+    }
+    .story-text p:last-of-type { margin-bottom: 0; }
+
+    /* Pull stat */
+    .story-stat {
+      display: inline-flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      margin-top: var(--space-6);
+      padding: var(--space-5) var(--space-6);
+      background: rgba(255,255,255,.6);
+      border: 1px solid var(--beige);
+      border-radius: var(--radius-lg);
+    }
+    .story-stat-num {
+      font-family: var(--font-serif);
+      font-size: 2.5rem;
+      font-weight: 300;
+      color: var(--espresso);
+      line-height: 1;
+    }
+    .story-stat-label {
+      font-size: var(--text-xs);
+      color: var(--brown-light);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+    }
+
+    /* ══════════════════════════════════════════════
+       PINK MARQUEE
+       ══════════════════════════════════════════════ */
+    .marquee-strip {
+      background: var(--lavender);
+      overflow: hidden;
+      padding: var(--space-3) 0;
+    }
+    .marquee-track {
+      display: flex;
+      white-space: nowrap;
+      animation: marqueeScroll 32s linear infinite;
+      width: max-content;
+    }
+    .marquee-strip:hover .marquee-track { animation-play-state: paused; }
+    .marquee-item {
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+      color: rgba(255,255,255,.85);
+      font-weight: 500;
+      padding: 0 var(--space-6);
+    }
+    .marquee-item.accent { color: rgba(255,255,255,.4); padding: 0 var(--space-4); }
+    @keyframes marqueeScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* ══════════════════════════════════════════════
+       CAMPAIGNS
+       ══════════════════════════════════════════════ */
+    .campaigns-section {
+      padding: clamp(5rem, 10vw, 9rem) 0;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding-left: var(--space-6);
+      padding-right: var(--space-6);
+    }
+    .campaigns-header {
+      margin-bottom: clamp(3rem, 6vw, 5rem);
+    }
+    .campaigns-eyebrow {
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+      color: var(--brown-light);
+      font-weight: 500;
+      margin-bottom: var(--space-3);
+    }
+    .campaigns-title {
+      font-family: var(--font-serif);
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 300;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+    .campaigns-title em { font-style: italic; }
+
+    /* Hero campaign (full-width) */
+    .campaign-hero {
+      position: relative;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      aspect-ratio: 16/7;
+      margin-bottom: var(--space-5);
+      cursor: pointer;
+    }
+    @media (max-width: 640px) { .campaign-hero { aspect-ratio: 4/3; } }
+    .campaign-hero img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center 35%;
+      transition: transform 700ms ease-out;
+    }
+    .campaign-hero:hover img { transform: scale(1.03); }
+    .campaign-hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, rgba(10,4,4,.65) 0%, rgba(10,4,4,.15) 60%, transparent 100%);
+    }
+    .campaign-hero-body {
+      position: absolute;
+      z-index: 2;
+      left: clamp(1.5rem, 5vw, 4rem);
+      bottom: clamp(1.5rem, 5vw, 3rem);
+    }
+    .campaign-season {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.5);
+      margin-bottom: var(--space-2);
+    }
+    .campaign-name {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 4vw, 4rem);
+      font-weight: 300;
+      color: var(--white);
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: var(--space-5);
+    }
+    .campaign-name em { font-style: italic; }
+    .campaign-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: 11px;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--white);
+      border-bottom: 1px solid rgba(255,255,255,.4);
+      padding-bottom: 2px;
+      transition: border-color var(--dur-fast);
+    }
+    .campaign-cta:hover { border-color: var(--white); }
+
+    /* Campaign grid (smaller cards) */
+    .campaign-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-5);
+    }
+    @media (min-width: 768px) { .campaign-grid { grid-template-columns: repeat(3, 1fr); } }
+
+    .campaign-card {
+      position: relative;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      aspect-ratio: 3/4;
+      cursor: pointer;
+    }
+    .campaign-card img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 600ms ease-out;
+    }
+    .campaign-card:hover img { transform: scale(1.06); }
+    .campaign-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(59,43,43,.6) 0%, rgba(59,43,43,.05) 55%, transparent 100%);
+      transition: background var(--dur-med);
+    }
+    .campaign-card:hover .campaign-card-overlay {
+      background: linear-gradient(to top, rgba(59,43,43,.72) 0%, rgba(59,43,43,.15) 55%, transparent 100%);
+    }
+    .campaign-card-body {
+      position: absolute;
+      z-index: 2;
+      bottom: 0; left: 0; right: 0;
+      padding: var(--space-5) var(--space-5);
+    }
+    .campaign-card-season {
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.55);
+      margin-bottom: 4px;
+    }
+    .campaign-card-name {
+      font-family: var(--font-serif);
+      font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+      font-weight: 300;
+      color: var(--white);
+      line-height: 1.2;
+      margin-bottom: var(--space-3);
+    }
+    .campaign-card-name em { font-style: italic; }
+    .campaign-card-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      color: var(--white);
+      background: rgba(255,255,255,.15);
+      backdrop-filter: blur(6px);
+      border-radius: var(--radius-full);
+      padding: 5px 12px;
+      border: 1px solid rgba(255,255,255,.25);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity var(--dur-med), transform var(--dur-med);
+    }
+    .campaign-card:hover .campaign-card-cta { opacity: 1; transform: translateY(0); }
+
+    /* ══════════════════════════════════════════════
+       VALUES SECTION
+       ══════════════════════════════════════════════ */
+    .values-section {
+      background: var(--lavender, #C5BEE2);
+      padding: clamp(5rem, 10vw, 9rem) var(--space-6);
+    }
+    .values-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .values-eyebrow {
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+      color: var(--espresso, #3B2B2B);
+      opacity: .55;
+      font-weight: 500;
+      margin-bottom: var(--space-5);
+    }
+    .values-title {
+      font-family: var(--font-serif);
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 300;
+      letter-spacing: -0.03em;
+      color: var(--espresso, #3B2B2B);
+      line-height: 1.1;
+      margin-bottom: clamp(3rem, 6vw, 5rem);
+    }
+    .values-title em { font-style: italic; color: var(--white, #FFFFFF); }
+
+    .values-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-8);
+      border-top: 1px solid rgba(59,43,43,.12);
+      padding-top: var(--space-8);
+    }
+    @media (min-width: 640px) { .values-grid { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 900px) { .values-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .value-item {}
+    .value-icon {
+      font-size: 1.5rem;
+      color: var(--white, #FFFFFF);
+      line-height: 1;
+      margin-bottom: var(--space-4);
+    }
+    .value-name {
+      font-family: var(--font-serif);
+      font-size: var(--text-xl);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--espresso, #3B2B2B);
+      margin-bottom: var(--space-3);
+    }
+    .value-desc {
+      font-size: var(--text-sm);
+      color: var(--brown-mid, #6B5050);
+      line-height: 1.9;
+    }
+
+    /* ══════════════════════════════════════════════
+       TEAM / FOUNDERS
+       ══════════════════════════════════════════════ */
+    .team-section {
+      padding: clamp(5rem, 10vw, 9rem) var(--space-6);
+      background: var(--bg-base);
+    }
+    .team-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .team-header {
+      margin-bottom: clamp(3rem, 6vw, 5rem);
+      text-align: center;
+    }
+    .team-eyebrow {
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+      color: var(--brown-light);
+      font-weight: 500;
+      margin-bottom: var(--space-3);
+    }
+    .team-title {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 300;
+      letter-spacing: -0.02em;
+    }
+    .team-title em { font-style: italic; }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-6);
+    }
+    @media (min-width: 768px) { .team-grid { grid-template-columns: repeat(4, 1fr); gap: var(--space-8); } }
+
+    .team-card { text-align: center; }
+    .team-photo {
+      aspect-ratio: 3/4;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      margin-bottom: var(--space-4);
+      background: var(--cream);
+    }
+    .team-photo img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      transition: transform 600ms ease-out;
+    }
+    .team-card:hover .team-photo img { transform: scale(1.04); }
+    .team-name {
+      font-family: var(--font-serif);
+      font-size: var(--text-lg);
+      font-weight: 300;
+      color: var(--espresso);
+      margin-bottom: var(--space-1);
+    }
+    .team-role {
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      color: var(--brown-light);
+    }
+
+    /* ══════════════════════════════════════════════
+       CLOSING CTA
+       ══════════════════════════════════════════════ */
+    .about-cta-section {
+      background: var(--blush-light);
+      border-top: 1px solid var(--blush);
+      border-bottom: 1px solid var(--blush);
+      padding: clamp(4rem, 8vw, 7rem) var(--space-6);
+      text-align: center;
+    }
+    .about-cta-eyebrow {
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+      color: var(--brown-light);
+      margin-bottom: var(--space-4);
+    }
+    .about-cta-title {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-6);
+    }
+    .about-cta-title em { font-style: italic; }
+    .about-cta-btns {
+      display: flex;
+      gap: var(--space-4);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary-about {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-4) var(--space-8);
+      background: var(--espresso);
+      color: var(--white);
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      transition: background var(--dur-fast), transform var(--dur-fast);
+    }
+    .btn-primary-about:hover { background: #2a1e1e; transform: translateY(-1px); }
+    .btn-outline-about {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-4) var(--space-8);
+      border: 1.5px solid var(--espresso);
+      color: var(--espresso);
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      transition: background var(--dur-fast), transform var(--dur-fast);
+    }
+    .btn-outline-about:hover { background: var(--espresso); color: var(--white); transform: translateY(-1px); }
+  </style>
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+
+  <div class="announcement-bar">✦ &nbsp;Spedizione gratuita su ordini superiori a €50 &nbsp;✦&nbsp; Reso gratuito entro 30 giorni &nbsp;✦</div>
+
+  <div data-include="site-header"></div>
+
+  <!-- ══════════════════════════════════════════
+       HERO
+       ══════════════════════════════════════════ -->
+  <section class="about-hero">
+    <img
+      src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1920&q=85"
+      alt="Memi Abbigliamento — Chi Siamo"
+      class="about-hero-bg"
+      loading="eager"
+    />
+    <div class="about-hero-overlay"></div>
+    <div class="about-hero-content">
+      <p class="about-hero-eyebrow">Fondata con passione · dal 2018</p>
+      <h1 class="about-hero-title">La nostra<br><em>storia</em></h1>
+      <p class="about-hero-sub">Una boutique nata dall'amore per il bello, la qualità, e il potere trasformativo di un abito che ti fa sentire davvero te stessa.</p>
+    </div>
+    <div class="scroll-hint" aria-hidden="true">
+      <span>Scopri</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       MANIFESTO
+       ══════════════════════════════════════════ -->
+  <div class="manifesto-section">
+    <p class="manifesto-eyebrow">La nostra filosofia</p>
+    <blockquote class="manifesto-quote">
+      "Ogni capo ha una storia.<br>Ogni donna <em>merita</em> di raccontarla."
+    </blockquote>
+    <p class="manifesto-body">
+      Crediamo che la moda non sia solo ciò che indossi, ma ciò che comunichi al mondo —
+      e a te stessa. Da Memi selezioniamo ogni pezzo con cura, cercando quella rara
+      combinazione di qualità artigianale, estetica contemporanea e comodità quotidiana.
+    </p>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       OUR STORY
+       ══════════════════════════════════════════ -->
+  <section class="story-section" id="story">
+    <div class="story-inner">
+
+      <div class="story-header">
+        <div class="story-header-left">
+          <p class="story-header-eyebrow">La nostra storia</p>
+          <h2 class="story-header-title">Nata a <em>Napoli,</em><br>cresciuta nel cuore<br>delle donne italiane.</h2>
+        </div>
+        <div class="story-header-right">
+          Memi Abbigliamento nasce nel 2018 da un'idea semplice: portare nel quartiere
+          la stessa cura estetica e qualità dei brand di lusso, a prezzi accessibili.
+          Oggi vestiamo donne in tutta Italia, con la stessa passione del primo giorno.
+        </div>
+      </div>
+
+      <!-- Split 1 -->
+      <div class="story-split">
+        <div class="story-img">
+          <img
+            src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=960&q=85"
+            alt="Il nostro atelier"
+            loading="lazy"
+          />
+          <span class="story-img-caption">Napoli, 2018 — L'atelier originale</span>
+        </div>
+        <div class="story-text">
+          <p class="story-text-label">Capitolo 01</p>
+          <h3>Un'idea nata<br>da una <em>passione</em></h3>
+          <p>
+            Tutto inizia con una passione condivisa: la convinzione che ogni donna meriti
+            di sentirsi bella senza rinunciare alla qualità. Memi nasce in un piccolo
+            atelier nel centro di Napoli, con pochi capi selezionati a mano e una clientela
+            di fidate amiche.
+          </p>
+          <p>
+            Il passaparola fa il resto. In pochi mesi, le nostre clienti diventano
+            una comunità. Non vendono solo abiti — condividono un modo di essere.
+          </p>
+          <div class="story-stat">
+            <span class="story-stat-num">2018</span>
+            <span class="story-stat-label">Anno di fondazione</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Split 2 (reversed) -->
+      <div class="story-split reverse">
+        <div class="story-img">
+          <img
+            src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=960&q=85"
+            alt="La selezione dei capi"
+            loading="lazy"
+          />
+          <span class="story-img-caption">Processo di selezione — ogni capo scelto a mano</span>
+        </div>
+        <div class="story-text">
+          <p class="story-text-label">Capitolo 02</p>
+          <h3>La cura nella<br><em>selezione</em></h3>
+          <p>
+            Ogni capo che entra in Memi passa attraverso il nostro occhio critico:
+            il tessuto, la manifattura, la caduta, il modo in cui si muove. Lavoriamo
+            con piccoli produttori italiani e brand europei che condividono la nostra
+            visione di moda consapevole.
+          </p>
+          <p>
+            La sostenibilità per noi non è una parola di tendenza. È una scelta
+            quotidiana: acquistare meglio, produrre meno, valorizzare di più.
+          </p>
+          <div class="story-stat">
+            <span class="story-stat-num">48+</span>
+            <span class="story-stat-label">Produttori selezionati</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Split 3 -->
+      <div class="story-split">
+        <div class="story-img">
+          <img
+            src="https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?auto=format&fit=crop&w=960&q=85"
+            alt="La comunità Memi"
+            loading="lazy"
+          />
+          <span class="story-img-caption">La comunità Memi — donne che si supportano</span>
+        </div>
+        <div class="story-text">
+          <p class="story-text-label">Capitolo 03</p>
+          <h3>Una comunità<br>che <em>cresce</em></h3>
+          <p>
+            Oggi Memi è molto più di una boutique online. È una comunità di donne
+            che credono nel potere dello stile personale come forma di espressione
+            autentica. Ogni acquisto è un atto di fiducia che non prendiamo alla leggera.
+          </p>
+          <p>
+            Il nostro impegno è semplice: essere sempre lì, con nuove proposte
+            ogni settimana, assistenza vera e un gusto che non tradisce mai.
+          </p>
+          <div class="story-stat">
+            <span class="story-stat-num">12k+</span>
+            <span class="story-stat-label">Clienti soddisfatte</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       MARQUEE
+       ══════════════════════════════════════════ -->
+  <div class="marquee-strip" aria-hidden="true">
+    <div class="marquee-track">
+      <span class="marquee-item">Memi Abbigliamento</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Napoli · Italia</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Fondato nel 2018</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Made with Love</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Qualità Artigianale</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Stile Senza Tempo</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Memi Abbigliamento</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Napoli · Italia</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Fondato nel 2018</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Made with Love</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Qualità Artigianale</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Stile Senza Tempo</span>
+      <span class="marquee-item accent">✦</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       CAMPAIGNS
+       ══════════════════════════════════════════ -->
+  <section class="campaigns-section" id="campaigns">
+    <div class="campaigns-header">
+      <p class="campaigns-eyebrow">Le nostre campagne</p>
+      <h2 class="campaigns-title">Storie di <em>stile</em><br>raccontate per immagini</h2>
+    </div>
+
+    <!-- Hero campaign -->
+    <div class="campaign-hero">
+      <img
+        src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1920&q=85"
+        alt="Campagna Spring Summer 2026"
+        loading="lazy"
+      />
+      <div class="campaign-hero-overlay"></div>
+      <div class="campaign-hero-body">
+        <p class="campaign-season">Primavera Estate 2026</p>
+        <h3 class="campaign-name">Spring Summer<br><em>2026</em></h3>
+        <a href="collections/novita/index.html" class="campaign-cta">Scopri la collezione →</a>
+      </div>
+    </div>
+
+    <!-- Campaign grid -->
+    <div class="campaign-grid">
+
+      <div class="campaign-card">
+        <img
+          src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=700&q=80"
+          alt="Fall Winter 2025"
+          loading="lazy"
+        />
+        <div class="campaign-card-overlay"></div>
+        <div class="campaign-card-body">
+          <p class="campaign-card-season">Autunno Inverno 2025</p>
+          <p class="campaign-card-name">Fall Winter<br><em>2025</em></p>
+          <span class="campaign-card-cta">Esplora →</span>
+        </div>
+      </div>
+
+      <div class="campaign-card">
+        <img
+          src="https://images.unsplash.com/photo-1469334031218-e382a7
+          loading="lazy"
+        />
+        <div class="campaign-card-overlay"></div>
+        <div class="campaign-card-body">
+          <p class="campaign-card-season">Estate 2025</p>
+          <p class="campaign-card-name">Dance<br><em>Collection</em></p>
+          <span class="campaign-card-cta">Esplora →</span>
+        </div>
+      </div>
+
+      <div class="campaign-card">
+        <img
+          src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=700&q=80"
+          alt="Campagna Primavera 2025"
+          loading="lazy"
+        />
+        <div class="campaign-card-overlay"></div>
+        <div class="campaign-card-body">
+          <p class="campaign-card-season">Primavera 2025</p>
+          <p class="campaign-card-name">Spring<br><em>2025</em></p>
+          <span class="campaign-card-cta">Esplora →</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- VALUES SECTION -->
+  <section class="values-section" id="values">
+    <div class="values-inner">
+      <div class="values-header">
+        <p class="values-eyebrow">I nostri valori</p>
+        <h2 class="values-title">Cosa ci <em>guida</em></h2>
+      </div>
+      <div class="values-grid">
+        <div class="value-item">
+          <div class="value-icon">✦</div>
+          <h3 class="value-name">Qualità</h3>
+          <p class="value-desc">Ogni capo è selezionato con cura per garantire materiali di prima scelta e lavorazioni artigianali.</p>
+        </div>
+        <div class="value-item">
+          <div class="value-icon">◈</div>
+          <h3 class="value-name">Stile</h3>
+          <p class="value-desc">Un gusto raffinato che si evolve stagione dopo stagione, sempre fedele a un'estetica senza tempo.</p>
+        </div>
+        <div class="value-item">
+          <div class="value-icon">♡</div>
+          <h3 class="value-name">Cura</h3>
+          <p class="value-desc">Ti accompagniamo dall'ispirazione all'acquisto, con un servizio clienti presente e attento.</p>
+        </div>
+        <div class="value-item">
+          <div class="value-icon">⊕</div>
+          <h3 class="value-name">Comunità</h3>
+          <p class="value-desc">Una community di donne che si riconoscono in un modo di vestire autentico e consapevole.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA SECTION -->
+  <section class="about-cta-section">
+    <div class="about-cta-inner">
+      <p class="about-cta-eyebrow">Pronta a scoprire?</p>
+      <h2 class="about-cta-title">Entra nella <em>collezione</em></h2>
+      <p class="about-cta-sub">Nuovi capi ogni settimana. Spedizione gratuita da €50.</p>
+      <a href="shop" class="btn-about-cta">Scopri la collezione →</a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       TEAM
+       ══════════════════════════════════════════ -->
+  <section class="team-section">
+    <div class="team-inner">
+      <div class="team-header">
+        <p class="team-eyebrow">Il nostro team</p>
+        <h2 class="team-title">Le persone<br>dietro <em>Memi</em></h2>
+      </div>
+      <div class="team-grid">
+        <div class="team-card">
+          <div class="team-photo">
+            <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=400&q=80" alt="Fondatrice" loading="lazy" />
+          </div>
+          <p class="team-name">Mia Romano</p>
+          <p class="team-role">Fondatrice & Direttrice Creativa</p>
+        </div>
+        <div class="team-card">
+          <div class="team-photo">
+            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80" alt="Buyer" loading="lazy" />
+          </div>
+          <p class="team-name">Sofia Esposito</p>
+          <p class="team-role">Head Buyer & Selezione</p>
+        </div>
+        <div class="team-card">
+          <div class="team-photo">
+            <img src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=400&q=80" alt="Visual" loading="lazy" />
+          </div>
+          <p class="team-name">Giulia Ferrara</p>
+          <p class="team-role">Art Direction & Visual</p>
+        </div>
+        <div class="team-card">
+          <div class="team-photo">
+            <img src="https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?auto=format&fit=crop&w=400&q=80" alt="Customer Care" loading="lazy" />
+          </div>
+          <p class="team-name">Chiara Marini</p>
+          <p class="team-role">Customer Experience</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       CLOSING CTA
+       ══════════════════════════════════════════ -->
+  <section class="about-cta-section">
+    <p class="about-cta-eyebrow">Unisciti alla famiglia Memi</p>
+    <h2 class="about-cta-title">Pronta a scoprire<br>il tuo nuovo <em>stile preferito?</em></h2>
+    <div class="about-cta-btns">
+      <a href="shop" class="btn-primary-about">Scopri la collezione</a>
+      <a href="look" class="btn-outline-about">Shop the Look</a>
+    </div>
+  </section>
+
+  <script src="api-client.js"></script>
+  <script src="app.js?v=3"></script>
+</body>
+</html>

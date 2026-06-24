@@ -1,0 +1,961 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shop the Look — Memi Abbigliamento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="tokens.css" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg-base);color:var(--espresso);font-family:var(--font-sans);
+         line-height:var(--leading-normal);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+    img{display:block;width:100%;object-fit:cover;}
+    a{color:inherit;text-decoration:none;}
+    button{cursor:pointer;border:none;background:none;font-family:inherit;}
+    ul{list-style:none;}
+
+    /* ── Announcement ── */
+    .announcement-bar{background:var(--blush-light);color:var(--brown-mid);text-align:center;
+      padding:var(--space-2) var(--space-4);font-size:var(--text-xs);
+      letter-spacing:var(--tracking-wider);text-transform:uppercase;font-weight:500;
+      border-bottom:1px solid var(--blush);}
+
+    /* ── Header ── */
+    .site-header{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.92);
+      backdrop-filter:blur(12px);border-bottom:1px solid var(--beige);}
+    .header-inner{max-width:1280px;margin:0 auto;padding:0 var(--space-4);height:64px;
+      display:flex;align-items:center;gap:var(--space-4);}
+    .logo{flex:1;text-align:center;font-family:var(--font-serif);font-size:var(--text-xl);
+      font-weight:400;letter-spacing:var(--tracking-wide);text-transform:uppercase;}
+    .logo span{color:var(--blush-dark);}
+    .icon-btn{position:relative;width:40px;height:40px;display:flex;align-items:center;
+      justify-content:center;border-radius:var(--radius-full);transition:background var(--dur-fast);}
+    .icon-btn:hover{background:var(--bg-soft);}
+    .icon-btn svg{width:20px;height:20px;stroke:var(--espresso);fill:none;stroke-width:1.6;}
+    .cart-badge{position:absolute;top:4px;right:4px;min-width:16px;height:16px;
+      background:var(--blush-dark);color:var(--white);border-radius:var(--radius-full);
+      font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+    .header-actions{display:flex;align-items:center;gap:var(--space-3);flex-shrink:0;}
+    .burger{display:flex;flex-direction:column;gap:5px;width:24px;padding:var(--space-1);flex-shrink:0;}
+    .burger span{display:block;height:1.5px;background:var(--espresso);border-radius:2px;}
+    .desktop-nav{display:none;}
+    @media(min-width:900px){
+      .burger{display:none;}
+      .logo{flex:unset;font-size:var(--text-2xl);}
+      .desktop-nav{display:flex;align-items:center;gap:var(--space-8);font-size:var(--text-sm);
+        letter-spacing:var(--tracking-wide);text-transform:uppercase;font-weight:500;
+        flex:1;justify-content:center;}
+      .desktop-nav a{color:var(--brown-mid);transition:color var(--dur-fast);padding-bottom:2px;position:relative;}
+      .desktop-nav a.active{color:var(--espresso);}
+      .desktop-nav a.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:var(--blush-dark);}
+      .desktop-nav a:hover{color:var(--espresso);}
+    }
+
+    /* ══════════════════════════════════════════
+       EDITORIAL HERO
+       ══════════════════════════════════════════ */
+    .editorial-hero {
+      position: relative;
+      height: clamp(400px, 60vh, 700px);
+      overflow: hidden;
+      background: #1a1210;
+    }
+    .editorial-hero-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 20%;
+      transition: transform 8s ease-out;
+    }
+    .editorial-hero:hover .editorial-hero-bg { transform: scale(1.03); }
+    .editorial-hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to right,
+        rgba(10,4,4,.78) 0%,
+        rgba(10,4,4,.42) 55%,
+        rgba(10,4,4,.12) 100%
+      );
+      z-index: 1;
+    }
+    .editorial-hero-content {
+      position: absolute;
+      z-index: 2;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 var(--space-6) var(--space-10);
+    }
+    @media (min-width: 768px) {
+      .editorial-hero-content { padding: 0 var(--space-16) var(--space-16); max-width: 640px; }
+    }
+    .hero-eyebrow {
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+      color: rgba(255,255,255,.6);
+      font-weight: 500;
+      margin-bottom: var(--space-3);
+      opacity: 0;
+      animation: heroIn 0.7s ease-out 0.2s forwards;
+    }
+    .hero-title {
+      font-family: var(--font-serif);
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 300;
+      line-height: 1.06;
+      color: var(--white);
+      letter-spacing: -0.03em;
+      margin-bottom: var(--space-5);
+      opacity: 0;
+      animation: heroIn 0.8s ease-out 0.35s forwards;
+    }
+    .hero-title em { font-style: italic; font-weight: 400; }
+    .hero-sub {
+      font-size: var(--text-sm);
+      color: rgba(255,255,255,.6);
+      margin-bottom: var(--space-8);
+      opacity: 0;
+      animation: heroIn 0.7s ease-out 0.5s forwards;
+      max-width: 480px;
+    }
+    @keyframes heroIn { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(12px); } }
+
+    /* Floating look count + scroll hint */
+    .hero-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      opacity: 0;
+      animation: heroIn 0.7s ease-out 0.65s forwards;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-5);
+      border-radius: var(--radius-full);
+      border: 1.5px solid rgba(255,255,255,.3);
+      color: rgba(255,255,255,.85);
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(6px);
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    /* Right-side editorial stats */
+    .hero-stat {
+      position: absolute;
+      z-index: 2;
+      right: var(--space-8);
+      bottom: var(--space-8);
+      text-align: right;
+      opacity: 0;
+      animation: heroIn 0.7s ease-out 0.75s forwards;
+    }
+    .hero-stat-num {
+      font-family: var(--font-serif);
+      font-size: 4rem;
+      font-weight: 300;
+      color: rgba(255,255,255,.12);
+      line-height: 1;
+    }
+    .hero-stat-label {
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.3);
+    }
+    @media (max-width: 640px) { .hero-stat { display: none; } }
+
+    /* ══════════════════════════════════════════
+       MARQUEE STRIP
+       ══════════════════════════════════════════ */
+    .marquee-strip {
+      background: var(--lavender);
+      overflow: hidden;
+      padding: var(--space-3) 0;
+      border-top: 1px solid rgba(255,255,255,.1);
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+    .marquee-track {
+      display: flex;
+      white-space: nowrap;
+      animation: marqueeScroll 30s linear infinite;
+      width: max-content;
+    }
+    .marquee-strip:hover .marquee-track { animation-play-state: paused; }
+    .marquee-item {
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+      color: rgba(255,255,255,.85);
+      font-weight: 500;
+      padding: 0 var(--space-6);
+    }
+    .marquee-item.accent { color: rgba(255,255,255,.45); padding: 0 var(--space-4); }
+    @keyframes marqueeScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* ══════════════════════════════════════════
+       LOOK TABS
+       ══════════════════════════════════════════ */
+    .look-tabs-wrap {
+      border-bottom: 1px solid var(--beige);
+      background: var(--bg-base);
+      position: sticky;
+      top: 64px;
+      z-index: 100;
+    }
+    .look-tabs {
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 var(--space-4);
+    }
+    .look-tabs::-webkit-scrollbar { display: none; }
+    .look-tab {
+      flex-shrink: 0;
+      padding: var(--space-4) var(--space-5);
+      font-size: var(--text-xs);
+      font-weight: 500;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      color: var(--brown-light);
+      border-bottom: 2px solid transparent;
+      transition: color var(--dur-fast), border-color var(--dur-fast);
+      white-space: nowrap;
+    }
+    .look-tab.active { color: var(--espresso); border-bottom-color: var(--lavender-dark,#8A7BB5); }
+    .look-tab:hover { color: var(--espresso); }
+
+    /* ══════════════════════════════════════════
+       LOOK SECTION
+       ══════════════════════════════════════════ */
+    .look-section {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: var(--space-8) var(--space-4) var(--space-16);
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-8);
+    }
+    @media (min-width: 768px) {
+      .look-section { grid-template-columns: 55% 1fr; align-items: start; }
+    }
+    @media (min-width: 1024px) {
+      .look-section { grid-template-columns: 58% 1fr; }
+    }
+
+    /* ── Look image ── */
+    .look-image-wrap {
+      position: relative;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      aspect-ratio: 3/4;
+      background: var(--cream);
+      box-shadow: 0 20px 60px rgba(59,43,43,.15);
+    }
+    @media (min-width: 768px) {
+      .look-image-wrap {
+        aspect-ratio: unset;
+        height: min(78vh, 680px);
+      }
+    }
+    .look-image-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      transition: transform 8s ease-out;
+    }
+    .look-image-wrap:hover .look-image-bg { transform: scale(1.03); }
+
+    .look-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(59,43,43,.3) 0%, transparent 50%);
+    }
+
+    /* Hotspot pins */
+    .hotspot {
+      position: absolute;
+      width: 40px; height: 40px;
+      transform: translate(-50%,-50%);
+      cursor: pointer;
+    }
+    .hotspot-pulse {
+      position: absolute;
+      inset: -5px;
+      border-radius: var(--radius-full);
+      background: rgba(197,190,226,.5);
+      animation: ping 2.2s ease-out infinite;
+      pointer-events: none;
+    }
+    @keyframes ping { 0%{transform:scale(1);opacity:.7} 100%{transform:scale(1.9);opacity:0} }
+    .hotspot-ring {
+      position: relative;
+      z-index: 1;
+      width: 100%; height: 100%;
+      border-radius: var(--radius-full);
+      background: rgba(255,253,249,.92);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 16px rgba(59,43,43,.25);
+      border: 2px solid var(--white);
+      transition: transform var(--dur-fast), box-shadow var(--dur-fast), background var(--dur-fast);
+    }
+    .hotspot:hover .hotspot-ring,
+    .hotspot.active .hotspot-ring {
+      transform: scale(1.18);
+      background: var(--lavender);
+      box-shadow: 0 4px 24px rgba(197,190,226,.35);
+    }
+    .hotspot-ring svg {
+      width: 14px; height: 14px;
+      stroke: var(--espresso); fill: none; stroke-width: 2;
+      transition: stroke var(--dur-fast);
+    }
+    .hotspot:hover .hotspot-ring svg,
+    .hotspot.active .hotspot-ring svg { stroke: var(--white); }
+
+    .hotspot-label {
+      position: absolute;
+      left: calc(100% + 12px); top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      background: rgba(255,253,249,.95);
+      backdrop-filter: blur(8px);
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full);
+      font-size: var(--text-xs); font-weight: 500;
+      color: var(--espresso);
+      white-space: nowrap;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--beige);
+      opacity: 0;
+      transition: opacity var(--dur-fast), transform var(--dur-fast);
+      pointer-events: none;
+    }
+    .hotspot:hover .hotspot-label,
+    .hotspot.active .hotspot-label { opacity: 1; transform: translateY(-50%) translateX(0); }
+
+    /* Look counter pill */
+    .look-counter-pill {
+      position: absolute;
+      top: var(--space-5); left: var(--space-5);
+      background: rgba(255,255,255,.9);
+      backdrop-filter: blur(8px);
+      border-radius: var(--radius-full);
+      padding: 6px 16px;
+      font-size: var(--text-xs); font-weight: 600;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      color: var(--espresso);
+      border: 1px solid rgba(228,216,204,.6);
+      z-index: 2;
+    }
+
+    /* ── Look info panel ── */
+    .look-info {}
+    .look-number {
+      font-size: var(--text-xs); letter-spacing: var(--tracking-wider);
+      text-transform: uppercase; color: var(--brown-light); font-weight: 500;
+      margin-bottom: var(--space-2);
+    }
+    .look-title {
+      font-family: var(--font-serif);
+      font-size: clamp(1.75rem, 3vw, 2.5rem);
+      font-weight: 300;
+      letter-spacing: var(--tracking-tight);
+      margin-bottom: var(--space-3);
+    }
+    .look-title em { font-style: italic; }
+    .look-description {
+      font-size: var(--text-sm); color: var(--brown-mid);
+      line-height: var(--leading-normal);
+      margin-bottom: var(--space-6);
+      padding-bottom: var(--space-6);
+      border-bottom: 1px solid var(--beige);
+    }
+
+    /* Look items */
+    .look-items { display: flex; flex-direction: column; gap: var(--space-3); margin-bottom: var(--space-5); }
+    .look-item {
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1.5px solid var(--beige);
+      transition: border-color var(--dur-fast), box-shadow var(--dur-fast), transform var(--dur-fast);
+      cursor: pointer;
+    }
+    .look-item:hover, .look-item.highlighted {
+      border-color: var(--lavender-dark,#8A7BB5);
+      box-shadow: 0 4px 20px rgba(197,190,226,.25);
+      transform: translateX(2px);
+    }
+    .look-item-img {
+      width: 56px; height: 68px; flex-shrink: 0;
+      border-radius: var(--radius-md); overflow: hidden;
+    }
+    .look-item-img img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .look-item-img .ph-thumb {
+      width: 100%; height: 100%;
+    }
+    .look-item-link { display: contents; color: inherit; text-decoration: none; }
+    .look-item-link:hover .look-item-name { text-decoration: underline; text-underline-offset: 2px; }
+    .look-item-info { flex: 1; }
+    .look-item-tag {
+      font-size: 10px; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--lavender-dark,#8A7BB5); margin-bottom: 2px;
+    }
+    .look-item-name {
+      font-size: var(--text-sm); font-weight: 500; line-height: var(--leading-snug); margin-bottom: 2px;
+    }
+    .look-item-color { font-size: var(--text-xs); color: var(--brown-light); }
+    .look-item-right {
+      display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-2);
+    }
+    .look-item-price {
+      font-family: var(--font-serif); font-size: var(--text-base);
+      font-weight: 500; white-space: nowrap;
+    }
+    .btn-item-cart {
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+      background: var(--espresso); color: var(--white);
+      font-size: var(--text-xs); font-weight: 600;
+      padding: 6px 12px; border-radius: var(--radius-full); white-space: nowrap;
+      transition: background var(--dur-fast);
+    }
+    .btn-item-cart:hover { background: #2a1e1e; }
+    .btn-item-cart svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+    /* Total + Add all */
+    .look-total {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: var(--text-sm); color: var(--brown-mid);
+      padding: var(--space-4) var(--space-4);
+      background: var(--bg-soft);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-4);
+    }
+    .look-total .total-price {
+      font-family: var(--font-serif); font-size: var(--text-xl);
+      font-weight: 500; color: var(--espresso);
+    }
+    .btn-add-all {
+      width: 100%; padding: var(--space-4);
+      background: var(--lavender); color: var(--white);
+      font-size: var(--text-sm); font-weight: 600;
+      letter-spacing: var(--tracking-wide); text-transform: uppercase;
+      border-radius: var(--radius-full);
+      display: flex; align-items: center; justify-content: center; gap: var(--space-3);
+      transition: background var(--dur-fast), transform var(--dur-fast);
+      box-shadow: 0 4px 16px rgba(197,190,226,.3);
+      margin-bottom: var(--space-4);
+    }
+    .btn-add-all:hover { background: #9388B8; transform: translateY(-1px); }
+    .btn-add-all svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+
+    .insta-link {
+      text-align: center;
+      font-size: var(--text-xs);
+      color: var(--brown-light);
+      padding: var(--space-3);
+    }
+    .insta-link a { color: var(--lavender-dark,#8A7BB5); font-weight: 600; }
+
+    /* ══════════════════════════════════════════
+       MORE LOOKS (photo grid)
+       ══════════════════════════════════════════ */
+    .more-looks-section {
+      background: var(--cream);
+      padding: var(--space-2) 0;
+    }
+    .more-looks {
+      padding: var(--space-12) var(--space-4) var(--space-16);
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .more-looks-header {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: var(--space-8); gap: var(--space-4);
+    }
+    .more-looks-eyebrow {
+      font-size: var(--text-xs); letter-spacing: var(--tracking-wider);
+      text-transform: uppercase; color: var(--brown-light); font-weight: 500;
+      margin-bottom: var(--space-2);
+    }
+    .more-looks-title {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 3vw, 3rem);
+      font-weight: 300; letter-spacing: var(--tracking-tight);
+    }
+    .more-looks-title em { font-style: italic; }
+    .btn-view-all {
+      font-size: var(--text-xs); letter-spacing: var(--tracking-wider);
+      text-transform: uppercase; font-weight: 500; color: var(--brown-mid);
+      border-bottom: 1px solid var(--beige-dark); padding-bottom: 1px;
+      transition: color var(--dur-fast), border-color var(--dur-fast);
+      flex-shrink: 0;
+    }
+    .btn-view-all:hover { color: var(--espresso); border-color: var(--espresso); }
+
+    .looks-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-4) var(--space-3);
+    }
+    @media (min-width: 640px) { .looks-grid { gap: var(--space-5) var(--space-4); } }
+    @media (min-width: 768px) { .looks-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .look-card {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      cursor: pointer;
+      aspect-ratio: 3/4;
+    }
+    .look-card-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform var(--dur-med) var(--ease-out);
+    }
+    .look-card:hover .look-card-bg { transform: scale(1.06); }
+    .look-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(59,43,43,.65) 0%, rgba(59,43,43,.08) 60%, transparent 100%);
+    }
+    .look-card-body {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: var(--space-5);
+    }
+    .look-card-num {
+      font-size: 10px; letter-spacing: var(--tracking-wider);
+      text-transform: uppercase; color: rgba(255,255,255,.65); margin-bottom: 4px;
+    }
+    .look-card-name {
+      font-family: var(--font-serif); font-size: var(--text-lg);
+      font-weight: 300; color: var(--white);
+      line-height: var(--leading-tight); margin-bottom: var(--space-3);
+    }
+    .look-card-cta {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(255,253,249,.92); color: var(--espresso);
+      font-size: 10px; font-weight: 700; letter-spacing: var(--tracking-wider);
+      text-transform: uppercase; padding: 6px 12px; border-radius: var(--radius-full);
+      opacity: 0; transform: translateY(6px);
+      transition: opacity var(--dur-med), transform var(--dur-med);
+    }
+    .look-card:hover .look-card-cta { opacity: 1; transform: translateY(0); }
+
+    /* ══════════════════════════════════════════
+       EDITORIAL PULL QUOTE
+       ══════════════════════════════════════════ */
+    .editorial-pull {
+      text-align: center;
+      padding: var(--space-16) var(--space-6);
+      background: var(--blush-light);
+      border-top: 1px solid var(--blush);
+      border-bottom: 1px solid var(--blush);
+      margin: 0;
+    }
+    .editorial-pull blockquote {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--espresso);
+      letter-spacing: var(--tracking-tight);
+      max-width: 720px;
+      margin: 0 auto var(--space-4);
+      line-height: 1.35;
+    }
+    .editorial-pull cite {
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+      color: var(--brown-light);
+      font-style: normal;
+    }
+
+    :root { --ease-out: cubic-bezier(0.22, 1, 0.36, 1); }
+  </style>
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+
+  <div class="announcement-bar">✦ &nbsp;Spedizione gratuita su ordini superiori a €50 &nbsp;✦&nbsp; Ogni look è acquistabile in pochi click &nbsp;✦</div>
+
+  <div data-include="site-header"></div>
+
+  <!-- ═══════════════════════════════════════
+       EDITORIAL HERO
+       ═══════════════════════════════════════ -->
+  <section class="editorial-hero" aria-label="Shop the Look">
+    <img
+      src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1920&q=85"
+      alt=""
+      class="editorial-hero-bg"
+      loading="eager"
+    />
+    <div class="editorial-hero-overlay"></div>
+    <div class="editorial-hero-content">
+      <p class="hero-eyebrow">Ispirazione &amp; Stile</p>
+      <h1 class="hero-title">Shop<br><em>the Look</em></h1>
+      <p class="hero-sub">Ogni outfit è acquistabile. Clicca sui pin dorati per scoprire i capi e aggiungili al carrello in un secondo.</p>
+      <div class="hero-meta">
+        <span class="hero-badge">4 look curati</span>
+        <span class="hero-badge">✦ Nuovi arrivi</span>
+      </div>
+    </div>
+    <div class="hero-stat" aria-hidden="true">
+      <div class="hero-stat-num">04</div>
+      <div class="hero-stat-label">Look completi</div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       MARQUEE STRIP
+       ═══════════════════════════════════════ -->
+  <div class="marquee-strip" aria-hidden="true">
+    <div class="marquee-track">
+      <span class="marquee-item">Shop the Look</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Outfit Completi</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Stile Curato</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Ogni Capo Acquistabile</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Ispirazione Estate 2025</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Made in Italy</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Shop the Look</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Outfit Completi</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Stile Curato</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Ogni Capo Acquistabile</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Ispirazione Estate 2025</span>
+      <span class="marquee-item accent">✦</span>
+      <span class="marquee-item">Made in Italy</span>
+      <span class="marquee-item accent">✦</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       LOOK TABS
+       ═══════════════════════════════════════ -->
+  <div class="look-tabs-wrap">
+    <nav class="look-tabs" aria-label="Seleziona look">
+      <button class="look-tab active" onclick="selectLookTab(this)">Look #1 — Estate Cipria</button>
+      <button class="look-tab" onclick="selectLookTab(this)">Look #2 — Verde Salvia</button>
+      <button class="look-tab" onclick="selectLookTab(this)">Look #3 — Lavanda Night</button>
+      <button class="look-tab" onclick="selectLookTab(this)">Look #4 — Total Cream</button>
+    </nav>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       MAIN LOOK SECTION
+       ═══════════════════════════════════════ -->�
+  <div class="look-section" id="lookSection">
+    <!-- LOOK IMAGE -->
+    <div class="look-image-wrap">
+      <img class="look-image-bg" id="lookMainImg"
+        src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=960&q=85"
+        alt="Look #1 Estate Cipria" loading="eager" />
+      <div class="look-overlay"></div>
+      <div class="look-counter-pill" id="lookCounterPill">Look 1 di 4</div>
+
+      <!-- Hotspot pins -->
+      <button class="hotspot" style="top:28%;left:48%;" onclick="highlightItem(0)" aria-label="Vestito Lino Cannes">
+        <span class="hotspot-pulse"></span>
+        <span class="hotspot-ring"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        <span class="hotspot-label">Vestito Lino</span>
+      </button>
+      <button class="hotspot" style="top:60%;left:62%;" onclick="highlightItem(1)" aria-label="Cintura">
+        <span class="hotspot-pulse" style="animation-delay:.4s"></span>
+        <span class="hotspot-ring"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        <span class="hotspot-label">Cintura dorata</span>
+      </button>
+      <button class="hotspot" style="top:80%;left:35%;" onclick="highlightItem(2)" aria-label="Scarpe">
+        <span class="hotspot-pulse" style="animation-delay:.8s"></span>
+        <span class="hotspot-ring"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        <span class="hotspot-label">Sandali cipria</span>
+      </button>
+    </div>
+
+    <!-- LOOK INFO -->
+    <div class="look-info" id="lookInfo">
+      <p class="look-number" id="lookNumber">Look #1</p>
+      <h2 class="look-title" id="lookTitle">Estate <em>Cipria</em></h2>
+      <p class="look-description" id="lookDesc">Un abito in lino dal taglio morbido, abbinato a una cintura dorata e sandali cipria. Fresco, elegante, perfetto dal mattino alla sera.</p>
+
+      <div class="look-items" id="lookItems">
+        <div class="look-item" id="item0">
+          <a class="look-item-link" href="/products/vestito-lino-cannes/">
+          <div class="look-item-img"><div class="ph-thumb" style="background:linear-gradient(145deg,#f2c4bd,#e8a8a0);border-radius:6px;"></div></div>
+          <div class="look-item-info">
+            <p class="look-item-tag">Vestito</p>
+            <p class="look-item-name">Vestito Lino Cannes</p>
+            <p class="look-item-color">Rosa cipria · Taglia M</p>
+          </div>
+          </a>
+          <div class="look-item-right">
+            <span class="look-item-price">€89,00</span>
+            <button class="btn-item-cart" onclick="addToCartFromLook('Vestito Lino Cannes','€89,00')">
+              <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+              Aggiungi
+            </button>
+          </div>
+        </div>
+        <div class="look-item" id="item1">
+          <div class="look-item-img"><div class="ph-thumb" style="background:linear-gradient(145deg,#e8d5b5,#c8a87a);border-radius:6px;"></div></div>
+          <div class="look-item-info">
+            <p class="look-item-tag">Accessorio</p>
+            <p class="look-item-name">Cintura Intrecciata Oro</p>
+            <p class="look-item-color">Oro naturale · Taglia unica</p>
+          </div>
+          <div class="look-item-right">
+            <span class="look-item-price">€39,00</span>
+            <button class="btn-item-cart" onclick="addToCartFromLook('Cintura Intrecciata Oro','€39,00')">
+              <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+              Aggiungi
+            </button>
+          </div>
+        </div>
+        <div class="look-item" id="item2">
+          <div class="look-item-img"><div class="ph-thumb" style="background:linear-gradient(145deg,#f5ddd5,#e0b8a8);border-radius:6px;"></div></div>
+          <div class="look-item-info">
+            <p class="look-item-tag">Scarpe</p>
+            <p class="look-item-name">Sandali Cipria Estivi</p>
+            <p class="look-item-color">Rosa cipria · Numero 38</p>
+          </div>
+          <div class="look-item-right">
+            <span class="look-item-price">€65,00</span>
+            <button class="btn-item-cart" onclick="addToCartFromLook('Sandali Cipria Estivi','€65,00')">
+              <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+              Aggiungi
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="look-total">
+        <span>Totale look</span>
+        <span class="total-price" id="lookTotal">€193,00</span>
+      </div>
+      <button class="btn-add-all" onclick="addAllToCart(this)">
+        <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+        Aggiungi tutto al carrello
+      </button>
+      <p class="insta-link">Trova altri look su <a href="https://instagram.com/memiabbigliamento" target="_blank" rel="noopener">@memiabbigliamento</a></p>
+    </div>
+  </div>
+
+  <!-- MORE LOOKS -->
+  <section class="more-looks-section">
+    <div class="more-looks">
+      <div class="more-looks-header">
+        <div>
+          <p class="more-looks-eyebrow">Ispirazione</p>
+          <h2 class="more-looks-title">Altri <em>Look</em></h2>
+        </div>
+        <a href="look" class="btn-view-all">Vedi tutti →</a>
+      </div>
+      <div class="looks-grid">
+        <div class="look-card" onclick="selectLookByIndex(0)">
+          <img class="look-card-bg" src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=600&q=80" alt="" loading="lazy"/>
+          <div class="look-card-overlay"></div>
+          <div class="look-card-body"><p class="look-card-num">Look 01</p><p class="look-card-name">Estate<br>Cipria</p><span class="look-card-cta">Indossa →</span></div>
+        </div>
+        <div class="look-card" onclick="selectLookByIndex(1)">
+          <img class="look-card-bg" src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&q=80" alt="" loading="lazy"/>
+          <div class="look-card-overlay"></div>
+          <div class="look-card-body"><p class="look-card-num">Look 02</p><p class="look-card-name">Verde<br>Salvia</p><span class="look-card-cta">Indossa →</span></div>
+        </div>
+        <div class="look-card" onclick="selectLookByIndex(2)">
+          <img class="look-card-bg" src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80" alt="" loading="lazy"/>
+          <div class="look-card-overlay"></div>
+          <div class="look-card-body"><p class="look-card-num">Look 03</p><p class="look-card-name">Lavanda<br>Night</p><span class="look-card-cta">Indossa →</span></div>
+        </div>
+        <div class="look-card" onclick="selectLookByIndex(3)">
+          <img class="look-card-bg" src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80" alt="" loading="lazy"/>
+          <div class="look-card-overlay"></div>
+          <div class="look-card-body"><p class="look-card-num">Look 04</p><p class="look-card-name">Total<br>Cream</p><span class="look-card-cta">Indossa →</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="editorial-pull">
+    <blockquote>"Lo stile non è ciò che indossi, ma come lo indossi."</blockquote>
+    <cite>— Memi Abbigliamento, Estate 2025</cite>
+  </section>
+
+  <script>
+  var LOOKS=[
+    {
+      img:'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=960&q=85',
+      title:'Estate <em>Cipria</em>',num:'Look #1',counter:'Look 1 di 4',
+      desc:'Un abito in lino dal taglio morbido, abbinato a una cintura dorata e sandali cipria. Fresco, elegante, perfetto dal mattino alla sera.',
+      total:'€193,00',
+      items:[
+        {tag:'Vestito',name:'Vestito Lino Cannes',color:'Rosa cipria · Taglia M',price:'€89,00',bg:'linear-gradient(145deg,#f2c4bd,#e8a8a0)',slug:'vestito-lino-cannes'},
+        {tag:'Accessorio',name:'Cintura Intrecciata Oro',color:'Oro naturale · Taglia unica',price:'€39,00',bg:'linear-gradient(145deg,#e8d5b5,#c8a87a)'},
+        {tag:'Scarpe',name:'Sandali Cipria Estivi',color:'Rosa cipria · Numero 38',price:'€65,00',bg:'linear-gradient(145deg,#f5ddd5,#e0b8a8)'}
+      ]
+    },
+    {
+      img:'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=960&q=85',
+      title:'Verde <em>Salvia</em>',num:'Look #2',counter:'Look 2 di 4',
+      desc:'Blazer sartoriale salvia su gonna plissé avorio. Combinazione sofisticata per ogni occasione.',
+      total:'€184,00',
+      items:[
+        {tag:'Blazer',name:'Blazer Sartoriale Mia',color:'Verde salvia · Taglia S',price:'€105,00',bg:'linear-gradient(145deg,#c4d4c0,#a8c0a4)',slug:'blazer-sartoriale-mia'},
+        {tag:'Gonna',name:'Gonna Plissé Nuvola',color:'Avorio naturale · Taglia S',price:'€79,00',bg:'linear-gradient(145deg,#f7ecd8,#e8d5c0)',slug:'gonna-plisse-nuvola'}
+      ]
+    },
+    {
+      img:'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=960&q=85',
+      title:'Lavanda <em>Night</em>',num:'Look #3',counter:'Look 3 di 4',
+      desc:'Top in seta lavanda e gonna wrap salvia per una serata elegante. Femminilità in ogni dettaglio.',
+      total:'€135,00',
+      items:[
+        {tag:'Top',name:'Top Seta Lucida Aria',color:'Lavanda · Taglia XS',price:'€65,00',bg:'linear-gradient(145deg,#d6ceea,#b8a8d8)',slug:'top-seta-lucida-aria'},
+        {tag:'Gonna',name:'Gonna Wrap Salvia',color:'Verde salvia · Taglia S',price:'€70,00',bg:'linear-gradient(145deg,#c4d4c0,#a8c0a4)',slug:'gonna-wrap-salvia'}
+      ]
+    },
+    {
+      img:'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=960&q=85',
+      title:'Total <em>Cream</em>',num:'Look #4',counter:'Look 4 di 4',
+      desc:'Un coordinato total avorio per un look minimal e raffinato. Set coordinato viola come tocco di carattere.',
+      total:'€178,00',
+      items:[
+        {tag:'Set',name:'Set Coordinato Viola',color:'Lilla morbido · Taglia XS',price:'€130,00',bg:'linear-gradient(145deg,#d6ceea,#b8a8d8)',slug:'set-coordinato-viola'},
+        {tag:'Top',name:'Top Bustier Perla',color:'Avorio madreperla · Taglia S',price:'€48,00',bg:'linear-gradient(145deg,#f7ecd8,#e8d5c0)',slug:'top-bustier-perla'}
+      ]
+    }
+  ];
+
+  var currentLook=0;
+  function PILL_SVG(){return '<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>';}
+
+  function selectLookByIndex(idx){
+    document.querySelectorAll('.look-tab')[idx].click();
+  }
+
+  function selectLookTab(btn){
+    document.querySelectorAll('.look-tab').forEach(function(t,i){
+      t.classList.toggle('active',t===btn);
+      if(t===btn)currentLook=i;
+    });
+    renderLook(currentLook);
+    var sec=document.getElementById('lookSection');if(sec)sec.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  function renderLook(idx){
+    var l=LOOKS[idx];if(!l)return;
+    var img=document.getElementById('lookMainImg');
+    img.style.opacity='0';setTimeout(function(){img.src=l.img;img.alt=l.title.replace(/<[^>]*>/g,'');img.style.opacity='1';},200);
+    img.style.transition='opacity .3s ease';
+    document.getElementById('lookCounterPill').textContent=l.counter;
+    document.getElementById('lookNumber').textContent=l.num;
+    document.getElementById('lookTitle').innerHTML=l.title;
+    document.getElementById('lookDesc').textContent=l.desc;
+    document.getElementById('lookTotal').textContent=l.total;
+    var container=document.getElementById('lookItems');
+    container.innerHTML=l.items.map(function(item,i){
+      var inner='<div class="look-item-img"><div class="ph-thumb" style="background:'+item.bg+';border-radius:6px;width:100%;height:100%;"></div></div>'
+        +'<div class="look-item-info"><p class="look-item-tag">'+item.tag+'</p><p class="look-item-name">'+item.name+'</p><p class="look-item-color">'+item.color+'</p></div>';
+      var linked=item.slug
+        ?'<a class="look-item-link" href="/products/'+item.slug+'/">'+inner+'</a>'
+        :inner;
+      return '<div class="look-item" id="item'+i+'">'
+        +linked
+        +'<div class="look-item-right"><span class="look-item-price">'+item.price+'</span>'
+        +'<button class="btn-item-cart" onclick="addToCartFromLook(\''+item.name+'\',\''+item.price+'\')">'+PILL_SVG()+' Aggiungi</button></div>'
+        +'</div>';
+    }).join('');
+  }
+
+  function highlightItem(idx){
+    document.querySelectorAll('.look-item').forEach(function(el,i){el.classList.toggle('highlighted',i===idx);});
+    var el=document.getElementById('item'+idx);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+
+  function addToCartFromLook(name,price){
+    var btn=event.currentTarget;
+    var priceNum=parseFloat(price.replace(/[€\s]/g,'').replace(',','.'));
+    var lookItem=btn.closest('.look-item');
+    var variant=lookItem?(lookItem.querySelector('.look-item-color')||{}).textContent||'':'';
+    var id=name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+    if(typeof window.addToCart==='function'){window.addToCart({id:id,name:name,price:priceNum,variant:variant,color:'ph-blush'});}
+    var orig=btn.innerHTML;btn.textContent='✓ Aggiunto';btn.style.background='var(--sage)';
+    setTimeout(function(){btn.innerHTML=orig;btn.style.background='';},1600);
+  }
+
+  function addAllToCart(btn){
+    var l=LOOKS[currentLook];if(!l)return;
+    if(!btn)btn=document.querySelector('.btn-add-all');
+    if(btn.disabled)return;
+    btn.disabled=true;
+    if(typeof window.addToCart==='function'){
+      var inCart=JSON.parse(localStorage.getItem('memi_cart')||'[]').map(function(c){return c.id;});
+      var added=0;
+      l.items.forEach(function(item){
+        var priceNum=parseFloat(item.price.replace(/[€\s]/g,'').replace(',','.'));
+        var id=item.slug||item.name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+        if(inCart.indexOf(id)!==-1)return;
+        window.addToCart({id:id,name:item.name,price:priceNum,variant:item.color||'',color:'ph-blush',silent:true,noIncrement:true});
+        added++;
+      });
+      if(typeof window.showToast==='function'){
+        window.showToast(added>0?added+' prodotti aggiunti al carrello':'Prodotti già nel carrello');
+      }
+    }
+    var orig=btn.innerHTML;
+    btn.textContent='✓ Tutto aggiunto!';btn.style.background='var(--sage)';
+    setTimeout(function(){btn.innerHTML=orig;btn.style.background='';btn.disabled=false;},2000);
+  }
+
+  (function initLookFromQuery(){
+    var params=new URLSearchParams(window.location.search);
+    var requested=parseInt(params.get('look'),10);
+    if(requested && requested>=1 && requested<=LOOKS.length){
+      var idx=requested-1;
+      document.querySelectorAll('.look-tab').forEach(function(t,i){t.classList.toggle('active',i===idx);});
+      currentLook=idx;
+      renderLook(idx);
+    }
+  })();
+  </script>
+  <script src="api-client.js"></script>
+  <script src="app.js?v=3"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "memi-abbigliamento",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["server.py"],
+      "port": 3456,
+      "autoPort": false
+    }
+  ]
+}

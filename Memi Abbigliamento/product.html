@@ -1,0 +1,736 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vestito Lino Cannes — Memi Abbigliamento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <style>
+    /* Tokens now live in tokens.css (linked in <head>) */
+
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;font-size:16px;}
+    body{background:var(--bg-base);color:var(--espresso);font-family:var(--font-sans);
+         font-weight:400;line-height:var(--leading-normal);-webkit-font-smoothing:antialiased;}
+    img{display:block;width:100%;object-fit:cover;}
+    a{color:inherit;text-decoration:none;}
+    button{cursor:pointer;border:none;background:none;font-family:inherit;}
+    ul,ol{list-style:none;}
+
+    /* ── Announcement ── */
+    .announcement-bar{background:var(--blush-light);color:var(--brown-mid);text-align:center;
+      padding:var(--space-2) var(--space-4);font-size:var(--text-xs);
+      letter-spacing:var(--tracking-wider);text-transform:uppercase;font-weight:500;
+      border-bottom:1px solid var(--blush);}
+
+    /* ── Header ── */
+    .site-header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);
+      backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--beige);}
+    .header-inner{max-width:1280px;margin:0 auto;padding:0 var(--space-4);height:64px;
+      display:flex;align-items:center;gap:var(--space-4);}
+    .logo{flex:1;text-align:center;font-family:var(--font-serif);font-size:var(--text-xl);
+      font-weight:400;letter-spacing:var(--tracking-wide);text-transform:uppercase;
+      color:var(--espresso);}
+    .logo span{color:var(--blush-dark);}
+    .icon-btn{position:relative;width:40px;height:40px;display:flex;align-items:center;
+      justify-content:center;border-radius:var(--radius-full);
+      transition:background var(--dur-fast);color:var(--espresso);}
+    .icon-btn:hover{background:var(--bg-soft);}
+    .icon-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6;}
+    .cart-badge{position:absolute;top:4px;right:4px;min-width:16px;height:16px;
+      background:var(--blush-dark);color:var(--white);border-radius:var(--radius-full);
+      font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;
+      padding:0 3px;}
+    .header-actions{display:flex;align-items:center;gap:var(--space-4);flex-shrink:0;}
+    .burger{display:flex;flex-direction:column;gap:5px;width:24px;padding:var(--space-1);flex-shrink:0;}
+    .burger span{display:block;height:1.5px;background:var(--espresso);border-radius:2px;}
+    .desktop-nav{display:none;}
+    @media(min-width:900px){
+      .burger{display:none;}
+      .logo{flex:unset;text-align:left;font-size:var(--text-2xl);}
+      .desktop-nav{display:flex;align-items:center;gap:var(--space-8);font-size:var(--text-sm);
+        letter-spacing:var(--tracking-wide);text-transform:uppercase;font-weight:500;
+        flex:1;justify-content:center;}
+      .desktop-nav a{color:var(--brown-mid);transition:color var(--dur-fast);}
+      .desktop-nav a:hover{color:var(--espresso);}
+    }
+
+    /* ── Breadcrumb ── */
+    .breadcrumb{padding:var(--space-4) var(--space-4);font-size:var(--text-xs);
+      color:var(--brown-light);letter-spacing:var(--tracking-wide);
+      display:flex;align-items:center;gap:var(--space-2);max-width:1280px;margin:0 auto;}
+    .breadcrumb a{color:var(--brown-light);transition:color var(--dur-fast);}
+    .breadcrumb a:hover{color:var(--espresso);}
+    .breadcrumb svg{width:12px;height:12px;stroke:var(--beige-dark);fill:none;stroke-width:2;}
+
+    /* ── PDP Layout ── */
+    .pdp{max-width:1280px;margin:0 auto;padding:0 var(--space-4) var(--space-16);}
+
+    .pdp-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:var(--space-8);
+    }
+    @media(min-width:768px){
+      .pdp-grid{grid-template-columns:55% 1fr;gap:var(--space-12);align-items:start;}
+    }
+    @media(min-width:1024px){
+      .pdp-grid{grid-template-columns:58% 1fr;}
+    }
+
+    /* ── Image Gallery ── */
+    .gallery{}
+
+    /* Main image */
+    .gallery-main{
+      position:relative;
+      border-radius:var(--radius-lg);
+      overflow:hidden;
+      aspect-ratio:3/4;
+      background:var(--cream);
+      margin-bottom:var(--space-3);
+    }
+    .gallery-main-img{
+      height:100%;
+      object-position:center top;
+      transition:opacity var(--dur-med) var(--ease-out);
+    }
+    .gallery-main .ph{width:100%;height:100%;}
+
+    /* Zoom hint */
+    .gallery-zoom-hint{
+      position:absolute;bottom:var(--space-4);right:var(--space-4);
+      background:rgba(255,255,255,.85);backdrop-filter:blur(6px);
+      border-radius:var(--radius-full);padding:var(--space-2) var(--space-3);
+      font-size:var(--text-xs);color:var(--brown-mid);
+      display:flex;align-items:center;gap:5px;
+    }
+    .gallery-zoom-hint svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;}
+
+    /* Thumbnails */
+    .gallery-thumbs{
+      display:flex;gap:var(--space-2);overflow-x:auto;
+      scrollbar-width:none;padding-bottom:2px;
+    }
+    .gallery-thumbs::-webkit-scrollbar{display:none;}
+    .thumb{
+      flex-shrink:0;width:72px;height:96px;border-radius:var(--radius-md);
+      overflow:hidden;cursor:pointer;
+      border:2px solid transparent;
+      transition:border-color var(--dur-fast);
+    }
+    .thumb.active{border-color:var(--blush-dark);}
+    .thumb img,.thumb .ph{height:100%;object-position:center top;}
+
+    /* ── Product Info Panel ── */
+    .pdp-info{}
+
+    /* Sticky on desktop */
+    @media(min-width:768px){
+      .pdp-info{position:sticky;top:80px;}
+    }
+
+    .product-brand{
+      font-size:var(--text-xs);letter-spacing:var(--tracking-wider);
+      text-transform:uppercase;color:var(--brown-light);font-weight:500;
+      margin-bottom:var(--space-2);
+    }
+    .product-title{
+      font-family:var(--font-serif);font-size:var(--text-3xl);
+      font-weight:300;line-height:var(--leading-tight);
+      letter-spacing:var(--tracking-tight);margin-bottom:var(--space-3);
+    }
+
+    /* Rating */
+    .product-rating{
+      display:flex;align-items:center;gap:var(--space-3);
+      margin-bottom:var(--space-5);
+    }
+    .stars{display:flex;gap:2px;}
+    .star{font-size:14px;color:var(--blush-dark);}
+    .star.empty{color:var(--beige);}
+    .rating-count{font-size:var(--text-xs);color:var(--brown-light);}
+    .rating-count a{text-decoration:underline;color:var(--brown-light);}
+
+    /* Price */
+    .product-price-row{
+      display:flex;align-items:baseline;gap:var(--space-3);
+      margin-bottom:var(--space-6);
+      padding-bottom:var(--space-6);
+      border-bottom:1px solid var(--beige);
+    }
+    .price-main{font-family:var(--font-serif);font-size:var(--text-2xl);font-weight:500;}
+    .price-old{font-size:var(--text-base);color:var(--brown-light);text-decoration:line-through;}
+    .price-tag{font-size:var(--text-sm);font-weight:600;color:var(--blush-dark);}
+
+    /* Color selector */
+    .selector-label{
+      font-size:var(--text-xs);letter-spacing:var(--tracking-wider);
+      text-transform:uppercase;font-weight:600;color:var(--espresso);
+      margin-bottom:var(--space-3);display:flex;align-items:center;gap:var(--space-2);
+    }
+    .selector-label span{font-weight:400;color:var(--brown-light);}
+
+    .color-swatches{
+      display:flex;gap:var(--space-2);margin-bottom:var(--space-5);flex-wrap:wrap;
+    }
+    .color-swatch{
+      width:30px;height:30px;border-radius:var(--radius-full);
+      cursor:pointer;border:2px solid transparent;
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);
+      transition:border-color var(--dur-fast),transform var(--dur-fast);
+    }
+    .color-swatch:hover{transform:scale(1.1);}
+    .color-swatch.active{border-color:var(--espresso);transform:scale(1.1);}
+
+    /* Size selector */
+    .size-grid{
+      display:flex;gap:var(--space-2);flex-wrap:wrap;margin-bottom:var(--space-2);
+    }
+    .size-btn{
+      height:42px;min-width:48px;padding:0 var(--space-3);
+      border:1px solid var(--beige);border-radius:var(--radius-sm);
+      font-size:var(--text-sm);font-weight:500;color:var(--brown-mid);
+      transition:border-color var(--dur-fast),background var(--dur-fast),color var(--dur-fast);
+      background:var(--white);
+    }
+    .size-btn:hover{border-color:var(--espresso);color:var(--espresso);}
+    .size-btn.active{border-color:var(--espresso);background:var(--espresso);color:var(--white);}
+    .size-btn.oos{opacity:.35;text-decoration:line-through;pointer-events:none;}
+
+    .size-guide-link{
+      font-size:var(--text-xs);color:var(--brown-light);text-decoration:underline;
+      cursor:pointer;margin-bottom:var(--space-6);display:inline-block;
+    }
+    .size-guide-link:hover{color:var(--espresso);}
+
+    /* CTA buttons */
+    .cta-stack{display:flex;flex-direction:column;gap:var(--space-3);margin-bottom:var(--space-5);}
+
+    .btn-atc{
+      width:100%;padding:var(--space-4);
+      background:var(--espresso);color:var(--white);
+      font-size:var(--text-sm);font-weight:600;
+      letter-spacing:var(--tracking-wide);text-transform:uppercase;
+      border-radius:var(--radius-full);
+      display:flex;align-items:center;justify-content:center;gap:var(--space-2);
+      transition:background var(--dur-fast),transform var(--dur-fast),box-shadow var(--dur-fast);
+      box-shadow:var(--shadow-sm);
+    }
+    .btn-atc:hover:not(:disabled){background:#2a1e1e;transform:translateY(-1px);box-shadow:var(--shadow-md);}
+    .btn-atc:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+    .btn-wishlist.active{border-color:var(--blush-dark);background:var(--blush-light);color:var(--blush-dark);}
+    .btn-atc svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;}
+
+    .btn-wishlist{
+      width:100%;padding:var(--space-4);
+      background:transparent;color:var(--espresso);
+      font-size:var(--text-sm);font-weight:500;
+      border:1px solid var(--beige-dark);border-radius:var(--radius-full);
+      display:flex;align-items:center;justify-content:center;gap:var(--space-2);
+      transition:border-color var(--dur-fast),background var(--dur-fast);
+    }
+    .btn-wishlist:hover{border-color:var(--blush-dark);background:var(--blush-light);}
+    .btn-wishlist svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;}
+
+    /* Klarna badge */
+    .klarna-note{
+      font-size:var(--text-xs);color:var(--brown-light);
+      text-align:center;margin-bottom:var(--space-5);
+    }
+    .klarna-note strong{color:var(--espresso);}
+
+    /* Perks mini row */
+    .mini-perks{
+      display:flex;flex-direction:column;gap:var(--space-3);
+      padding:var(--space-5);background:var(--bg-soft);
+      border-radius:var(--radius-lg);border:1px solid var(--beige);
+      margin-bottom:var(--space-6);
+    }
+    .mini-perk{
+      display:flex;align-items:center;gap:var(--space-3);
+      font-size:var(--text-sm);color:var(--brown-mid);
+    }
+    .mini-perk svg{width:18px;height:18px;stroke:var(--sage-dark);fill:none;stroke-width:1.8;flex-shrink:0;}
+
+    /* ── Accordion ── */
+    .accordions{border-top:1px solid var(--beige);}
+    .accordion-item{border-bottom:1px solid var(--beige);}
+    .accordion-header{
+      width:100%;padding:var(--space-5) 0;
+      display:flex;align-items:center;justify-content:space-between;
+      font-size:var(--text-sm);font-weight:500;color:var(--espresso);
+      letter-spacing:var(--tracking-wide);text-transform:uppercase;
+      cursor:pointer;transition:color var(--dur-fast);background:none;border:none;
+      font-family:var(--font-sans);text-align:left;
+    }
+    .accordion-header:hover{color:var(--blush-dark);}
+    .accordion-chevron{
+      width:18px;height:18px;flex-shrink:0;
+      stroke:currentColor;fill:none;stroke-width:1.8;
+      transition:transform var(--dur-med) var(--ease-out);
+    }
+    .accordion-item.open .accordion-chevron{transform:rotate(180deg);}
+    .accordion-body{
+      max-height:0;overflow:hidden;
+      transition:max-height var(--dur-med) var(--ease-out),padding var(--dur-med);
+    }
+    .accordion-item.open .accordion-body{max-height:600px;padding-bottom:var(--space-5);}
+    .accordion-body p,.accordion-body li{font-size:var(--text-sm);color:var(--brown-mid);
+      line-height:var(--leading-normal);}
+    .accordion-body ul{display:flex;flex-direction:column;gap:var(--space-2);padding-left:var(--space-4);}
+    .accordion-body li::before{content:"·";margin-right:var(--space-2);color:var(--blush-dark);}
+
+    /* ── Related Products ── */
+    .related{padding:var(--space-12) var(--space-4) var(--space-16);max-width:1280px;margin:0 auto;}
+    .related-title{
+      font-family:var(--font-serif);font-size:var(--text-3xl);font-weight:300;
+      letter-spacing:var(--tracking-tight);margin-bottom:var(--space-8);
+    }
+    .related-title em{font-style:italic;}
+    .related-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:var(--space-4) var(--space-3);
+    }
+    @media(min-width:640px){.related-grid{gap:var(--space-5) var(--space-4);}}
+    @media(min-width:768px){.related-grid{grid-template-columns:repeat(4,1fr);}}
+
+    /* Product card (copy from homepage) */
+    .product-card{display:flex;flex-direction:column;background:var(--bg-card);
+      border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-xs);
+      transition:box-shadow var(--dur-med) var(--ease-out),transform var(--dur-med) var(--ease-out);cursor:pointer;}
+    .product-card:hover{box-shadow:0 12px 40px rgba(59,43,43,.14);transform:translateY(-3px);}
+    .product-img-wrap{position:relative;aspect-ratio:3/4;overflow:hidden;background:var(--cream);}
+    .product-img-wrap .ph{width:100%;height:100%;}
+    .product-img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center top;}
+    .product-info{padding:var(--space-3) var(--space-3) var(--space-4);}
+    .product-name{font-size:var(--text-sm);color:var(--espresso);line-height:var(--leading-snug);margin-bottom:var(--space-1);}
+    .product-color{font-size:var(--text-xs);color:var(--brown-light);margin-bottom:var(--space-2);}
+    .product-pricing{display:flex;align-items:baseline;gap:var(--space-2);}
+    .price-current{font-family:var(--font-serif);font-size:var(--text-base);font-weight:500;}
+
+    /* Placeholder helpers */
+    .ph-blush{background:linear-gradient(145deg,var(--blush-light) 0%,var(--blush) 100%);}
+    .ph-sage{background:linear-gradient(145deg,var(--sage-light) 0%,var(--sage) 100%);}
+    .ph-lavender{background:linear-gradient(145deg,var(--lavender-light) 0%,var(--lavender) 100%);}
+    .ph-cream{background:linear-gradient(145deg,var(--cream) 0%,var(--beige) 100%);}
+    .ph-fig{
+      width:100%;height:100%;display:flex;align-items:flex-end;
+      justify-content:center;overflow:hidden;
+    }
+    .ph-fig svg{width:55%;opacity:.22;}
+  </style>
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+
+  <!-- ── Announcement ── -->
+  <div class="announcement-bar">✦ &nbsp;Spedizione gratuita su ordini superiori a €50 &nbsp;✦</div>
+
+  <!-- ── Header ── -->
+  <div data-include="site-header"></div>
+  <!-- Header is injected by app.js (injectHeader) — shared with every other page. -->
+
+  <!-- ── Breadcrumb ── -->
+  <div class="breadcrumb">
+    <a href="/">Home</a>
+    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    <a href="collections/vestiti/index.html">Vestiti</a>
+    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    <span style="color:var(--espresso);">Vestito Lino Cannes</span>
+  </div>
+
+  <!-- ── PDP ── -->
+  <main class="pdp">
+    <div class="pdp-grid">
+
+      <!-- ═══ LEFT — Image Gallery ═══ -->
+      <div class="gallery">
+
+        <!-- Main image -->
+        <div class="gallery-main" id="galleryMain">
+          <img id="mainImg" class="gallery-main-img" src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=960&q=85" alt="Vestito Lino Cannes" loading="eager" style="width:100%;height:100%;object-fit:cover;">
+          <div class="gallery-zoom-hint">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            Zoom
+          </div>
+        </div>
+
+        <!-- Thumbnails -->
+        <div class="gallery-thumbs" role="list" aria-label="Viste prodotto">
+          <button class="thumb active" onclick="selectThumb(this,'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=960&q=85')" aria-label="Vista frontale">
+            <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=120&h=160&q=80" alt="Vista frontale" style="width:100%;height:100%;object-fit:cover;">
+          </button>
+          <button class="thumb" onclick="selectThumb(this,'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=960&q=85')" aria-label="Vista posteriore">
+            <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=120&h=160&q=80" alt="Vista posteriore" style="width:100%;height:100%;object-fit:cover;">
+          </button>
+          <button class="thumb" onclick="selectThumb(this,'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=960&q=85')" aria-label="Dettaglio tessuto">
+            <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=120&h=160&q=80" alt="Dettaglio" style="width:100%;height:100%;object-fit:cover;">
+          </button>
+          <button class="thumb" onclick="selectThumb(this,'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=960&q=85')" aria-label="Vista laterale">
+            <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=120&h=160&q=80" alt="Vista laterale" style="width:100%;height:100%;object-fit:cover;">
+          </button>
+        </div>
+
+      </div><!-- /gallery -->
+
+      <!-- ═══ RIGHT — Product Info ═══ -->
+      <div class="pdp-info">
+
+        <p class="product-brand">Memi Abbigliamento</p>
+        <h1 class="product-title">Vestito Lino Cannes</h1>
+
+        <!-- Rating -->
+        <div class="product-rating">
+          <div class="stars" aria-label="4.8 su 5">
+            <span class="star">★</span><span class="star">★</span><span class="star">★</span>
+            <span class="star">★</span><span class="star" style="color:var(--beige-dark);">★</span>
+          </div>
+          <span class="rating-count"><a href="#reviews">4.8 (32 recensioni)</a></span>
+        </div>
+
+        <!-- Price -->
+        <div class="product-price-row">
+          <span class="price-main">€89,00</span>
+        </div>
+
+        <!-- Color selector -->
+        <div style="margin-bottom:var(--space-5);">
+          <p class="selector-label">Colore <span id="colorLabel">— Rosa Cipria</span></p>
+          <div class="color-swatches" role="group" aria-label="Seleziona colore">
+            <button class="color-swatch active" style="background:#F2C4BD;" aria-label="Rosa Cipria" onclick="selectColor(this,'Rosa Cipria')"></button>
+            <button class="color-swatch" style="background:#C4D4C0;" aria-label="Verde Salvia" onclick="selectColor(this,'Verde Salvia')"></button>
+            <button class="color-swatch" style="background:#D6CEEA;" aria-label="Lavanda" onclick="selectColor(this,'Lavanda')"></button>
+            <button class="color-swatch" style="background:#E8DDD0;" aria-label="Avorio" onclick="selectColor(this,'Avorio')"></button>
+          </div>
+        </div>
+
+        <!-- Size selector -->
+        <div style="margin-bottom:var(--space-2);">
+          <p class="selector-label">Taglia <span id="sizeLabel">— Seleziona</span></p>
+          <div class="size-grid" role="group" aria-label="Seleziona taglia">
+            <button class="size-btn" onclick="selectSize(this,'XS')">XS</button>
+            <button class="size-btn" onclick="selectSize(this,'S')">S</button>
+            <button class="size-btn" onclick="selectSize(this,'M')">M</button>
+            <button class="size-btn oos" aria-label="L — esaurito">L</button>
+            <button class="size-btn" onclick="selectSize(this,'XL')">XL</button>
+          </div>
+        </div>
+        <button class="size-guide-link">Guida alle taglie →</button>
+
+        <!-- CTA -->
+        <div class="cta-stack">
+          <button class="btn-atc atc-btn" id="atcBtn" disabled>
+            <span class="atc-label">
+              <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;vertical-align:middle;margin-right:6px;"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+              Aggiungi al carrello
+            </span>
+            <span class="atc-spinner">
+              <svg class="atc-spinner-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9" stroke-opacity=".25"/><path d="M12 3a9 9 0 0 1 9 9" stroke-linecap="round"/></svg>
+            </span>
+            <span class="atc-check">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+          </button>
+          <button class="btn-wishlist" id="wishlistBtn">
+            <svg viewBox="0 0 24 24"><path id="wishlistHeart" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <span id="wishlistBtnLabel">Salva nella wishlist</span>
+          </button>
+        </div>
+
+        <!-- Klarna -->
+        <p class="klarna-note">
+          oppure 3 rate da <strong>€29,67</strong> con Klarna. <a href="#" style="text-decoration:underline;">Scopri di più</a>
+        </p>
+
+        <!-- Mini perks -->
+        <div class="mini-perks">
+          <div class="mini-perk">
+            <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            Spedizione gratuita — consegna in 2–3 giorni lavorativi
+          </div>
+          <div class="mini-perk">
+            <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Reso gratuito entro 30 giorni
+          </div>
+          <div class="mini-perk">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Pagamento sicuro — SSL crittografato
+          </div>
+        </div>
+
+        <!-- Accordions -->
+        <div class="accordions">
+
+          <div class="accordion-item open">
+            <button class="accordion-header" onclick="toggleAccordion(this)">
+              Descrizione & Cura del Tessuto
+              <svg class="accordion-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <p style="margin-bottom:var(--space-4);">
+                Il Vestito Lino Cannes è la definizione di eleganza estiva. Realizzato in puro lino
+                italiano al 100%, questo abito coniuga il comfort di un tessuto naturale con
+                la silhouette sciolta e femminile che ha reso Memi famosa.
+              </p>
+              <p style="margin-bottom:var(--space-4);">
+                <strong style="color:var(--espresso);font-size:var(--text-xs);letter-spacing:var(--tracking-wide);text-transform:uppercase;">Composizione:</strong><br>
+                100% Lino — Prodotto in Italia
+              </p>
+              <ul>
+                <li>Lavare a mano o in lavatrice a 30°C</li>
+                <li>Non centrifugare</li>
+                <li>Stirare a temperatura media con panno umido</li>
+                <li>Non asciugare in asciugatrice</li>
+                <li>Non candeggiare</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">
+              Spedizione & Resi
+              <svg class="accordion-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <ul>
+                <li>Spedizione standard gratuita su ordini ≥ €50 (2–3 giorni)</li>
+                <li>Spedizione express €8,90 (1 giorno lavorativo)</li>
+                <li>Reso gratuito entro 30 giorni dall'acquisto</li>
+                <li>Il capo deve essere non lavato, con etichette intatte</li>
+                <li>Rimborso completo entro 5 giorni dalla ricezione del reso</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">
+              Guida alle Taglie
+              <svg class="accordion-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <p style="margin-bottom:var(--space-4);">Il modello in foto indossa la taglia S e misura 174 cm.</p>
+              <table style="width:100%;border-collapse:collapse;font-size:var(--text-xs);">
+                <thead>
+                  <tr style="background:var(--bg-soft);">
+                    <th style="padding:var(--space-2) var(--space-3);text-align:left;color:var(--espresso);font-weight:600;">Taglia</th>
+                    <th style="padding:var(--space-2) var(--space-3);text-align:left;color:var(--espresso);font-weight:600;">Busto (cm)</th>
+                    <th style="padding:var(--space-2) var(--space-3);text-align:left;color:var(--espresso);font-weight:600;">Vita (cm)</th>
+                    <th style="padding:var(--space-2) var(--space-3);text-align:left;color:var(--espresso);font-weight:600;">Fianchi (cm)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-top:1px solid var(--beige);"><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">XS</td><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">80–83</td><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">62–65</td><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">87–90</td></tr>
+                  <tr style="border-top:1px solid var(--beige);"><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">S</td><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">84–87</td><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">66–69</td><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">91–94</td></tr>
+                  <tr style="border-top:1px solid var(--beige);"><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">M</td><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">88–93</td><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">70–75</td><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">95–100</td></tr>
+                  <tr style="border-top:1px solid var(--beige);"><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">L</td><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">94–99</td><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">76–81</td><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">101–106</td></tr>
+                  <tr style="border-top:1px solid var(--beige);"><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">XL</td><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">100–105</td><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">82–87</td><td style="padding:var(--space-2) var(--space-3);color:var(--brown-mid);">107–112</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div><!-- /accordions -->
+
+      </div><!-- /pdp-info -->
+    </div><!-- /pdp-grid -->
+  </main>
+
+  <!-- ── Related Products ── -->
+  <section class="related">
+    <h2 class="related-title">Ti potrebbe <em>piacere</em></h2>
+    <div class="related-grid">
+
+      <article class="product-card">
+        <div class="product-img-wrap"><img class="product-img-main" src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&h=800&q=80" alt="Blazer Sartoriale Mia" loading="lazy"></div>
+        <div class="product-info"><p class="product-name">Blazer Sartoriale Mia</p><p class="product-color">Verde salvia</p><div class="product-pricing"><span class="price-current">€105,00</span></div></div>
+      </article>
+
+      <article class="product-card">
+        <div class="product-img-wrap"><img class="product-img-main" src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&h=800&q=80" alt="Top Seta Lucida Aria" loading="lazy"></div>
+        <div class="product-info"><p class="product-name">Top Seta Lucida Aria</p><p class="product-color">Lavanda</p><div class="product-pricing"><span class="price-current">€65,00</span></div></div>
+      </article>
+
+      <article class="product-card">
+        <div class="product-img-wrap"><img class="product-img-main" src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&h=800&q=80" alt="Gonna Plissé Nuvola" loading="lazy"></div>
+        <div class="product-info"><p class="product-name">Gonna Plissé Nuvola</p><p class="product-color">Avorio naturale</p><div class="product-pricing"><span class="price-current">€79,00</span></div></div>
+      </article>
+
+      <article class="product-card">
+        <div class="product-img-wrap"><img class="product-img-main" src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=600&h=800&q=80" alt="Camicia Cotone Brisa" loading="lazy"></div>
+        <div class="product-info"><p class="product-name">Camicia Cotone Brisa</p><p class="product-color">Corallo pastello</p><div class="product-pricing"><span class="price-current">€55,00</span></div></div>
+      </article>
+
+    </div>
+  </section>
+
+  <script>
+    // Load correct product from URL ?id= param
+    var _p = (function() {
+      var PRODUCTS = {
+        'vestito-lino-cannes':   { name: 'Vestito Lino Cannes',   color: 'Rosa Cipria',      colorKey: 'ph-blush',    price: 89,  priceStr: '€89,00',  category: 'Vestiti',   desc: 'Il Vestito Lino Cannes è la definizione di eleganza estiva. Realizzato in puro lino italiano al 100%, questo abito coniuga il comfort di un tessuto naturale con la silhouette sciolta e femminile che ha reso Memi famosa.' },
+        'blazer-sartoriale-mia': { name: 'Blazer Sartoriale Mia', color: 'Verde Salvia',     colorKey: 'ph-sage',     price: 105, priceStr: '€105,00', category: 'Blazer',    desc: 'Il Blazer Sartoriale Mia reinterpreta la giacca classica con leggerezza contemporanea. Struttura pulita, spalle arrotondate e un verde salvia che cattura la luce del mattino.' },
+        'top-seta-lucida-aria':  { name: 'Top Seta Lucida Aria',  color: 'Lavanda',          colorKey: 'ph-lavender', price: 65,  priceStr: '€65,00',  category: 'Top',       desc: 'Il Top Seta Lucida Aria è un\'ode alla leggerezza. In seta lavanda con finitura brillante, scivola sul corpo con una fluidità ineguagliabile. Perfetto per le serate estive.' },
+        'gonna-plisse-nuvola':   { name: 'Gonna Plissé Nuvola',   color: 'Avorio Naturale',  colorKey: 'ph-cream',    price: 79,  priceStr: '€79,00',  category: 'Gonne',     desc: 'La Gonna Plissé Nuvola è il capo must-have della stagione. Il plissé fine danza ad ogni passo, creando un movimento poetico. L\'avorio naturale si abbina a qualsiasi top.' },
+        'camicia-cotone-brisa':  { name: 'Camicia Cotone Brisa',  color: 'Corallo Pastello', colorKey: 'ph-blush',    price: 55,  priceStr: '€55,00',  category: 'Top',       desc: 'La Camicia Cotone Brisa porta con sé l\'aria del Mediterraneo. Il corallo pastello scalda la pelle, mentre il cotone leggero lascia respirare.' },
+        'giacca-kimono-fresca':  { name: 'Giacca Kimono Fresca',  color: 'Verde Menta',      colorKey: 'ph-sage',     price: 72,  priceStr: '€72,00',  category: 'Accessori', desc: 'La Giacca Kimono Fresca fonde l\'estetica orientale con la sensibilità italiana. Le maniche ampie e la schiena fluida creano una silhouette armoniosa.' },
+        'set-coordinato-viola':  { name: 'Set Coordinato Viola',  color: 'Lilla Morbido',    colorKey: 'ph-lavender', price: 130, priceStr: '€130,00', category: 'Set',       desc: 'Il Set Coordinato Viola è un\'opera di stile totale. Il lilla morbido avvolge in un\'aura romantica — indossali insieme per un look ricercato, o separatamente per due outfit distinti.' },
+        'pantalone-culotte-zen': { name: 'Pantalone Culotte Zen', color: 'Verde Muschio',    colorKey: 'ph-sage',     price: 88,  priceStr: '€88,00',  category: 'Pantaloni', desc: 'Il Pantalone Culotte Zen reinterpreta la silhouette culotte con eleganza zen. Il verde muschio si fonde con la natura, mentre il taglio ampio regala libertà di movimento.' },
+        'vestito-midi-fiori':    { name: 'Vestito Midi Fiori',    color: 'Rosa Antico',      colorKey: 'ph-blush',    price: 115, priceStr: '€115,00', category: 'Vestiti',   desc: 'Il Vestito Midi Fiori cattura la poesia della primavera in piena estate. Il rosa antico porta calore senza eccessi, mentre la lunghezza midi equilibra femminilità e riservatezza.' },
+        'gonna-wrap-salvia':     { name: 'Gonna Wrap Salvia',     color: 'Verde Salvia',     colorKey: 'ph-sage',     price: 70,  priceStr: '€70,00',  category: 'Gonne',     desc: 'La Gonna Wrap Salvia abbraccia il corpo con un gesto avvolgente. Il verde salvia aggiunge un tocco botanico al guardaroba. L\'apertura frontale regala movimento ad ogni passo.' },
+        'maxi-cardigan-nuvola':  { name: 'Maxi Cardigan Nuvola',  color: 'Grigio Cipria',    colorKey: 'ph-lavender', price: 85,  priceStr: '€85,00',  category: 'Accessori', desc: 'Il Maxi Cardigan Nuvola è il compagno ideale delle serate fresche. La lunghezza maxi e il grigio cipria lo rendono un pezzo versatile che completa ogni outfit.' },
+        'top-bustier-perla':     { name: 'Top Bustier Perla',     color: 'Avorio Madreperla',colorKey: 'ph-cream',    price: 48,  priceStr: '€48,00',  category: 'Top',       desc: 'Il Top Bustier Perla è un gioiello di semplicità. L\'avorio madreperla riflette la luce con delicatezza, mentre la struttura bustier valorizza la silhouette con discreta sensualità.' },
+      };
+      var id = new URLSearchParams(window.location.search).get('id');
+      var p  = PRODUCTS[id];
+      if (!p) return null;
+
+      document.title = p.name + ' — Memi Abbigliamento';
+      var bcSpan = document.querySelector('.breadcrumb span[style]');
+      if (bcSpan) bcSpan.textContent = p.name;
+      var titleEl = document.querySelector('.product-title');
+      if (titleEl) titleEl.textContent = p.name;
+      var priceEl = document.querySelector('.price-main');
+      if (priceEl) priceEl.textContent = p.priceStr;
+      var mainImg = document.getElementById('mainImg');
+      if (mainImg) mainImg.className = 'ph-fig ' + p.colorKey;
+      var descP = document.querySelector('.accordion-body p');
+      if (descP) descP.textContent = p.desc;
+      var colorLabelEl = document.getElementById('colorLabel');
+      if (colorLabelEl) colorLabelEl.textContent = '— ' + p.color;
+      return p;
+    })();
+
+    // Gallery thumbnail swap
+    function selectThumb(btn, src) {
+      document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('mainImg').src = src;
+    }
+
+    // Product data
+    const PRODUCT_NAME      = document.querySelector('.product-title')?.textContent.trim() || 'Vestito Lino Cannes';
+    const PRODUCT_PRICE     = _p ? _p.price    : 89;
+    const PRODUCT_COLOR_KEY = _p ? _p.colorKey : 'ph-blush';
+
+    // Color selector
+    let selectedColor = 'Rosa Cipria';
+    let selectedColorKey = PRODUCT_COLOR_KEY;
+    const colorKeyMap = { 'Rosa Cipria': 'ph-blush', 'Verde Salvia': 'ph-sage', 'Lavanda': 'ph-lavender', 'Avorio': 'ph-cream' };
+
+    function selectColor(btn, name) {
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      selectedColor = name;
+      selectedColorKey = colorKeyMap[name] || PRODUCT_COLOR_KEY;
+      document.getElementById('colorLabel').textContent = '— ' + name;
+    }
+
+    // Size selector
+    let selectedSize = null;
+    function selectSize(btn, size) {
+      document.querySelectorAll('.size-btn:not(.oos)').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedSize = size;
+      document.getElementById('sizeLabel').textContent = '— ' + size;
+      document.getElementById('atcBtn').disabled = false;
+      document.getElementById('atcBtn').style.opacity = '1';
+    }
+
+    // ATC button — morph state machine + flying thumbnail
+    const atcBtn = document.getElementById('atcBtn');
+    atcBtn.style.opacity = '0.5';
+    atcBtn.style.cursor = 'not-allowed';
+
+    atcBtn.addEventListener('click', function () {
+      if (!selectedSize || this.classList.contains('is-loading') || this.classList.contains('is-done')) return;
+
+      // Phase 1: spinner
+      this.classList.add('is-loading');
+      const self = this;
+
+      setTimeout(function () {
+        // Phase 2: checkmark + add to cart
+        self.classList.remove('is-loading');
+        self.classList.add('is-done');
+
+        if (typeof window.addToCart === 'function') {
+          const id = PRODUCT_NAME.toLowerCase().replace(/\s+/g, '-') + '-' + selectedColor.toLowerCase().replace(/\s+/g, '-') + '-' + selectedSize.toLowerCase();
+          window.addToCart({
+            id:      id,
+            name:    PRODUCT_NAME,
+            variant: selectedColor + ' · ' + selectedSize,
+            price:   PRODUCT_PRICE,
+            color:   selectedColorKey
+          });
+        }
+
+        // Flying thumbnail from the main gallery image
+        var galleryEl = document.getElementById('mainImg');
+        if (galleryEl && typeof window.flyToCart === 'function') {
+          window.flyToCart(galleryEl);
+        }
+
+        // Phase 3: open cart after thumbnail lands
+        setTimeout(function () {
+          window.openCart && window.openCart();
+        }, 450);
+
+        // Reset button
+        setTimeout(function () {
+          self.classList.remove('is-done');
+        }, 1800);
+
+      }, 320);
+    });
+    atcBtn.addEventListener('mouseenter', function() { if (!this.disabled) this.style.cursor = 'pointer'; });
+
+    // Wishlist button
+    const wishlistBtn = document.getElementById('wishlistBtn');
+
+    function pdpWishId() {
+      var base = PRODUCT_NAME.toLowerCase().replace(/\s+/g, '-');
+      return base;
+    }
+
+    function pdpSyncWishBtn() {
+      try {
+        var wl  = JSON.parse(localStorage.getItem('memi_wishlist')) || [];
+        var baseId = pdpWishId();
+        var wishId = baseId + (selectedSize ? '-sz-' + selectedSize : '');
+        var id  = wishId;
+        var on  = wl.some(function(i) { return i.id === wishId || i.productId === baseId; });
+        var inWish = document.getElementById('wishlistHeart');
+        var label  = document.getElementById('wishlistBtnLabel');
+        wishlistBtn.classList.toggle('active', on);
+        if (inWish) inWish.style.fill = on ? 'var(--blush-dark)' : 'none';
+        if (label)  label.textContent  = on ? 'Nella wishlist ✓' : 'Salva nella wishlist';
+      } catch (_) {}
+    }
+
+    pdpSyncWishBtn();
+
+    wishlistBtn.addEventListener('click', function () {
+      var id = pdpWishId();
+      if (typeof window.toggleWishlist === 'function') {
+        window.toggleWishlist(id, PRODUCT_NAME, selectedColor, selectedColorKey, selectedSize);
+      }
+      pdpSyncWishBtn();
+    });
+
+    // Accordion
+    function toggleAccordion(btn) {
+      const item = btn.parentElement;
+      item.classList.toggle('open');
+    }
+  </script>
+
+  <script src="api-client.js"></script>
+  <script src="app.js?v=3"></script>
+</body>
+</html>
