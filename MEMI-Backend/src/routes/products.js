@@ -40,8 +40,9 @@ router.get('/', async (req, res) => {
     else { sql += ' AND p.status = "attivo"'; }
     sql += ' GROUP BY p.id';
     sql += ' ORDER BY p.popularity ASC';
-    sql += ' LIMIT ? OFFSET ?';
-    params.push(parseInt(limit), parseInt(offset));
+    const safeLimit  = parseInt(limit)  || 100;
+    const safeOffset = parseInt(offset) || 0;
+    sql += ` LIMIT ${safeLimit} OFFSET ${safeOffset}`;
 
     const [rows] = await pool.execute(sql, params);
 

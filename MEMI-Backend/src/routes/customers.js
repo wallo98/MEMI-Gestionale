@@ -28,8 +28,9 @@ router.get('/', requireAdmin, async (req, res) => {
       params.push(like, like, like);
     }
 
-    sql += ' ORDER BY total_spent DESC LIMIT ? OFFSET ?';
-    params.push(parseInt(limit), parseInt(offset));
+    const safeLimit  = parseInt(limit)  || 50;
+    const safeOffset = parseInt(offset) || 0;
+    sql += ` ORDER BY total_spent DESC LIMIT ${safeLimit} OFFSET ${safeOffset}`;
 
     const [customers] = await pool.execute(sql, params);
     const [[{ total }]] = await pool.execute('SELECT COUNT(*) as total FROM customers');

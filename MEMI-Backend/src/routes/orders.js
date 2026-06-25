@@ -195,9 +195,11 @@ router.get('/admin/list', requireAdmin, async (req, res) => {
       filterParams.push(like, like, like, like);
     }
 
+    const safeLimit  = parseInt(limit)  || 50;
+    const safeOffset = parseInt(offset) || 0;
     const [orders] = await pool.execute(
-      `SELECT * FROM orders ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
-      [...filterParams, parseInt(limit), parseInt(offset)]
+      `SELECT * FROM orders ${where} ORDER BY created_at DESC LIMIT ${safeLimit} OFFSET ${safeOffset}`,
+      filterParams
     );
     const [[{ total }]] = await pool.execute(`SELECT COUNT(*) as total FROM orders ${where}`, filterParams);
     return res.json({ orders, total });
