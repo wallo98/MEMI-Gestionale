@@ -692,22 +692,7 @@
       <div class="look-overlay"></div>
       <div class="look-counter-pill" id="lookCounterPill">Look 1 di 4</div>
 
-      <!-- Hotspot pins -->
-      <button class="hotspot" style="top:28%;left:48%;" onclick="highlightItem(0)" aria-label="Vestito Lino Cannes">
-        <span class="hotspot-pulse"></span>
-        <span class="hotspot-ring"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
-        <span class="hotspot-label">Vestito Lino</span>
-      </button>
-      <button class="hotspot" style="top:60%;left:62%;" onclick="highlightItem(1)" aria-label="Cintura">
-        <span class="hotspot-pulse" style="animation-delay:.4s"></span>
-        <span class="hotspot-ring"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
-        <span class="hotspot-label">Cintura dorata</span>
-      </button>
-      <button class="hotspot" style="top:80%;left:35%;" onclick="highlightItem(2)" aria-label="Scarpe">
-        <span class="hotspot-pulse" style="animation-delay:.8s"></span>
-        <span class="hotspot-ring"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
-        <span class="hotspot-label">Sandali cipria</span>
-      </button>
+      <!-- Hotspot pins — injected dynamically by renderHotspots() -->
     </div>
 
     <!-- LOOK INFO -->
@@ -825,10 +810,15 @@
       title:'Estate <em>Cipria</em>',num:'Look #1',counter:'Look 1 di 4',
       desc:'Un abito in lino dal taglio morbido, abbinato a una cintura dorata e sandali cipria. Fresco, elegante, perfetto dal mattino alla sera.',
       total:'€193,00',
+      pins:[
+        {top:'28%',left:'48%'},
+        {top:'58%',left:'63%'},
+        {top:'80%',left:'36%'}
+      ],
       items:[
-        {tag:'Vestito',name:'Vestito Lino Cannes',color:'Rosa cipria · Taglia M',price:'€89,00',bg:'linear-gradient(145deg,#f2c4bd,#e8a8a0)',slug:'vestito-lino-cannes'},
-        {tag:'Accessorio',name:'Cintura Intrecciata Oro',color:'Oro naturale · Taglia unica',price:'€39,00',bg:'linear-gradient(145deg,#e8d5b5,#c8a87a)'},
-        {tag:'Scarpe',name:'Sandali Cipria Estivi',color:'Rosa cipria · Numero 38',price:'€65,00',bg:'linear-gradient(145deg,#f5ddd5,#e0b8a8)'}
+        {tag:'Vestito',name:'Vestito Lino Cannes',label:'Vestito Lino',color:'Rosa cipria · Taglia M',price:'€89,00',bg:'linear-gradient(145deg,#f2c4bd,#e8a8a0)',slug:'vestito-lino-cannes'},
+        {tag:'Accessorio',name:'Cintura Intrecciata Oro',label:'Cintura Oro',color:'Oro naturale · Taglia unica',price:'€39,00',bg:'linear-gradient(145deg,#e8d5b5,#c8a87a)'},
+        {tag:'Scarpe',name:'Sandali Cipria Estivi',label:'Sandali',color:'Rosa cipria · Numero 38',price:'€65,00',bg:'linear-gradient(145deg,#f5ddd5,#e0b8a8)'}
       ]
     },
     {
@@ -836,9 +826,13 @@
       title:'Verde <em>Salvia</em>',num:'Look #2',counter:'Look 2 di 4',
       desc:'Blazer sartoriale salvia su gonna plissé avorio. Combinazione sofisticata per ogni occasione.',
       total:'€184,00',
+      pins:[
+        {top:'25%',left:'44%'},
+        {top:'68%',left:'54%'}
+      ],
       items:[
-        {tag:'Blazer',name:'Blazer Sartoriale Mia',color:'Verde salvia · Taglia S',price:'€105,00',bg:'linear-gradient(145deg,#c4d4c0,#a8c0a4)',slug:'blazer-sartoriale-mia'},
-        {tag:'Gonna',name:'Gonna Plissé Nuvola',color:'Avorio naturale · Taglia S',price:'€79,00',bg:'linear-gradient(145deg,#f7ecd8,#e8d5c0)',slug:'gonna-plisse-nuvola'}
+        {tag:'Blazer',name:'Blazer Sartoriale Mia',label:'Blazer Salvia',color:'Verde salvia · Taglia S',price:'€105,00',bg:'linear-gradient(145deg,#c4d4c0,#a8c0a4)',slug:'blazer-sartoriale-mia'},
+        {tag:'Gonna',name:'Gonna Plissé Nuvola',label:'Gonna Plissé',color:'Avorio naturale · Taglia S',price:'€79,00',bg:'linear-gradient(145deg,#f7ecd8,#e8d5c0)',slug:'gonna-plisse-nuvola'}
       ]
     },
     {
@@ -846,9 +840,13 @@
       title:'Lavanda <em>Night</em>',num:'Look #3',counter:'Look 3 di 4',
       desc:'Top in seta lavanda e gonna wrap salvia per una serata elegante. Femminilità in ogni dettaglio.',
       total:'€135,00',
+      pins:[
+        {top:'26%',left:'50%'},
+        {top:'66%',left:'42%'}
+      ],
       items:[
-        {tag:'Top',name:'Top Seta Lucida Aria',color:'Lavanda · Taglia XS',price:'€65,00',bg:'linear-gradient(145deg,#d6ceea,#b8a8d8)',slug:'top-seta-lucida-aria'},
-        {tag:'Gonna',name:'Gonna Wrap Salvia',color:'Verde salvia · Taglia S',price:'€70,00',bg:'linear-gradient(145deg,#c4d4c0,#a8c0a4)',slug:'gonna-wrap-salvia'}
+        {tag:'Top',name:'Top Seta Lucida Aria',label:'Top Lavanda',color:'Lavanda · Taglia XS',price:'€65,00',bg:'linear-gradient(145deg,#d6ceea,#b8a8d8)',slug:'top-seta-lucida-aria'},
+        {tag:'Gonna',name:'Gonna Wrap Salvia',label:'Gonna Wrap',color:'Verde salvia · Taglia S',price:'€70,00',bg:'linear-gradient(145deg,#c4d4c0,#a8c0a4)',slug:'gonna-wrap-salvia'}
       ]
     },
     {
@@ -856,9 +854,13 @@
       title:'Total <em>Cream</em>',num:'Look #4',counter:'Look 4 di 4',
       desc:'Un coordinato total avorio per un look minimal e raffinato. Set coordinato viola come tocco di carattere.',
       total:'€178,00',
+      pins:[
+        {top:'32%',left:'52%'},
+        {top:'70%',left:'40%'}
+      ],
       items:[
-        {tag:'Set',name:'Set Coordinato Viola',color:'Lilla morbido · Taglia XS',price:'€130,00',bg:'linear-gradient(145deg,#d6ceea,#b8a8d8)',slug:'set-coordinato-viola'},
-        {tag:'Top',name:'Top Bustier Perla',color:'Avorio madreperla · Taglia S',price:'€48,00',bg:'linear-gradient(145deg,#f7ecd8,#e8d5c0)',slug:'top-bustier-perla'}
+        {tag:'Set',name:'Set Coordinato Viola',label:'Set Viola',color:'Lilla morbido · Taglia XS',price:'€130,00',bg:'linear-gradient(145deg,#d6ceea,#b8a8d8)',slug:'set-coordinato-viola'},
+        {tag:'Top',name:'Top Bustier Perla',label:'Top Bustier',color:'Avorio madreperla · Taglia S',price:'€48,00',bg:'linear-gradient(145deg,#f7ecd8,#e8d5c0)',slug:'top-bustier-perla'}
       ]
     }
   ];
@@ -877,6 +879,26 @@
     });
     renderLook(currentLook);
     var sec=document.getElementById('lookSection');if(sec)sec.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  function renderHotspots(idx){
+    var l=LOOKS[idx];if(!l)return;
+    var wrap=document.querySelector('.look-image-wrap');if(!wrap)return;
+    wrap.querySelectorAll('.hotspot').forEach(function(h){h.remove();});
+    l.items.forEach(function(item,i){
+      var pin=l.pins&&l.pins[i]?l.pins[i]:{top:(20+i*30)+'%',left:'48%'};
+      var btn=document.createElement('button');
+      btn.className='hotspot';
+      btn.style.top=pin.top;
+      btn.style.left=pin.left;
+      btn.setAttribute('aria-label',item.name);
+      btn.addEventListener('click',(function(idx){return function(){highlightItem(idx);};})(i));
+      btn.innerHTML=
+        '<span class="hotspot-pulse" style="animation-delay:'+(i*0.4)+'s"></span>'
+        +'<span class="hotspot-ring"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>'
+        +'<span class="hotspot-label">'+(item.label||item.name)+'</span>';
+      wrap.appendChild(btn);
+    });
   }
 
   function renderLook(idx){
@@ -902,6 +924,7 @@
         +'<button class="btn-item-cart" onclick="addToCartFromLook(\''+item.name+'\',\''+item.price+'\')">'+PILL_SVG()+' Aggiungi</button></div>'
         +'</div>';
     }).join('');
+    renderHotspots(idx);
   }
 
   function highlightItem(idx){
@@ -955,12 +978,15 @@
       document.querySelectorAll('.look-tab').forEach(function(t,i){t.classList.toggle('active',i===idx);});
       currentLook=idx;
       renderLook(idx);
+    } else {
+      // Render hotspots for the default Look #1 (pre-rendered in HTML)
+      renderHotspots(0);
     }
   })();
   </script>
 
   <div data-include="site-footer"></div>
   <script src="api-client.js"></script>
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>
