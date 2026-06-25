@@ -47,7 +47,7 @@ router.post('/register', async (req, res) => {
     return res.status(201).json({ token, user: { id: user.id, email: user.email, nome: user.nome } });
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY')
-      return res.status(409).json({ error: 'Email già registrata' });
+      return res.status(409).json({ error: 'Email gia registrata' });
     console.error('register error', err);
     return res.status(500).json({ error: 'Errore server' });
   }
@@ -101,11 +101,28 @@ router.get('/me', requireCustomer, async (req, res) => {
 router.put('/me', requireCustomer, async (req, res) => {
   const { nome, cognome, telefono, indirizzo, citta, cap, paese } = req.body;
   try {
-    await pool.execute(
-      `UPDATE customers SET nome=?, cognome=?, telefono=?, indirizzo=?, citta=?, cap=?, paese=?
-       WHERE id=?`,
-      [nome, cognome, telefono, indirizzo, citta, cap, paese, req.customer.id]
-    );
+    // Build dynamic SET clause — only update fields that were actually sent
+    const fields = [];
+    const vals   = [];
+    const add = (col, val) => {
+      if (val !== undefined) { fields.push(`${col} = ?`); vals.push(val === '' ? null : val); }
+    };
+    add('nome',      nome);
+    add('cognome',   cognome);
+    add('telefono',  telefono);
+    add('indirizzo', indirizzo);
+    add('citta',     citta);
+    add('cap',       cap);
+    add('paese',     paese);
+
+    if (!fields.length) return res.json({ ok: true }); // nothing to update
+
+    // nome must not be empty
+    if (nome !== undefined && !nome.trim())
+      return res.status(400).json({ error: 'Il nome non puo essere vuoto' });
+
+    vals.push(req.customer.id);
+    await pool.execute(`UPDATE customers SET ${fields.join(', ')} WHERE id = ?`, vals);
     return res.json({ ok: true });
   } catch (err) {
     console.error('update me error', err);

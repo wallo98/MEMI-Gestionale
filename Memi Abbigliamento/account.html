@@ -254,6 +254,10 @@
             '<input class="field-input" type="tel" id="pfTelefono" value="' + (user.telefono || '') + '" /></div>' +
           '<div><label class="field-label">Città</label>' +
             '<input class="field-input" type="text" id="pfCitta" value="' + (user.citta || '') + '" /></div>' +
+          '<div><label class="field-label">CAP</label>' +
+            '<input class="field-input" type="text" id="pfCap" value="' + (user.cap || '') + '" maxlength="10" /></div>' +
+          '<div><label class="field-label">Paese</label>' +
+            '<input class="field-input" type="text" id="pfPaese" value="' + (user.paese || 'Italia') + '" /></div>' +
           '<div class="field-full"><label class="field-label">Indirizzo</label>' +
             '<input class="field-input" type="text" id="pfIndirizzo" value="' + (user.indirizzo || '') + '" /></div>' +
           '<div class="profile-form-footer">' +
@@ -291,9 +295,10 @@
       var data = {
         nome:       document.getElementById('pfNome').value.trim(),
         cognome:    document.getElementById('pfCognome').value.trim(),
-        email:      document.getElementById('pfEmail').value.trim(),
         telefono:   document.getElementById('pfTelefono').value.trim(),
         citta:      document.getElementById('pfCitta').value.trim(),
+        cap:        document.getElementById('pfCap').value.trim(),
+        paese:      document.getElementById('pfPaese').value.trim(),
         indirizzo:  document.getElementById('pfIndirizzo').value.trim(),
       };
 

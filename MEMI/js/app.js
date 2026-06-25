@@ -354,7 +354,7 @@ VIEWS.products = function(){
     ${pageHead("Prodotti","Gestisci catalogo, varianti, prezzi e magazzino.",`
       <button class="btn btn-ghost btn-sm">📥 Importa</button>
       <button class="btn btn-soft btn-sm">📤 Esporta</button>
-      <button class="btn btn-primary btn-sm">+ Nuovo prodotto</button>
+      <button class="btn btn-primary btn-sm js-new-product">+ Nuovo prodotto</button>
     `)}
     <div class="card" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
       <input type="text" id="prodSearch" placeholder="Cerca prodotto..." style="flex:1;min-width:200px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fafafa"/>
@@ -472,7 +472,10 @@ VIEWS.customers = function(){
             <td><div style="display:flex;align-items:center;gap:8px"><div class="avatar small">${c.nome.charAt(0)}</div><strong>${c.nome}</strong></div></td>
             <td>${c.email}</td><td>${c.ordini}</td><td>${c.speso}</td><td>${c.ultimo}</td>
             <td>${c.vip?'<span class="badge badge-pink">VIP</span>':'<span class="badge badge-soft">Standard</span>'}</td>
-            <td class="row-actions"><button>👁</button><button>✉</button></td>
+            <td class="row-actions">
+              <button class="js-view-customer" data-id="${c._db_id||c.id}" data-name="${c.nome}" title="Visualizza">👁</button>
+              <button class="js-email-customer" data-email="${c.email}" title="Invia email">✉</button>
+            </td>
           </tr>
         `).join('')}
       </tbody>
@@ -561,16 +564,19 @@ VIEWS.popups = function(){
 
 VIEWS.discounts = function(){
   return `
-    ${pageHead("Sconti","Codici sconto e promozioni automatiche.",`<button class="btn btn-primary btn-sm">+ Nuovo sconto</button>`)}
+    ${pageHead("Sconti","Codici sconto e promozioni automatiche.",`<button class="btn btn-primary btn-sm js-new-discount">+ Nuovo sconto</button>`)}
     <div class="table-card"><div class="table-wrap"><table class="data">
       <thead><tr><th>Codice</th><th>Tipo</th><th>Utilizzi</th><th>Scadenza</th><th>Stato</th><th></th></tr></thead>
       <tbody>
         ${DATA.discounts.map(d=>`
-          <tr>
+          <tr data-id="${d._db_id||''}">
             <td><strong>${d.code}</strong></td>
             <td>${d.tipo}</td><td>${d.utilizzi}</td><td>${d.scad}</td>
             <td>${statusPill(d.stato)}</td>
-            <td class="row-actions"><button>📋</button><button>🗑</button></td>
+            <td class="row-actions">
+              <button class="js-copy-code" data-code="${d.code}" title="Copia codice">📋</button>
+              <button class="js-del-discount" data-id="${d._db_id||''}" data-code="${d.code}" title="Elimina">🗑</button>
+            </td>
           </tr>
         `).join('')}
       </tbody>
@@ -776,7 +782,7 @@ VIEWS.tracking = function(){
 
 VIEWS["shipping-zones"] = function(){
   return `
-    ${pageHead("Zone & Tariffe di spedizione","Definisci paesi, metodi e prezzi.",`<button class="btn btn-primary btn-sm">+ Nuova zona</button>`)}
+    ${pageHead("Zone & Tariffe di spedizione","Definisci paesi, metodi e prezzi.",`<button class="btn btn-primary btn-sm js-new-zone">+ Nuova zona</button>`)}
     <div class="table-card"><div class="table-wrap"><table class="data">
       <thead><tr><th>Zona</th><th>Paesi</th><th>Metodo</th><th>Prezzo</th><th>Spedizione gratuita</th><th></th></tr></thead>
       <tbody>
@@ -786,8 +792,11 @@ VIEWS["shipping-zones"] = function(){
             <td>${z.paesi}</td>
             <td>${z.metodo}</td>
             <td>${z.prezzo}</td>
-            <td>${z.grat==='-'?'<span class="badge badge-soft">no</span>':'<span class="badge badge-green">da '+z.grat+'</span>'}</td>
-            <td class="row-actions"><button>✏</button><button>🗑</button></td>
+            <td>${z.grat==='—'||z.grat==='-'?'<span class="badge badge-soft">no</span>':'<span class="badge badge-green">da '+z.grat+'</span>'}</td>
+            <td class="row-actions">
+              <button class="js-edit-zone" data-id="${z._db_id||''}" title="Modifica">✏</button>
+              <button class="js-del-zone" data-id="${z._db_id||''}" data-nome="${z.nome}" title="Elimina">🗑</button>
+            </td>
           </tr>
         `).join('')}
       </tbody>
@@ -1381,9 +1390,17 @@ $(function(){
 
   // Delegated handlers
   $(document).on('click','.js-toggle-courier', function(){
-    const $c = $(this).closest('.courier-card');
-    $c.toggleClass('active');
-    toast($c.hasClass('active')?'Corriere attivato':'Corriere disattivato', $c.hasClass('active')?'success':'info');
+    const $card = $(this).closest('.courier-card');
+    const code  = $card.data('courier');
+    const nowActive = !$card.hasClass('active');
+    $card.toggleClass('active');
+    if (window.AdminAPI && code) {
+      AdminAPI.shipping.updateCourier(code, { attivo: nowActive ? 1 : 0 })
+        .done(function(){ toast(nowActive ? 'Corriere attivato' : 'Corriere disattivato', nowActive ? 'success' : 'info'); })
+        .fail(function(){ $card.toggleClass('active'); toast('Errore aggiornamento corriere', 'error'); });
+    } else {
+      toast(nowActive ? 'Corriere attivato' : 'Corriere disattivato', nowActive ? 'success' : 'info');
+    }
   });
   $(document).on('click','.js-courier-config', function(e){
     e.stopPropagation();
@@ -1471,7 +1488,7 @@ $(function(){
       </div>
       <div style="margin-top:18px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
         <button class="btn btn-ghost btn-sm">🖨 Stampa</button>
-        <button class="btn btn-soft btn-sm">📧 Email</button>
+        ${dbId ? `<button class="btn btn-soft btn-sm js-open-ship-modal" data-id="${dbId}" data-order="${o.id}">🚚 Spedisci</button>` : ''}
         ${dbId ? `<button class="btn btn-primary btn-sm js-save-order-status" data-id="${dbId}">💾 Salva stato</button>` : ''}
       </div>
     `);
@@ -1493,6 +1510,7 @@ $(function(){
   $(document).on('click','.js-product', function(){
     const id = $(this).data('id');
     const p = DATA.products.find(x=>x.id===id);
+    if (!p) return;
     openModal(p.nome, `
       <div style="display:flex;gap:16px">
         <div class="prod-thumb" style="width:140px;height:140px;border-radius:10px;flex:0 0 140px">${p.img}</div>
@@ -1505,10 +1523,67 @@ $(function(){
         </div>
       </div>
       <div style="margin-top:18px;display:flex;gap:8px;justify-content:flex-end">
-        <button class="btn btn-soft btn-sm">✏ Modifica</button>
-        <button class="btn btn-primary btn-sm">📦 Riordina stock</button>
+        <button class="btn btn-ghost btn-sm js-del-product" data-id="${p.id}" data-nome="${p.nome}">🗑 Elimina</button>
+        <button class="btn btn-soft btn-sm js-edit-product" data-id="${p.id}">✏ Modifica</button>
       </div>
     `);
+  });
+
+  // Delete product
+  $(document).on('click','.js-del-product', function(){
+    const id   = $(this).data('id');
+    const nome = $(this).data('nome');
+    if (!id || !window.AdminAPI) return;
+    if (!confirm(`Eliminare il prodotto "${nome}"? L'azione è irreversibile.`)) return;
+    AdminAPI.products.delete(id)
+      .done(function(){
+        toast('Prodotto eliminato', 'success');
+        closeModal();
+        renderView('products');
+      })
+      .fail(function(){ toast('Errore durante l\'eliminazione', 'error'); });
+  });
+
+  // Edit product — open form modal
+  $(document).on('click','.js-edit-product', function(){
+    const id = $(this).data('id');
+    if (!id || !window.AdminAPI) return;
+    AdminAPI.products.get(id).done(function(p){
+      openModal(`Modifica: ${p.name}`, `
+        <form id="editProductForm">
+          <div class="kv" style="grid-template-columns:120px 1fr;gap:10px">
+            <div class="k">Nome *</div><div class="v"><input class="field-input" type="text" name="name" value="${p.name||''}" required style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+            <div class="k">Categoria *</div><div class="v"><input class="field-input" type="text" name="categoria" value="${p.categoria||''}" required style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+            <div class="k">Prezzo €</div><div class="v"><input class="field-input" type="number" name="price" step="0.01" value="${p.price||''}" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+            <div class="k">Stato</div><div class="v">
+              <select name="status" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px">
+                ${['attivo','bozza','esaurito'].map(s=>`<option value="${s}" ${p.status===s?'selected':''}>${AdminAPI.statusLabel(s)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="k">Descrizione</div><div class="v"><textarea name="description" rows="3" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px">${p.description||''}</textarea></div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal()">Annulla</button>
+            <button type="submit" class="btn btn-primary btn-sm" data-id="${id}">💾 Salva modifiche</button>
+          </div>
+        </form>
+      `);
+      $('#editProductForm').on('submit', function(e){
+        e.preventDefault();
+        const fd = Object.fromEntries(new FormData(this));
+        const $btn = $(this).find('[type=submit]');
+        $btn.prop('disabled',true).text('Salvataggio…');
+        AdminAPI.products.update(id, {
+          name: fd.name, categoria: fd.categoria,
+          price: parseFloat(fd.price), status: fd.status,
+          description: fd.description
+        }).done(function(){
+          toast('Prodotto aggiornato','success');
+          closeModal();
+          renderView('products');
+        }).fail(function(){ toast('Errore aggiornamento','error'); $btn.prop('disabled',false).text('💾 Salva modifiche'); });
+      });
+    }).fail(function(){ toast('Errore caricamento prodotto','error'); });
   });
 
   // Toggle view (grid/list) prodotti
@@ -1613,6 +1688,318 @@ $(function(){
     sendChatMessage($(this).text());
   });
 
+  /* ═══════════════════════════════════════════════════
+     ⭐ NEW PRODUCT — create modal
+     ═══════════════════════════════════════════════════ */
+  $(document).on('click','.js-new-product', function(){
+    openModal('Nuovo prodotto', `
+      <form id="newProductForm">
+        <div class="kv" style="grid-template-columns:130px 1fr;gap:10px">
+          <div class="k">ID / SKU *</div><div class="v"><input class="field-input" type="text" name="id" placeholder="es. vestito-floreale-01" required style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+          <div class="k">Nome *</div><div class="v"><input class="field-input" type="text" name="name" placeholder="Nome prodotto" required style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+          <div class="k">Categoria *</div><div class="v"><input class="field-input" type="text" name="categoria" placeholder="es. Vestiti" required style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+          <div class="k">Prezzo € *</div><div class="v"><input class="field-input" type="number" name="price" step="0.01" min="0" placeholder="0.00" required style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+          <div class="k">Prezzo orig. €</div><div class="v"><input class="field-input" type="number" name="original_price" step="0.01" min="0" placeholder="(se scontato)" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+          <div class="k">Stato</div><div class="v">
+            <select name="status" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px">
+              <option value="attivo">Attivo</option>
+              <option value="bozza">Bozza</option>
+            </select>
+          </div>
+          <div class="k">Taglie / Stock</div><div class="v">
+            <small style="color:var(--muted)">Formato: XS:10, S:20, M:15, L:8</small>
+            <input class="field-input" type="text" name="taglie_str" placeholder="XS:10, S:20, M:15, L:8" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px;margin-top:4px"/>
+          </div>
+          <div class="k">Descrizione</div><div class="v"><textarea name="description" rows="3" placeholder="Descrizione prodotto..." style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"></textarea></div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal()">Annulla</button>
+          <button type="submit" class="btn btn-primary btn-sm">+ Crea prodotto</button>
+        </div>
+      </form>
+    `);
+    $('#newProductForm').on('submit', function(e){
+      e.preventDefault();
+      if (!window.AdminAPI) return;
+      const fd  = Object.fromEntries(new FormData(this));
+      const $btn = $(this).find('[type=submit]');
+      const taglie = (fd.taglie_str || '').split(',').map(s => s.trim()).filter(Boolean).map(s => {
+        const parts = s.split(':');
+        return { taglia: (parts[0]||'').trim().toUpperCase(), stock: parseInt(parts[1]) || 0 };
+      });
+      $btn.prop('disabled', true).text('Creazione...');
+      AdminAPI.products.create({
+        id: fd.id.trim().toLowerCase().replace(/\s+/g, '-'),
+        name: fd.name, categoria: fd.categoria,
+        price: parseFloat(fd.price),
+        original_price: fd.original_price ? parseFloat(fd.original_price) : null,
+        status: fd.status, description: fd.description, taglie: taglie,
+      }).done(function(){
+        toast('Prodotto creato', 'success');
+        closeModal();
+        renderView('products');
+      }).fail(function(xhr){
+        const msg = (xhr.responseJSON && xhr.responseJSON.error) || 'Errore creazione';
+        toast(msg, 'error');
+        $btn.prop('disabled', false).text('+ Crea prodotto');
+      });
+    });
+  });
+
+  /* NEW DISCOUNT */
+  $(document).on('click','.js-new-discount', function(){
+    openModal('Nuovo codice sconto', `
+      <form id="newDiscountForm">
+        <div class="kv" style="grid-template-columns:130px 1fr;gap:10px">
+          <div class="k">Codice *</div><div class="v"><input type="text" name="code" placeholder="es. ESTATE30" required style="text-transform:uppercase;width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+          <div class="k">Tipo *</div><div class="v">
+            <select name="tipo" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px">
+              <option value="percentuale">Percentuale %</option>
+              <option value="fisso">Fisso EUR</option>
+              <option value="spedizione">Spedizione gratuita</option>
+            </select>
+          </div>
+          <div class="k">Valore</div><div class="v"><input type="number" name="valore" step="0.01" min="0" placeholder="es. 20 per 20%" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+          <div class="k">Ordine min. EUR</div><div class="v"><input type="number" name="min_order" step="0.01" min="0" value="0" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+          <div class="k">Max utilizzi</div><div class="v"><input type="number" name="max_utilizzi" min="1" placeholder="(illimitato)" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+          <div class="k">Scadenza</div><div class="v"><input type="date" name="scadenza" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+          <div class="k">Stato</div><div class="v">
+            <select name="stato" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px">
+              <option value="attivo">Attivo</option>
+              <option value="bozza">Bozza / Pianificato</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal()">Annulla</button>
+          <button type="submit" class="btn btn-primary btn-sm">+ Crea sconto</button>
+        </div>
+      </form>
+    `);
+    $('#newDiscountForm').on('submit', function(e){
+      e.preventDefault();
+      if (!window.AdminAPI) return;
+      const fd   = Object.fromEntries(new FormData(this));
+      const $btn = $(this).find('[type=submit]');
+      $btn.prop('disabled', true).text('Creazione...');
+      AdminAPI.discounts.create({
+        code:         fd.code.toUpperCase().trim(),
+        tipo:         fd.tipo,
+        valore:       parseFloat(fd.valore) || 0,
+        min_order:    parseFloat(fd.min_order) || 0,
+        max_utilizzi: fd.max_utilizzi ? parseInt(fd.max_utilizzi) : null,
+        scadenza:     fd.scadenza || null,
+        stato:        fd.stato,
+      }).done(function(){
+        toast('Codice sconto creato', 'success');
+        closeModal();
+        renderView('discounts');
+      }).fail(function(xhr){
+        const msg = (xhr.responseJSON && xhr.responseJSON.error) || 'Errore creazione';
+        toast(msg, 'error');
+        $btn.prop('disabled', false).text('+ Crea sconto');
+      });
+    });
+  });
+
+  /* Copy discount code */
+  $(document).on('click','.js-copy-code', function(e){
+    e.stopPropagation();
+    const code = $(this).data('code');
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(code).then(function(){ toast('Codice copiato: ' + code, 'success'); });
+    } else {
+      toast(code, 'info');
+    }
+  });
+
+  /* Delete discount */
+  $(document).on('click','.js-del-discount', function(e){
+    e.stopPropagation();
+    const id   = $(this).data('id');
+    const code = $(this).data('code');
+    if (!id || !window.AdminAPI) return;
+    if (!confirm('Eliminare il codice "' + code + '"?')) return;
+    AdminAPI.discounts.delete(id)
+      .done(function(){ toast('Codice eliminato', 'success'); renderView('discounts'); })
+      .fail(function(){ toast('Errore eliminazione', 'error'); });
+  });
+
+  /* SHIPPING ZONES */
+  function openZoneModal(title, initialData, onSave){
+    const d = initialData || {};
+    openModal(title, `
+      <form id="zoneForm">
+        <div class="kv" style="grid-template-columns:150px 1fr;gap:10px">
+          <div class="k">Nome zona *</div><div class="v"><input type="text" name="nome" value="${d.nome||''}" required style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+          <div class="k">Paesi *</div><div class="v"><input type="text" name="paesi" value="${d.paesi||''}" required placeholder="es. Italia" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+          <div class="k">Metodo</div><div class="v"><input type="text" name="metodo" value="${d.metodo||''}" placeholder="es. Standard 3-5gg" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+          <div class="k">Prezzo EUR *</div><div class="v"><input type="number" name="prezzo" step="0.01" min="0" value="${d._raw_prezzo||''}" required style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+          <div class="k">Spediz. gratis da EUR</div><div class="v"><input type="number" name="spedizione_gratuita_da" step="0.01" min="0" value="${d._raw_grat||''}" placeholder="(vuoto = disattivata)" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal()">Annulla</button>
+          <button type="submit" class="btn btn-primary btn-sm">Salva</button>
+        </div>
+      </form>
+    `);
+    $('#zoneForm').on('submit', function(e){
+      e.preventDefault();
+      const fd   = Object.fromEntries(new FormData(this));
+      const $btn = $(this).find('[type=submit]');
+      $btn.prop('disabled', true).text('Salvataggio...');
+      onSave({
+        nome: fd.nome, paesi: fd.paesi, metodo: fd.metodo,
+        prezzo: parseFloat(fd.prezzo),
+        spedizione_gratuita_da: fd.spedizione_gratuita_da ? parseFloat(fd.spedizione_gratuita_da) : null,
+      }, $btn);
+    });
+  }
+
+  $(document).on('click','.js-new-zone', function(){
+    openZoneModal('Nuova zona di spedizione', null, function(payload, $btn){
+      AdminAPI.shipping.createZone(payload)
+        .done(function(){ toast('Zona creata','success'); closeModal(); renderView('shipping-zones'); })
+        .fail(function(){ toast('Errore creazione','error'); $btn.prop('disabled',false).text('Salva'); });
+    });
+  });
+
+  $(document).on('click','.js-edit-zone', function(){
+    const id = $(this).data('id');
+    if (!id) return;
+    const z = DATA.zones.find(function(x){ return x._db_id == id; });
+    const init = z ? Object.assign({}, z, {
+      _raw_prezzo: z.prezzo ? z.prezzo.replace('EUR ','').replace('E ','').replace(/[^\d.]/g,'') : '',
+      _raw_grat:   z.grat && z.grat !== '-' && z.grat !== 'EUR' ? z.grat.replace(/[^\d.]/g,'') : ''
+    }) : {};
+    openZoneModal('Modifica zona', init, function(payload, $btn){
+      AdminAPI.shipping.updateZone(id, payload)
+        .done(function(){ toast('Zona aggiornata','success'); closeModal(); renderView('shipping-zones'); })
+        .fail(function(){ toast('Errore aggiornamento','error'); $btn.prop('disabled',false).text('Salva'); });
+    });
+  });
+
+  $(document).on('click','.js-del-zone', function(){
+    const id   = $(this).data('id');
+    const nome = $(this).data('nome');
+    if (!id || !window.AdminAPI) return;
+    if (!confirm('Eliminare la zona "' + nome + '"?')) return;
+    AdminAPI.shipping.deleteZone(id)
+      .done(function(){ toast('Zona eliminata','success'); renderView('shipping-zones'); })
+      .fail(function(){ toast('Errore eliminazione','error'); });
+  });
+
+  /* CUSTOMER DETAIL */
+  $(document).on('click','.js-view-customer', function(){
+    const id   = $(this).data('id');
+    const name = $(this).data('name');
+    if (!id || !window.AdminAPI) return;
+    $('#modalTitle').text(name || 'Cliente');
+    $('#modalBody').html('<div style="padding:30px;text-align:center;color:var(--muted)">Caricamento...</div>');
+    $('#modalBackdrop').addClass('show');
+    const numId = String(id).replace('C-','').replace(/^0+/,'') || id;
+    AdminAPI.customers.get(numId).done(function(c){
+      const orders = (c.orders || []).map(function(o){
+        return '<tr>' +
+          '<td><strong>' + o.order_number + '</strong></td>' +
+          '<td>EUR ' + parseFloat(o.total).toFixed(2).replace('.',',') + '</td>' +
+          '<td>' + statusPill(AdminAPI.statusLabel(o.payment_status)) + '</td>' +
+          '<td>' + statusPill(AdminAPI.statusLabel(o.order_status)) + '</td>' +
+          '<td>' + new Date(o.created_at).toLocaleDateString('it-IT') + '</td>' +
+          '</tr>';
+      }).join('');
+      const addr = [c.indirizzo, c.citta, c.cap, c.paese].filter(Boolean).join(', ') || '-';
+      $('#modalBody').html(
+        '<div class="kv" style="grid-template-columns:120px 1fr;gap:8px;margin-bottom:16px">' +
+          '<div class="k">Nome</div><div class="v"><strong>' + (c.nome||'') + ' ' + (c.cognome||'') + '</strong></div>' +
+          '<div class="k">Email</div><div class="v"><a href="mailto:' + c.email + '">' + c.email + '</a></div>' +
+          '<div class="k">Telefono</div><div class="v">' + (c.telefono||'-') + '</div>' +
+          '<div class="k">Indirizzo</div><div class="v">' + addr + '</div>' +
+          '<div class="k">Ordini</div><div class="v">' + (c.total_orders||0) + '</div>' +
+          '<div class="k">Spesa totale</div><div class="v"><strong>EUR ' + parseFloat(c.total_spent||0).toFixed(2).replace('.',',') + '</strong></div>' +
+          '<div class="k">Registrato</div><div class="v">' + new Date(c.created_at).toLocaleDateString('it-IT') + '</div>' +
+          '<div class="k">Ultimo accesso</div><div class="v">' + (c.last_login ? new Date(c.last_login).toLocaleDateString('it-IT') : '-') + '</div>' +
+        '</div>' +
+        (orders ?
+          '<h4 style="margin-bottom:8px">Ultimi ordini</h4>' +
+          '<div style="overflow-x:auto"><table class="data" style="width:100%">' +
+          '<thead><tr><th>Ordine</th><th>Totale</th><th>Pagamento</th><th>Stato</th><th>Data</th></tr></thead>' +
+          '<tbody>' + orders + '</tbody>' +
+          '</table></div>'
+          : '<p style="color:var(--muted)">Nessun ordine.</p>') +
+        '<div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">' +
+          '<button class="btn btn-ghost btn-sm js-del-customer" data-id="' + numId + '" data-name="' + (c.nome||'') + '">Elimina account</button>' +
+        '</div>'
+      );
+    }).fail(function(){ $('#modalBody').html('<p style="padding:20px;color:var(--muted)">Errore caricamento cliente.</p>'); });
+  });
+
+  $(document).on('click','.js-email-customer', function(){
+    const email = $(this).data('email');
+    if (email) window.open('mailto:' + email, '_blank');
+  });
+
+  $(document).on('click','.js-del-customer', function(){
+    const id   = $(this).data('id');
+    const name = $(this).data('name');
+    if (!id || !window.AdminAPI) return;
+    if (!confirm('Eliminare l\'account di "' + name + '"?')) return;
+    AdminAPI.customers.delete(id)
+      .done(function(){ toast('Cliente eliminato','success'); closeModal(); renderView('customers'); })
+      .fail(function(){ toast('Errore eliminazione','error'); });
+  });
+
+  /* SHIP ORDER */
+  $(document).on('click','.js-open-ship-modal', function(){
+    const dbId    = $(this).data('id');
+    const orderNr = $(this).data('order');
+    const couriers = DATA.couriers && DATA.couriers.length ? DATA.couriers : [
+      {code:'sda',nome:'SDA'},{code:'brt',nome:'BRT'},{code:'gls',nome:'GLS'},
+      {code:'poste',nome:'Poste Italiane'},{code:'dhl',nome:'DHL'}
+    ];
+    const courierOpts = couriers.map(function(c){ return '<option value="' + c.code + '">' + c.nome + '</option>'; }).join('');
+    openModal('Spedisci ordine ' + orderNr, `
+      <form id="shipForm">
+        <div class="kv" style="grid-template-columns:130px 1fr;gap:10px">
+          <div class="k">Corriere *</div><div class="v">
+            <select name="courier_code" required style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px">
+              ${courierOpts}
+            </select>
+          </div>
+          <div class="k">Tracking # *</div><div class="v"><input type="text" name="tracking_number" required placeholder="es. SDA1234567890" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+          <div class="k">Destinazione</div><div class="v"><input type="text" name="destinazione" placeholder="es. Roma (RM)" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+          <div class="k">ETA</div><div class="v"><input type="date" name="eta" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+        </div>
+        <p style="margin-top:12px;font-size:12px;color:var(--muted)">Lo stato ordine verra impostato a <strong>Spedito</strong> e il pagamento a <strong>Pagato</strong>.</p>
+        <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal()">Annulla</button>
+          <button type="submit" class="btn btn-primary btn-sm">Conferma spedizione</button>
+        </div>
+      </form>
+    `);
+    $('#shipForm').on('submit', function(e){
+      e.preventDefault();
+      if (!window.AdminAPI) return;
+      const fd   = Object.fromEntries(new FormData(this));
+      const $btn = $(this).find('[type=submit]');
+      $btn.prop('disabled', true).text('Invio...');
+      AdminAPI.orders.ship(dbId, {
+        courier_code:    fd.courier_code,
+        tracking_number: fd.tracking_number,
+        destinazione:    fd.destinazione || null,
+        eta:             fd.eta || null,
+      }).done(function(){
+        toast('Ordine spedito', 'success');
+        closeModal();
+        renderView('orders');
+      }).fail(function(xhr){
+        const msg = (xhr.responseJSON && xhr.responseJSON.error) || 'Errore spedizione';
+        toast(msg, 'error');
+        $btn.prop('disabled', false).text('Conferma spedizione');
+      });
+    });
+  });
+
   // ── Initial data load from API, then render dashboard ──
   // NOTE: calls _origRenderView (not renderView) to avoid the infinite loop
   // where overridden renderView('dashboard') would re-trigger loadDashboardData.
@@ -1620,7 +2007,6 @@ $(function(){
     const api = window.AdminAPI;
     if (!api) { (typeof _origRenderView === 'function' ? _origRenderView : renderView)('dashboard'); return; }
 
-    // Parallel requests: KPIs, recent orders
     $.when(
       api.dashboard.kpis(),
       api.dashboard.recentOrders()
@@ -1628,28 +2014,25 @@ $(function(){
       var kpi    = kpiRes[0]    || {};
       var recent = ordersRes[0] || [];
 
-      // Update DATA.kpi
       if (kpi.revenue) DATA.kpi = kpi;
 
-      // Populate DATA.orders from recent
       DATA.orders = recent.map(function(o) {
         return {
-          id:         o.order_number,
-          _db_id:     o.id,
+          id:          o.order_number,
+          _db_id:      o.id,
           _raw_status: o.order_status,
-          cliente:    (o.customer_nome + ' ' + o.customer_cognome).trim(),
-          data:       new Date(o.created_at).toLocaleDateString('it-IT'),
-          totale:     '€ ' + parseFloat(o.total).toFixed(2).replace('.', ','),
-          pagamento:  AdminAPI.statusLabel(o.payment_status),
-          stato:      AdminAPI.statusLabel(o.order_status),
-          corriere:   (o.courier_code || '-').toUpperCase(),
-          tracking:   o.tracking_number || '-',
+          cliente:     (o.customer_nome + ' ' + o.customer_cognome).trim(),
+          data:        new Date(o.created_at).toLocaleDateString('it-IT'),
+          totale:      'EUR ' + parseFloat(o.total).toFixed(2).replace('.', ','),
+          pagamento:   AdminAPI.statusLabel(o.payment_status),
+          stato:       AdminAPI.statusLabel(o.order_status),
+          corriere:    (o.courier_code || '-').toUpperCase(),
+          tracking:    o.tracking_number || '-',
         };
       });
 
       _origRenderView('dashboard');
     }).fail(function() {
-      // Token may have expired — admin-api.js handles redirect on 401
       _origRenderView('dashboard');
     });
   }
@@ -1660,10 +2043,9 @@ $(function(){
     const api = window.AdminAPI;
     if (!api) { _origRenderView(name); return; }
 
-    var loading = '<div style="padding:60px;text-align:center;color:var(--muted)">⏳ Caricamento…</div>';
+    var loading = '<div style="padding:60px;text-align:center;color:var(--muted)">Caricamento...</div>';
     $('#viewContainer').html(loading);
 
-    // Per-view data refresh
     if (name === 'orders' || name === 'orders-drafts' || name === 'orders-abandoned') {
       api.orders.list({ limit: 100 }).done(function(data) {
         var list = (data && data.orders) ? data.orders : (Array.isArray(data) ? data : []);
@@ -1674,7 +2056,7 @@ $(function(){
             _raw_status:  o.order_status,
             cliente:      (o.customer_nome + ' ' + o.customer_cognome).trim(),
             data:         new Date(o.created_at).toLocaleDateString('it-IT'),
-            totale:       '€ ' + parseFloat(o.total).toFixed(2).replace('.', ','),
+            totale:       'EUR ' + parseFloat(o.total).toFixed(2).replace('.', ','),
             pagamento:    AdminAPI.statusLabel(o.payment_status),
             stato:        AdminAPI.statusLabel(o.order_status),
             corriere:     (o.courier_code || '-').toUpperCase(),
@@ -1692,14 +2074,15 @@ $(function(){
           if (p.taglie && Array.isArray(p.taglie)) {
             p.taglie.forEach(function(t) { totalStock += (parseInt(t.stock) || 0); });
           }
+          var icon = p.icon === 'bag' ? '' : p.icon === 'shoe' ? '' : p.icon === 'ring' ? '' : '';
           return {
             id:     p.id,
             nome:   p.name,
             cat:    p.categoria,
-            prezzo: '€ ' + parseFloat(p.price).toFixed(2).replace('.', ','),
+            prezzo: 'EUR ' + parseFloat(p.price).toFixed(2).replace('.', ','),
             stock:  totalStock,
             status: AdminAPI.statusLabel(p.status || 'attivo'),
-            img:    p.icon === 'bag' ? '👜' : p.icon === 'shoe' ? '👟' : p.icon === 'ring' ? '💍' : p.icon === 'belt' ? '🎀' : '👗',
+            img:    icon || p.icon || '',
           };
         });
         _origRenderView(name);
@@ -1710,12 +2093,13 @@ $(function(){
         var list = (data && data.customers) ? data.customers : [];
         DATA.customers = list.map(function(c) {
           return {
+            _db_id:  c.id,
             id:      'C-' + String(c.id).padStart(3, '0'),
             nome:    c.nome + (c.cognome ? ' ' + c.cognome : ''),
             email:   c.email,
             ordini:  c.total_orders || 0,
-            speso:   '€ ' + parseFloat(c.total_spent || 0).toFixed(2).replace('.', ','),
-            ultimo:  c.last_login ? new Date(c.last_login).toLocaleDateString('it-IT') : '—',
+            speso:   'EUR ' + parseFloat(c.total_spent || 0).toFixed(2).replace('.', ','),
+            ultimo:  c.last_login ? new Date(c.last_login).toLocaleDateString('it-IT') : '-',
             vip:     (c.total_spent || 0) > 300,
           };
         });
@@ -1727,30 +2111,60 @@ $(function(){
         if (!Array.isArray(list)) list = [];
         DATA.discounts = list.map(function(d) {
           var tipo = d.tipo === 'percentuale' ? 'Percentuale ' + d.valore + '%' :
-                     d.tipo === 'fisso'       ? '€ ' + parseFloat(d.valore).toFixed(2) + ' fisso' :
+                     d.tipo === 'fisso'       ? 'EUR ' + parseFloat(d.valore).toFixed(2) + ' fisso' :
                                                'Spedizione gratuita';
           return {
+            _db_id:  d.id,
             code:    d.code,
             tipo:    tipo,
-            utilizzi: (d.utilizzi || 0) + '/' + (d.max_utilizzi || '∞'),
-            scad:    d.scadenza ? new Date(d.scadenza).toLocaleDateString('it-IT') : '—',
+            utilizzi: (d.utilizzi || 0) + '/' + (d.max_utilizzi || '-'),
+            scad:    d.scadenza ? new Date(d.scadenza).toLocaleDateString('it-IT') : '-',
             stato:   AdminAPI.statusLabel(d.stato),
           };
         });
         _origRenderView(name);
       }).fail(function() { _origRenderView(name); });
 
-    } else if (name === 'shipping' || name === 'couriers') {
+    } else if (name === 'shipping' || name === 'couriers' || name === 'shipping-zones') {
       $.when(api.shipping.couriers(), api.shipping.zones()).done(function(courRes, zoneRes) {
         var couriers = Array.isArray(courRes[0]) ? courRes[0] : [];
         var zones    = Array.isArray(zoneRes[0]) ? zoneRes[0] : [];
         DATA.couriers = couriers.map(function(c) {
-          return { code: c.code, nome: c.nome, slug: c.slug, rate: '€ ' + parseFloat(c.rate || 0).toFixed(2), attivo: !!c.attivo, sped: 0, consegnati: 0, ritardi: 0 };
+          return { code: c.code, nome: c.nome, slug: c.slug || c.code.toUpperCase(), rate: 'EUR ' + parseFloat(c.rate || 0).toFixed(2), attivo: !!c.attivo, sped: 0, consegnati: 0, ritardi: 0 };
         });
         DATA.zones = zones.map(function(z) {
-          return { nome: z.nome, paesi: z.paesi, metodo: z.metodo, prezzo: '€ ' + parseFloat(z.prezzo || 0).toFixed(2), grat: z.spedizione_gratuita_da ? '€ ' + z.spedizione_gratuita_da : '—' };
+          return { _db_id: z.id, nome: z.nome, paesi: z.paesi, metodo: z.metodo, prezzo: 'EUR ' + parseFloat(z.prezzo || 0).toFixed(2), grat: z.spedizione_gratuita_da ? 'EUR ' + z.spedizione_gratuita_da : '-' };
         });
         _origRenderView(name);
+      }).fail(function() { _origRenderView(name); });
+
+    } else if (name === 'shipments' || name === 'tracking') {
+      api.shipping.shipments().done(function(list) {
+        if (!Array.isArray(list)) list = [];
+        DATA.shipments = list.map(function(s) {
+          return {
+            _db_id:       s.id,
+            id:           s.tracking_number,
+            ordine:       s.order_number || ('#' + s.order_id),
+            _order_db_id: s.order_id,
+            cliente:      ((s.customer_nome||'') + ' ' + (s.customer_cognome||'')).trim() || '-',
+            corriere:     (s.courier_code || '').toLowerCase(),
+            destinazione: s.destinazione || '-',
+            stato:        AdminAPI.statusLabel(s.stato),
+            eta:          s.eta ? new Date(s.eta).toLocaleDateString('it-IT') : '-',
+          };
+        });
+        if (!DATA.couriers || !DATA.couriers.length) {
+          api.shipping.couriers().done(function(courRes) {
+            var couriers = Array.isArray(courRes) ? courRes : [];
+            DATA.couriers = couriers.map(function(c) {
+              return { code: c.code, nome: c.nome, slug: c.slug || c.code.toUpperCase(), rate: 'EUR ' + parseFloat(c.rate || 0).toFixed(2), attivo: !!c.attivo, sped: 0, consegnati: 0, ritardi: 0 };
+            });
+            _origRenderView(name);
+          }).fail(function() { _origRenderView(name); });
+        } else {
+          _origRenderView(name);
+        }
       }).fail(function() { _origRenderView(name); });
 
     } else if (name === 'dashboard') {
