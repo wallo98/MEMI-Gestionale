@@ -3377,6 +3377,33 @@ $(function(){
     if(c && confirm('Bloccare '+c.nome+'? Non potrà più scriverti.')){ toast(c.nome+' bloccato','success'); }
   });
 
+  // ── Sidebar badges driven by real data (no hardcoded numbers) ──
+  function setSideBadge(id, n){
+    var el = document.getElementById(id);
+    if(!el) return;
+    if(n && n>0){ el.textContent = n; el.style.display=''; }
+    else { el.style.display='none'; }
+  }
+  function updateSidebarBadges(){
+    if(!window.AdminAPI) return;
+    // Orders needing attention + drafts (from real orders)
+    AdminAPI.orders.list({limit:200}).done(function(d){
+      var list = (d && d.orders) ? d.orders : (Array.isArray(d) ? d : []);
+      var pending = list.filter(function(o){ return o.order_status==='in_attesa' || o.order_status==='in_preparazione'; }).length;
+      var drafts  = list.filter(function(o){ return o.order_status==='in_attesa'; }).length;
+      setSideBadge('badgeOrders', pending);
+      setSideBadge('badgeDrafts', drafts);
+    }).fail(function(){ setSideBadge('badgeOrders',0); setSideBadge('badgeDrafts',0); });
+    // Active discount codes
+    AdminAPI.discounts.list().done(function(l){
+      l = Array.isArray(l) ? l : [];
+      setSideBadge('badgeDiscounts', l.filter(function(x){ return x.stato==='attivo'; }).length);
+    }).fail(function(){ setSideBadge('badgeDiscounts',0); });
+    // Chat (frontend demo data) — count unread; abandoned carts: no data source
+    try { setSideBadge('badgeChat', (typeof CHATS!=='undefined'?CHATS:[]).reduce(function(s,c){ return s+(c.unread||0); },0)); } catch(_){}
+    setSideBadge('badgeAbandoned', 0);
+  }
+
   // ── Initial data load from API, then render dashboard ──
   function loadDashboardData() {
     var api = window.AdminAPI;
@@ -3398,9 +3425,9 @@ $(function(){
       // KPIs
       if (kpi.revenue) {
         DATA.kpi = kpi;
-        var pendingCount = parseInt((kpi.orders && kpi.orders.value) || 0);
-        if (pendingCount > 0) $('.sidebar .badge-pink').first().text(pendingCount);
       }
+      // Refresh sidebar badges from real data (no hardcoded numbers)
+      updateSidebarBadges();
 
       // Recent orders
       if (Array.isArray(recent) && recent.length) {
@@ -3749,7 +3776,7 @@ $(function(){
   // an expired token before the first data request fires.
   if (window.AdminAPI && AdminAPI.isLoggedIn()) {
     AdminAPI.auth.me()
-      .done(function() { loadDashboardData(); })
+      .done(function() { updateSidebarBadges(); loadDashboardData(); })
       .fail(function() {
         // redirect is already handled inside admin-api.js request()
         // but belt-and-suspenders: ensure we land on login

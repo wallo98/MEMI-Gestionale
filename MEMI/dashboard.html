@@ -38,13 +38,13 @@
       <div class="nav-parent" data-group="orders">
         <a href="#" class="nav-item" data-view="orders">
           <span class="ic">🧾</span> <span class="lbl">Ordini</span>
-          <span class="badge badge-pink">12</span>
+          <span class="badge badge-pink" id="badgeOrders" style="display:none"></span>
           <span class="chev">▾</span>
         </a>
         <div class="nav-children">
           <a href="#" class="nav-item child" data-view="orders">Tutti gli ordini</a>
-          <a href="#" class="nav-item child" data-view="orders-drafts">Bozze <span class="badge badge-soft">3</span></a>
-          <a href="#" class="nav-item child" data-view="orders-abandoned">Carrelli abbandonati <span class="badge badge-soft">7</span></a>
+          <a href="#" class="nav-item child" data-view="orders-drafts">Bozze <span class="badge badge-soft" id="badgeDrafts" style="display:none"></span></a>
+          <a href="#" class="nav-item child" data-view="orders-abandoned">Carrelli abbandonati <span class="badge badge-soft" id="badgeAbandoned" style="display:none"></span></a>
           <a href="#" class="nav-item child" data-view="returns">Resi</a>
           <a href="#" class="nav-item child" data-view="invoices">Fatture</a>
         </div>
@@ -95,12 +95,12 @@
 
       <a href="#" class="nav-item" data-view="discounts">
         <span class="ic">🏷</span> <span class="lbl">Sconti</span>
-        <span class="badge badge-green">4</span>
+        <span class="badge badge-green" id="badgeDiscounts" style="display:none"></span>
       </a>
 
       <a href="#" class="nav-item" data-view="chat">
         <span class="ic">💬</span> <span class="lbl">Chat clienti</span>
-        <span class="badge badge-pink">5</span>
+        <span class="badge badge-pink" id="badgeChat" style="display:none"></span>
       </a>
 
       <!-- ANALYTICS -->
@@ -243,7 +243,7 @@
 <div id="toast" class="toast"></div>
 
 <!-- Admin API client — must load before app.js -->
-<script src="js/admin-api.js"></script>
-<script src="js/app.js"></script>
+<script src="js/admin-api.js?v=7"></script>
+<script src="js/app.js?v=7"></script>
 </body>
 </html>

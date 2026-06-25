@@ -938,6 +938,26 @@ window.submitNewsletter = function (form) {
     '</div>';
   }
 
+  // Update the category filter counts from the real product list.
+  // Categories with no products are hidden so no fake numbers remain.
+  function updateCategoryCounts(products) {
+    var counts = {};
+    (products || []).forEach(function (p) {
+      var c = (p.categoria || '').toLowerCase();
+      if (c) counts[c] = (counts[c] || 0) + 1;
+    });
+    var boxes = document.querySelectorAll('.check-item input[data-cat]');
+    Array.prototype.forEach.call(boxes, function (cb) {
+      var cat  = cb.getAttribute('data-cat');
+      var item = cb.closest('.check-item');
+      if (!item) return;
+      var span = item.querySelector('.check-count');
+      var n    = counts[cat] || 0;
+      if (span) span.textContent = '(' + n + ')';
+      item.style.display = n > 0 ? '' : 'none';
+    });
+  }
+
   window.initShopCatalog = function () {
     var grid = document.getElementById('productGrid');
     if (!grid) return;
@@ -946,6 +966,7 @@ window.submitNewsletter = function (form) {
       .then(function (r) { return r.json(); })
       .then(function (res) {
         var products = Array.isArray(res) ? res : (res && res.products) || [];
+        updateCategoryCounts(products);
         if (!Array.isArray(products) || !products.length) {
           grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem 1rem;color:var(--brown-light);font-size:.88rem;">Nessun prodotto disponibile.</div>';
           if (typeof applyFilters === 'function') applyFilters();
