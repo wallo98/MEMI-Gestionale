@@ -1,0 +1,29 @@
+# =============================================================
+# MEMI — LOCAL development overrides
+# =============================================================
+# This file ONLY adds published ports so you can open the apps in a
+# browser on your own machine (no Traefik / domains needed).
+#
+# It is used explicitly, so it never affects the production deploy:
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
+#
+# After it's running, open:
+#   Admin gestionale : http://localhost:8081
+#   Negozio (shop)   : http://localhost:8080
+#   Backend API      : http://localhost:3000/health
+#   MySQL (optional) : localhost:3307  (user/pass from .env or defaults)
+# =============================================================
+
+services:
+  mysql:
+    ports:
+      - "3307:3306"     # optional — only needed if you want to inspect the DB
+  backend:
+    ports:
+      - "3000:3000"
+  ecommerce:
+    ports:
+      - "8080:80"
+  admin:
+    ports:
+      - "8081:80"
