@@ -236,3 +236,56 @@
     setTimeout(function() { renderReviews(productId, root); }, 200);
   });
 })();
+
+/* ============================================================
+   GALLERY HYDRATION — replaces the static placeholder gallery
+   with the real uploaded product images from the API. Runs on
+   every /products/<slug>/ page via the shared script, so admin
+   uploads appear without regenerating the static HTML.
+   ============================================================ */
+(function () {
+  'use strict';
+  document.addEventListener('DOMContentLoaded', function () {
+    var root = document.getElementById('pdpRoot');
+    if (!root || !window.MemiAPI || !window.MemiAPI.products) return;
+    var productId = root.dataset.id;
+    if (!productId) return;
+
+    window.MemiAPI.products.get(productId).then(function (p) {
+      var raw = (p && Array.isArray(p.images)) ? p.images : [];
+      var imgs = raw.map(function (x) {
+        if (typeof x === 'string') return { full: x, card: x, thumb: x };
+        return { full: x.full || x.card || x.thumb, card: x.card || x.full, thumb: x.thumb || x.card || x.full };
+      }).filter(function (i) { return i.full; });
+      if (!imgs.length) return; // no real images → keep the placeholder figure
+
+      var main = document.getElementById('mainImg');
+      var thumbsWrap = document.querySelector('.gallery-thumbs');
+      if (!main) return;
+      var name = root.dataset.name || '';
+
+      function show(i) {
+        main.classList.remove('ph-fig', 'ph-flat', 'ph-shimmer');
+        main.style.width = '100%'; main.style.height = '100%';
+        main.innerHTML = '<img class="gallery-main-img" src="' + imgs[i].full + '" alt="' + name +
+          '" style="width:100%;height:100%;object-fit:cover;object-position:center top">';
+        if (thumbsWrap) {
+          var ts = thumbsWrap.querySelectorAll('.thumb');
+          for (var j = 0; j < ts.length; j++) ts[j].classList.toggle('active', j === i);
+        }
+      }
+
+      if (thumbsWrap) {
+        thumbsWrap.innerHTML = imgs.map(function (im, i) {
+          return '<button type="button" class="thumb' + (i === 0 ? ' active' : '') + '" data-i="' + i + '" role="listitem" style="padding:0">' +
+            '<img src="' + im.thumb + '" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center top">' +
+          '</button>';
+        }).join('');
+        thumbsWrap.querySelectorAll('.thumb').forEach(function (btn) {
+          btn.addEventListener('click', function () { show(parseInt(this.dataset.i, 10) || 0); });
+        });
+      }
+      show(0);
+    }).catch(function () { /* keep placeholder on error */ });
+  });
+})();

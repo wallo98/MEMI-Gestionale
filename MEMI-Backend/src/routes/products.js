@@ -16,8 +16,10 @@
  */
 
 const router = require('express').Router();
+const multer = require('multer');
 const { pool }         = require('../db');
 const { requireAdmin } = require('../middleware/auth');
+const { processAndStore, deleteVariants } = require('../images');
 
 /* mysql2 returns JSON columns already parsed (object/array). Older rows or
    non-JSON storage may return a string. This handles both safely. */
@@ -25,6 +27,26 @@ function parseJSON(v, fallback) {
   if (v == null) return fallback;
   if (typeof v === 'object') return v;
   try { return JSON.parse(v); } catch (_) { return fallback; }
+}
+
+/* Multipart upload — images held in memory, then processed by sharp. */
+const MAX_MB = parseInt(process.env.MAX_UPLOAD_MB, 10) || 8;
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits:  { fileSize: MAX_MB * 1024 * 1024, files: 10 },
+  fileFilter: (req, file, cb) => {
+    if (/^image\//.test(file.mimetype)) cb(null, true);
+    else cb(Object.assign(new Error('Solo file immagine sono ammessi'), { statusCode: 415 }), false);
+  },
+});
+function uploadImages(req, res, next) {
+  upload.array('images', 10)(req, res, (err) => {
+    if (err) {
+      const msg = err.code === 'LIMIT_FILE_SIZE' ? `File troppo grande (max ${MAX_MB} MB)` : (err.message || 'Upload non valido');
+      return res.status(400).json({ error: msg });
+    }
+    next();
+  });
 }
 
 /* ── GET /api/products ── */
@@ -247,6 +269,56 @@ router.put('/:id/stock', requireAdmin, async (req, res) => {
     return res.json({ ok: true });
   } catch (err) {
     console.error('stock update error', err);
+    return res.status(500).json({ error: 'Errore server' });
+  }
+});
+
+/* ── POST /api/products/:id/images ── upload + process into WebP variants ── */
+router.post('/:id/images', requireAdmin, uploadImages, async (req, res) => {
+  try {
+    const [[product]] = await pool.execute('SELECT id, images FROM products WHERE id = ?', [req.params.id]);
+    if (!product) return res.status(404).json({ error: 'Prodotto non trovato' });
+    if (!req.files || !req.files.length) return res.status(400).json({ error: 'Nessun file ricevuto' });
+
+    let images = parseJSON(product.images, []);
+    if (!Array.isArray(images)) images = [];
+    images = images.map(x => (typeof x === 'string' ? { full: x, card: x, thumb: x } : x));
+
+    for (const file of req.files) {
+      const variants = await processAndStore(file.buffer);
+      images.push(variants);
+    }
+    await pool.execute('UPDATE products SET images = ? WHERE id = ?', [JSON.stringify(images), req.params.id]);
+    return res.status(201).json({ ok: true, images });
+  } catch (err) {
+    console.error('image upload error', err);
+    const code = err.statusCode || 500;
+    return res.status(code).json({ error: code === 500 ? 'Errore elaborazione immagine' : err.message });
+  }
+});
+
+/* ── DELETE /api/products/:id/images ── remove one image (by url) + its files ── */
+router.delete('/:id/images', requireAdmin, async (req, res) => {
+  const target = req.body && (req.body.url || req.body.full);
+  if (!target) return res.status(400).json({ error: 'URL immagine mancante' });
+  try {
+    const [[product]] = await pool.execute('SELECT id, images FROM products WHERE id = ?', [req.params.id]);
+    if (!product) return res.status(404).json({ error: 'Prodotto non trovato' });
+
+    let images = parseJSON(product.images, []);
+    if (!Array.isArray(images)) images = [];
+    const keep = []; let removed = null;
+    images.forEach(img => {
+      const full = typeof img === 'string' ? img : (img.full || img.card || img.thumb);
+      if (!removed && full === target) removed = img; else keep.push(img);
+    });
+    if (!removed) return res.status(404).json({ error: 'Immagine non trovata' });
+
+    await pool.execute('UPDATE products SET images = ? WHERE id = ?', [JSON.stringify(keep), req.params.id]);
+    deleteVariants(removed);
+    return res.json({ ok: true, images: keep });
+  } catch (err) {
+    console.error('image delete error', err);
     return res.status(500).json({ error: 'Errore server' });
   }
 });

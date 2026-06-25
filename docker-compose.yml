@@ -77,6 +77,12 @@ services:
       SMTP_USER:             ${SMTP_USER:-}
       SMTP_PASS:             ${SMTP_PASS:-}
       SMTP_FROM:             ${SMTP_FROM:-}
+      # Product image uploads
+      UPLOADS_DIR:           /app/uploads
+      MAX_UPLOAD_MB:         ${MAX_UPLOAD_MB:-8}
+    volumes:
+      # Persistent storage for uploaded product images (survives redeploys).
+      - uploads_data:/app/uploads
     networks:
       - memi_net
     labels:
@@ -139,6 +145,8 @@ services:
 
 volumes:
   mysql_data:
+    driver: local
+  uploads_data:
     driver: local
 
 networks:

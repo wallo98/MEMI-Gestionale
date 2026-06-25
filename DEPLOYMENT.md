@@ -251,3 +251,15 @@ find /backups -name "memi_*.sql.gz" -mtime +30 -delete
 > `initdb.d` mount (fresh volume) or `npm run db:init`.
 >
 > For running the whole stack locally, see **LOCAL-RUN.md**.
+
+> **Phase 6 note — product images (self-hosted):** uploaded images live on a
+> dedicated Docker volume **`uploads_data`** (mounted at `/app/uploads` on the
+> backend), separate from `mysql_data`. They are processed by `sharp` into WebP
+> variants and served at `/api/uploads/...`. Two operational points:
+>
+> 1. **Back up `uploads_data`** alongside the DB — it holds the actual image
+>    files. Example: `docker run --rm -v memi_uploads_data:/data -v $PWD:/backup alpine tar czf /backup/uploads-$(date +%F).tgz -C /data .`
+> 2. `sharp` ships prebuilt `linux-musl` binaries, so the Alpine image needs no
+>    build toolchain. The backend Dockerfile uses `npm install` (not `npm ci`)
+>    so the newly-added `sharp`/`multer` deps install even though the committed
+>    lockfile predates them. `MAX_UPLOAD_MB` (default 8) caps upload size.

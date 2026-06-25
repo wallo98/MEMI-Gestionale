@@ -48,6 +48,7 @@ const giftcardsRoutes     = require('./routes/giftcards');
 const campaignsRoutes     = require('./routes/campaigns');
 const cmsRoutes           = require('./routes/cms');
 const loyaltyRoutes       = require('./routes/loyalty');
+const { ensureDir: ensureUploadsDir, UPLOADS_DIR } = require('./images');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -94,6 +95,17 @@ app.use(cors({
 // ── Body parsing ───────────────────────────────────────────────
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// ── Uploaded product images (persistent volume) ───────────────
+// Mounted BEFORE rate limiting so image requests are never throttled.
+// Content-hashed filenames → safe to cache "immutable" forever.
+ensureUploadsDir();
+app.use('/api/uploads', express.static(UPLOADS_DIR, {
+  immutable: true,
+  maxAge:    '365d',
+  index:     false,
+  setHeaders(res) { res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin'); },
+}));
 
 // ── Rate limiting ──────────────────────────────────────────────
 const apiLimiter = rateLimit({

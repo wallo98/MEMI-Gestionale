@@ -888,10 +888,12 @@ window.submitNewsletter = function (form) {
       chips = '<button class="size-chip' + (isOos ? ' oos' : '') + '">Unica</button>';
     }
 
-    // Images — use first two from product.images[] if available, else placeholder
+    // Images — first two from product.images[]; each item is either a URL string
+    // (legacy) or a {full,card,thumb} variant object. Falls back to a placeholder.
     var imgs = Array.isArray(p.images) && p.images.length ? p.images : [];
-    var img1 = imgs[0] || 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=600&h=800&q=80';
-    var img2 = imgs[1] || imgs[0] || 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&h=800&q=80';
+    function pickImg(x, size) { return !x ? null : (typeof x === 'string' ? x : (x[size] || x.card || x.full || x.thumb)); }
+    var img1 = pickImg(imgs[0], 'card') || 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=600&h=800&q=80';
+    var img2 = pickImg(imgs[1], 'card') || pickImg(imgs[0], 'card') || 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&h=800&q=80';
 
     // Pricing
     var pricingHtml = '<span class="price-current">' + fmtPrice(p.price) + '</span>';
@@ -974,9 +976,4 @@ window.submitNewsletter = function (form) {
         }
 
         var html = '';
-        var bannerInserted = false;
-        products.forEach(function (p, i) {
-          // Insert editorial banner after the 4th card (like the original)
-          if (!bannerInserted && i === 4) {
-            html += buildEditorialBanner();
-            bannerInserte
+        v

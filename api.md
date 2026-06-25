@@ -311,3 +311,24 @@ the `loyalty_transactions` table, and indexes `order_items(product_id)` /
 Points are awarded automatically: a signup bonus on `POST /api/auth/register`, and
 `floor(total × points_per_euro)` on every order (`POST /api/orders` and
 `POST /api/orders/admin`). Config lives in `store_settings` under `loyalty_*` keys.
+
+---
+
+## Product images — self-hosted pipeline (Phase 6)
+
+Uploads are processed by **sharp** into responsive WebP variants (thumb 400w /
+card 800w / full 1600w), EXIF-stripped and auto-oriented, stored with
+content-hashed filenames on a persistent Docker volume, and served at
+`/api/uploads/<file>` (rides the existing nginx `/api` proxy on both domains).
+
+| Method | Path | Auth | Body | Returns |
+|--------|------|------|------|---------|
+| POST | `/api/products/:id/images` | Admin | multipart `images` (1–10 files, ≤ `MAX_UPLOAD_MB`) | `{ok, images}` — appends `{full,card,thumb,width,height}` to the product |
+| DELETE | `/api/products/:id/images` | Admin | `{url}` (the `full` url) | `{ok, images}` — removes the entry + deletes its files |
+| GET | `/api/uploads/<file>` | public | — | the image (cached `immutable`, 1 year) |
+
+`products.images` is a JSON array; each item is a `{full,card,thumb,width,height}`
+object (legacy plain-URL strings are still tolerated by the storefront/admin).
+Reorder / set-primary is done by `PUT /api/products/:id` with the reordered
+`images` array. Env: `UPLOADS_DIR` (default `<repo>/uploads`, `/app/uploads` in
+Docker) and `MAX_UPLOAD_MB` (default 8).

@@ -4,6 +4,21 @@ Status key: ✅ Fixed | ⚠️ Known limitation | ❌ Missing | 🔄 Workaround 
 
 ---
 
+## Sprint Giugno 2026 — Phase 6 (self-hosted product image pipeline)
+
+| # | Item | Detail |
+|---|------|--------|
+| 86 | Real image uploads | `sharp` pipeline: EXIF-strip + auto-orient + responsive **WebP** variants (thumb/card/full), content-hashed filenames. `multer` memory upload, type/size validation. |
+| 87 | Storage | Dedicated Docker volume `uploads_data` (`/app/uploads`), separate from the DB; served at `/api/uploads/...` via the existing nginx `/api` proxy (no CORS / new rules). |
+| 88 | Endpoints | `POST/DELETE /api/products/:id/images`; reorder/primary via `PUT /api/products/:id`. |
+| 89 | Admin gallery | Drag-and-drop upload, reorder (◀ ▶ ★), set-primary, delete in the product editor; new products reopen in the editor to add images; real thumbnails in the catalog grid/list. |
+| 90 | Storefront | Shop cards + product detail (gallery hydrated from the API in `product.js`, applies to all static product pages) now render the real WebP images; tolerant of legacy string URLs. |
+| 91 | Infra | `sharp`+`multer` added; Dockerfile switched to `npm install` (lockfile predates new deps) and creates the uploads dir owned by the non-root user; compose volume + `UPLOADS_DIR`/`MAX_UPLOAD_MB`. |
+
+**Verified:** the sharp pipeline was run end-to-end in the build sandbox (WebP variants generated, idempotent re-upload, clean delete, garbage rejected). Storefront/admin JS syntax-validated in isolation.
+
+---
+
 ## Sprint Giugno 2026 — Phase 5 (data integrity, routing, loyalty)
 
 ### Critical 500s fixed

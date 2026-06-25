@@ -1491,7 +1491,7 @@ function renderProductsArea(mode){
     const html = `<div class="prod-grid">
       ${DATA.products.map(p=>`
         <div class="prod-card js-product" data-id="${p.id}">
-          <div class="prod-thumb">${p.img}</div>
+          <div class="prod-thumb">${p.thumb?`<img src="${p.thumb}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`:p.img}</div>
           <div class="prod-info">
             <h4>${p.nome}</h4>
             <div class="price">${p.prezzo}</div>
@@ -1508,7 +1508,7 @@ function renderProductsArea(mode){
         ${DATA.products.map(p=>`
           <tr class="js-product" data-id="${p.id}" style="cursor:pointer">
             <td>${p.id}</td>
-            <td><div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">${p.img}</span>${p.nome}</div></td>
+            <td><div style="display:flex;align-items:center;gap:8px">${p.thumb?`<img src="${p.thumb}" alt="" style="width:28px;height:28px;object-fit:cover;border-radius:5px">`:`<span style="font-size:18px">${p.img}</span>`}${p.nome}</div></td>
             <td>${p.cat}</td><td><strong>${p.prezzo}</strong></td><td>${p.stock}</td>
             <td>${statusPill(p.status)}</td>
           </tr>
@@ -1915,15 +1915,72 @@ $(function(){
   });
 
   // Edit product — open form modal
-  $(document).on('click','.js-edit-product', function(){
-    const id = $(this).data('id');
+  /* ── Product image gallery (drag-drop upload, reorder, primary, delete) ── */
+  function imgUrl(img, size){ return (typeof img==='string') ? img : (img[size]||img.thumb||img.card||img.full); }
+  function imgFull(img){ return (typeof img==='string') ? img : (img.full||img.card||img.thumb); }
+  function productGalleryHtml(){
+    return '<div style="margin-top:16px">'+
+      '<div style="font-size:13px;font-weight:600;margin-bottom:6px">Immagini prodotto</div>'+
+      '<div id="galleryGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px"></div>'+
+      '<div id="galleryDrop" style="border:2px dashed var(--line);border-radius:8px;padding:16px;text-align:center;cursor:pointer;color:var(--muted);font-size:13px">'+
+        'Trascina qui le immagini o <strong>clicca per scegliere</strong><br><small>JPG · PNG · WebP — vengono ottimizzate in automatico</small>'+
+        '<input type="file" id="galleryFile" accept="image/*" multiple style="display:none"/>'+
+      '</div>'+
+      '<div id="galleryMsg" style="font-size:12px;color:var(--muted);margin-top:4px"></div>'+
+    '</div>';
+  }
+  function wireProductGallery(id, initialImages){
+    var imgs = Array.isArray(initialImages) ? initialImages.slice() : [];
+    var grid = document.getElementById('galleryGrid');
+    var drop = document.getElementById('galleryDrop');
+    var fileInput = document.getElementById('galleryFile');
+    var msg  = document.getElementById('galleryMsg');
+    if(!grid || !drop) return;
+    function render(){
+      if(!imgs.length){ grid.innerHTML = '<span style="color:var(--muted);font-size:12px">Nessuna immagine ancora.</span>'; return; }
+      grid.innerHTML = imgs.map(function(img,i){
+        return '<div style="position:relative;width:84px;height:106px;border:1px solid var(--line);border-radius:8px;overflow:hidden;'+(i===0?'box-shadow:0 0 0 2px var(--green-strong)':'')+'">'+
+          '<img src="'+imgUrl(img,'thumb')+'" style="width:100%;height:100%;object-fit:cover" alt=""/>'+
+          (i===0?'<span style="position:absolute;top:2px;left:2px;background:var(--green-strong);color:#fff;font-size:9px;padding:1px 4px;border-radius:4px">Principale</span>':'')+
+          '<div style="position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.9)">'+
+            '<button type="button" class="gal-left" data-i="'+i+'" title="Sposta a sinistra" style="font-size:12px;padding:1px 4px;background:none">◀</button>'+
+            (i!==0?'<button type="button" class="gal-primary" data-i="'+i+'" title="Imposta come principale" style="font-size:12px;padding:1px 4px;background:none">★</button>':'<span></span>')+
+            '<button type="button" class="gal-right" data-i="'+i+'" title="Sposta a destra" style="font-size:12px;padding:1px 4px;background:none">▶</button>'+
+            '<button type="button" class="gal-del" data-i="'+i+'" title="Elimina" style="font-size:12px;padding:1px 4px;background:none;color:var(--danger)">✕</button>'+
+          '</div>'+
+        '</div>';
+      }).join('');
+    }
+    function persist(){ AdminAPI.products.update(id, { images: imgs }).fail(function(){ toast('Errore salvataggio ordine','error'); }); }
+    function upload(files){
+      if(!files || !files.length) return;
+      msg.style.color='var(--muted)'; msg.textContent='Caricamento e ottimizzazione…';
+      AdminAPI.products.uploadImages(id, files).done(function(r){ imgs = r.images||imgs; render(); msg.textContent='Immagini caricate.'; })
+        .fail(function(x){ msg.style.color='var(--danger)'; msg.textContent=(x.responseJSON&&x.responseJSON.error)||'Errore caricamento'; });
+    }
+    render();
+    drop.addEventListener('click', function(){ fileInput.click(); });
+    fileInput.addEventListener('change', function(){ upload(this.files); this.value=''; });
+    ['dragover','dragenter'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.style.borderColor='var(--green-strong)'; }); });
+    ['dragleave','drop'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.style.borderColor='var(--line)'; }); });
+    drop.addEventListener('drop', function(e){ upload(e.dataTransfer.files); });
+    $(grid).on('click','.gal-del', function(){
+      var i=+$(this).data('i'); var img=imgs[i];
+      AdminAPI.products.deleteImage(id, imgFull(img)).done(function(r){ imgs=r.images||imgs; render(); }).fail(function(){ toast('Errore eliminazione','error'); });
+    });
+    $(grid).on('click','.gal-primary', function(){ var i=+$(this).data('i'); imgs.unshift(imgs.splice(i,1)[0]); render(); persist(); });
+    $(grid).on('click','.gal-left', function(){ var i=+$(this).data('i'); if(i>0){ imgs.splice(i-1,0,imgs.splice(i,1)[0]); render(); persist(); } });
+    $(grid).on('click','.gal-right', function(){ var i=+$(this).data('i'); if(i<imgs.length-1){ imgs.splice(i+1,0,imgs.splice(i,1)[0]); render(); persist(); } });
+  }
+
+  function openProductEditor(id){
     if (!id || !window.AdminAPI) return;
     AdminAPI.products.get(id).done(function(p){
       openModal(`Modifica: ${p.name}`, `
         <form id="editProductForm">
           <div class="kv" style="grid-template-columns:120px 1fr;gap:10px">
-            <div class="k">Nome *</div><div class="v"><input class="field-input" type="text" name="name" value="${p.name||''}" required style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
-            <div class="k">Categoria *</div><div class="v"><input class="field-input" type="text" name="categoria" value="${p.categoria||''}" required style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+            <div class="k">Nome *</div><div class="v"><input class="field-input" type="text" name="name" value="${(p.name||'').replace(/"/g,'&quot;')}" required style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
+            <div class="k">Categoria *</div><div class="v"><input class="field-input" type="text" name="categoria" value="${(p.categoria||'').replace(/"/g,'&quot;')}" required style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
             <div class="k">Prezzo €</div><div class="v"><input class="field-input" type="number" name="price" step="0.01" value="${p.price||''}" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px"/></div>
             <div class="k">Stato</div><div class="v">
               <select name="status" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px">
@@ -1932,12 +1989,14 @@ $(function(){
             </div>
             <div class="k">Descrizione</div><div class="v"><textarea name="description" rows="3" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:6px">${p.description||''}</textarea></div>
           </div>
+          ${productGalleryHtml()}
           <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
-            <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal()">Annulla</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal()">Chiudi</button>
             <button type="submit" class="btn btn-primary btn-sm" data-id="${id}">💾 Salva modifiche</button>
           </div>
         </form>
       `);
+      wireProductGallery(id, p.images);
       $('#editProductForm').on('submit', function(e){
         e.preventDefault();
         const fd = Object.fromEntries(new FormData(this));
@@ -1954,6 +2013,10 @@ $(function(){
         }).fail(function(){ toast('Errore aggiornamento','error'); $btn.prop('disabled',false).text('💾 Salva modifiche'); });
       });
     }).fail(function(){ toast('Errore caricamento prodotto','error'); });
+  }
+
+  $(document).on('click','.js-edit-product', function(){
+    openProductEditor($(this).data('id'));
   });
 
   // Toggle view (grid/list) prodotti
@@ -2184,16 +2247,17 @@ $(function(){
         return { taglia: (parts[0]||'').trim().toUpperCase(), stock: parseInt(parts[1]) || 0 };
       });
       $btn.prop('disabled', true).text('Creazione...');
+      const newId = fd.id.trim().toLowerCase().replace(/\s+/g, '-');
       AdminAPI.products.create({
-        id: fd.id.trim().toLowerCase().replace(/\s+/g, '-'),
+        id: newId,
         name: fd.name, categoria: fd.categoria,
         price: parseFloat(fd.price),
         original_price: fd.original_price ? parseFloat(fd.original_price) : null,
         status: fd.status, description: fd.description, taglie: taglie,
       }).done(function(){
-        toast('Prodotto creato', 'success');
-        closeModal();
-        renderView('products');
+        toast('Prodotto creato — ora aggiungi le immagini', 'success');
+        // Reopen in the editor so images can be uploaded right away
+        openProductEditor(newId);
       }).fail(function(xhr){
         const msg = (xhr.responseJSON && xhr.responseJSON.error) || 'Errore creazione';
         toast(msg, 'error');
@@ -3629,6 +3693,9 @@ $(function(){
             gioielli:'💍', accessori:'✨', set:'✨', cinture:'🪡'
           };
           var icon = _iconMap[p.icon] || _iconMap[p.categoria] || '👗';
+          var imgArr = Array.isArray(p.images) ? p.images : [];
+          var first  = imgArr[0];
+          var thumb  = first ? (typeof first==='string' ? first : (first.thumb||first.card||first.full)) : null;
           return {
             id:     p.id,
             nome:   p.name,
@@ -3637,6 +3704,7 @@ $(function(){
             stock:  totalStock,
             status: AdminAPI.statusLabel(p.status || 'attivo'),
             img:    icon,
+            thumb:  thumb,
           };
         });
         _origRenderView(name);

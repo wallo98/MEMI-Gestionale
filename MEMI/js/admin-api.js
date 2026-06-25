@@ -89,6 +89,24 @@
     updateStock: function(id, taglia, stock) {
       return put('/products/' + encodeURIComponent(id) + '/stock', { taglia: taglia, stock: stock });
     },
+    // Multipart image upload — bypasses the JSON request() wrapper.
+    uploadImages: function(id, files) {
+      var fd = new FormData();
+      for (var i = 0; i < files.length; i++) fd.append('images', files[i]);
+      var token = getToken();
+      return $.ajax({
+        url:         API_BASE + '/products/' + encodeURIComponent(id) + '/images',
+        method:      'POST',
+        data:        fd,
+        processData: false,
+        contentType: false,
+        headers:     token ? { Authorization: 'Bearer ' + token } : {},
+        dataType:    'json',
+      });
+    },
+    deleteImage: function(id, url) {
+      return request('DELETE', '/products/' + encodeURIComponent(id) + '/images', { url: url });
+    },
   };
 
   /* ═══════════════════════════════════════════════════════
