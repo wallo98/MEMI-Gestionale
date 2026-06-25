@@ -10,6 +10,7 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="tokens.css?v=2" />
   <link rel="stylesheet" href="shop.css?v=2" />
+  <link rel="stylesheet" href="app.css" />
   <style>
     /* ── Collection hero ── */
     .coll-hero {
@@ -111,39 +112,84 @@
       line-height: 1.9;
     }
 
-    /* ── Filters bar (reuses shop.css styles) ── */
-    .coll-filters {
+    /* ── Filter bar ── */
+    .ec-filterbar {
+      border-top: 1px solid var(--beige);
+      border-bottom: 1px solid var(--beige);
+      background: var(--white, #fff);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      margin-bottom: var(--space-6);
+    }
+    .ec-filterbar-inner {
       max-width: 1280px;
       margin: 0 auto;
-      padding: 0 var(--space-6) var(--space-4);
+      padding: 0 var(--space-6);
       display: flex;
       align-items: center;
-      gap: var(--space-3);
-      flex-wrap: wrap;
+      gap: var(--space-4);
     }
-    .coll-filter-chip {
-      padding: 6px 16px;
-      border: 1.5px solid var(--beige-dark);
+    .ec-chips {
+      display: flex;
+      gap: var(--space-2);
+      padding: 10px 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      flex: 1;
+    }
+    .ec-chips::-webkit-scrollbar { display: none; }
+    .ec-chip {
+      flex-shrink: 0;
+      padding: 5px 18px;
+      border: 1.5px solid var(--beige);
       border-radius: var(--radius-full);
-      font-size: var(--text-xs);
-      letter-spacing: var(--tracking-wide);
+      font-size: .7rem;
+      letter-spacing: .07em;
       text-transform: uppercase;
       font-weight: 500;
       color: var(--brown-mid);
       cursor: pointer;
       transition: all var(--dur-fast);
       background: transparent;
+      white-space: nowrap;
+      font-family: var(--font-sans);
     }
-    .coll-filter-chip:hover, .coll-filter-chip.active {
+    .ec-chip:hover, .ec-chip.active {
       background: var(--espresso);
       border-color: var(--espresso);
       color: var(--white);
     }
-    .coll-count {
-      margin-left: auto;
-      font-size: var(--text-xs);
-      color: var(--brown-light);
+    .ec-bar-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      flex-shrink: 0;
+      border-left: 1px solid var(--beige);
+      padding-left: var(--space-4);
     }
+    .ec-count {
+      font-size: .7rem;
+      color: var(--brown-light);
+      white-space: nowrap;
+      letter-spacing: .04em;
+    }
+    @media (max-width: 600px) { .ec-count { display: none; } }
+    .ec-sort {
+      padding: 5px 28px 5px 12px;
+      border: 1.5px solid var(--beige);
+      border-radius: var(--radius-full);
+      font-size: .7rem;
+      font-family: var(--font-sans);
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--espresso);
+      background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%233B2B2B' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center / 9px;
+      -webkit-appearance: none;
+      appearance: none;
+      cursor: pointer;
+    }
+    .ec-sort:focus { outline: none; border-color: var(--espresso); }
   </style>
 </head>
 <body>
@@ -195,13 +241,25 @@
   <!-- PRODUCT GRID -->
   <div class="shop-container" style="max-width:1280px;margin:0 auto;padding:0 var(--space-6);">
 
-    <div class="coll-filters">
-      <button class="coll-filter-chip active" onclick="filterColl(this,'')">Tutti</button>
-      <button class="coll-filter-chip" onclick="filterColl(this,'vestiti')">Vestiti</button>
-      <button class="coll-filter-chip" onclick="filterColl(this,'top')">Top &amp; Bluse</button>
-      <button class="coll-filter-chip" onclick="filterColl(this,'gonne')">Gonne</button>
-      <button class="coll-filter-chip" onclick="filterColl(this,'accessori')">Accessori</button>
-      <span class="coll-count"><span id="collCount">16</span> pezzi</span>
+    <div class="ec-filterbar">
+      <div class="ec-filterbar-inner">
+        <div class="ec-chips" id="collCatChips">
+          <button class="ec-chip active" data-cat="">Tutti</button>
+          <button class="ec-chip" data-cat="vestiti">Vestiti</button>
+          <button class="ec-chip" data-cat="top">Top &amp; Bluse</button>
+          <button class="ec-chip" data-cat="gonne">Gonne</button>
+          <button class="ec-chip" data-cat="accessori">Accessori</button>
+        </div>
+        <div class="ec-bar-right">
+          <span class="ec-count"><span id="collCount">12</span> pezzi</span>
+          <select class="ec-sort" id="collSort" aria-label="Ordina">
+            <option value="">Ordina</option>
+            <option value="asc">Prezzo ↑</option>
+            <option value="desc">Prezzo ↓</option>
+            <option value="new">Novità</option>
+          </select>
+        </div>
+      </div>
     </div>
 
     <div class="product-grid cols-4" id="collGrid">
@@ -238,25 +296,57 @@
   <script src="api-client.js"></script>
   <script src="app.js?v=5"></script>
   <script>
-    function filterColl(btn, cat) {
-      document.querySelectorAll('.coll-filter-chip').forEach(function(b){ b.classList.remove('active'); });
-      btn.classList.add('active');
-      var cards = document.querySelectorAll('#collGrid .product-card-link');
-      var n = 0;
-      cards.forEach(function(card) {
-        var c = card.querySelector('.product-card');
-        var show = !cat || (c && c.dataset.cat === cat);
-        card.style.display = show ? '' : 'none';
-        if (show) n++;
-      });
-      document.getElementById('collCount').textContent = n;
+  (function(){
+    var cards = Array.from(document.querySelectorAll('#collGrid .product-card-link'));
+    var countEl = document.getElementById('collCount');
+    var activeCat = '';
+    var activeSort = '';
+
+    // Init count
+    if (countEl) countEl.textContent = cards.length;
+
+    function getPrice(el) {
+      return parseFloat(((el.querySelector('.price-current')||{}).textContent||'0')
+        .replace(/[^\d,]/g,'').replace(',','.')) || 0;
     }
-    // Initialise count to actual number of product cards
-    (function(){
-      var n = document.querySelectorAll('#collGrid .product-card-link').length;
-      var el = document.getElementById('collCount');
-      if (el) el.textContent = n;
-    })();
+
+    function applyFilter() {
+      var visible = cards.filter(function(c){
+        if (!activeCat) return true;
+        var article = c.querySelector('.product-card');
+        return article && article.dataset.cat === activeCat;
+      });
+
+      if (activeSort === 'asc') visible.sort(function(a,b){ return getPrice(a)-getPrice(b); });
+      else if (activeSort === 'desc') visible.sort(function(a,b){ return getPrice(b)-getPrice(a); });
+      else if (activeSort === 'new') {
+        visible.sort(function(a,b){
+          var na = !!a.querySelector('.badge-new'), nb = !!b.querySelector('.badge-new');
+          return na===nb ? 0 : na ? -1 : 1;
+        });
+      }
+
+      var grid = document.getElementById('collGrid');
+      if (!grid) return;
+      cards.forEach(function(c){ c.style.display = 'none'; });
+      visible.forEach(function(c){ c.style.display = ''; grid.appendChild(c); });
+      if (countEl) countEl.textContent = visible.length;
+    }
+
+    // Category chips
+    document.querySelectorAll('#collCatChips .ec-chip').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        document.querySelectorAll('#collCatChips .ec-chip').forEach(function(b){ b.classList.remove('active'); });
+        this.classList.add('active');
+        activeCat = this.dataset.cat || '';
+        applyFilter();
+      });
+    });
+
+    // Sort select
+    var sortEl = document.getElementById('collSort');
+    if (sortEl) sortEl.addEventListener('change', function(){ activeSort = this.value; applyFilter(); });
+  })();
   </script>
 </body>
 </html>

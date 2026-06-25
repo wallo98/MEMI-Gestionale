@@ -339,33 +339,33 @@
       const s = document.createElement('style');
       s.id = 'sf2-styles';
       s.textContent = `
-        footer.sf2{background:var(--espresso,#3B2B2B);color:rgba(255,255,255,.65);padding:0;margin-top:auto;}
-        .sf2-trust{border-bottom:1px solid rgba(255,255,255,.08);padding:.9rem 2rem;}
+        footer.sf2{background:var(--lavender-light,#EAE7F4);color:var(--espresso,#3B2B2B);padding:0;margin-top:auto;}
+        .sf2-trust{border-bottom:1px solid var(--beige,#DDD9EC);padding:.9rem 2rem;}
         .sf2-trust-inner{max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;gap:1rem 2.5rem;justify-content:center;}
-        .sf2-trust-item{display:flex;align-items:center;gap:.5rem;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.4);}
-        .sf2-trust-item svg{width:14px;height:14px;stroke:rgba(255,255,255,.35);fill:none;stroke-width:1.6;flex-shrink:0;}
+        .sf2-trust-item{display:flex;align-items:center;gap:.5rem;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--brown-mid,#7A6B6B);}
+        .sf2-trust-item svg{width:14px;height:14px;stroke:var(--brown-mid,#7A6B6B);fill:none;stroke-width:1.6;flex-shrink:0;}
         .sf2-inner{max-width:1280px;margin:0 auto;padding:3rem 2rem 3.5rem;display:grid;grid-template-columns:1fr 2fr;gap:4rem;align-items:start;}
         .sf2-inner{max-width:1280px;margin:0 auto;padding:0 2rem 3.5rem;display:grid;grid-template-columns:1fr 2fr;gap:4rem;align-items:start;}
         @media(max-width:800px){.sf2-inner{grid-template-columns:1fr;gap:2.5rem;}}
-        .sf2-logo{font-family:var(--font-serif,'Cormorant Garamond',serif);font-size:2rem;font-weight:300;color:#fff;letter-spacing:.06em;text-decoration:none;display:block;margin-bottom:.55rem;}
-        .sf2-logo em{color:var(--blush,#E4B8C0);font-style:normal;}
-        .sf2-tagline{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:1.75rem;}
+        .sf2-logo{font-family:var(--font-serif,'Cormorant Garamond',serif);font-size:2rem;font-weight:300;color:var(--espresso,#3B2B2B);letter-spacing:.06em;text-decoration:none;display:block;margin-bottom:.55rem;}
+        .sf2-logo em{color:var(--blush-dark,#C48991);font-style:normal;}
+        .sf2-tagline{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--brown-light,#9e8a8a);margin-bottom:1.75rem;}
         .sf2-social{display:flex;gap:.6rem;}
-        .sf2-social a{width:36px;height:36px;border:1px solid rgba(255,255,255,.14);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:border-color .2s,background .2s;}
-        .sf2-social a:hover{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.07);}
-        .sf2-social svg{width:13px;height:13px;stroke:rgba(255,255,255,.6);fill:none;stroke-width:1.7;}
+        .sf2-social a{width:36px;height:36px;border:1px solid var(--beige-dark,#C0B9D9);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:border-color .2s,background .2s;}
+        .sf2-social a:hover{border-color:var(--espresso,#3B2B2B);background:rgba(59,43,43,.06);}
+        .sf2-social svg{width:13px;height:13px;stroke:var(--brown-mid,#7A6B6B);fill:none;stroke-width:1.7;}
         .sf2-nav{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;}
         @media(max-width:480px){.sf2-nav{grid-template-columns:repeat(2,1fr);}}
-        .sf2-col h4{font-size:.65rem;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:1rem;font-weight:600;}
+        .sf2-col h4{font-size:.65rem;letter-spacing:.13em;text-transform:uppercase;color:var(--brown-light,#9e8a8a);margin-bottom:1rem;font-weight:600;}
         .sf2-col ul{list-style:none;padding:0;margin:0;}
         .sf2-col li{margin-bottom:.5rem;}
-        .sf2-col a{font-size:.82rem;color:rgba(255,255,255,.6);text-decoration:none;transition:color .2s;}
-        .sf2-col a:hover{color:#fff;}
-        .sf2-bottom{max-width:1280px;margin:0 auto;padding:1.1rem 2rem;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;font-size:.7rem;color:rgba(255,255,255,.3);}
+        .sf2-col a{font-size:.82rem;color:var(--brown-mid,#7A6B6B);text-decoration:none;transition:color .2s;}
+        .sf2-col a:hover{color:var(--espresso,#3B2B2B);}
+        .sf2-bottom{max-width:1280px;margin:0 auto;padding:1.1rem 2rem;border-top:1px solid var(--beige,#DDD9EC);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;font-size:.7rem;color:var(--brown-light,#9e8a8a);}
         .sf2-legal{display:flex;gap:1.2rem;}
-        .sf2-legal a{color:rgba(255,255,255,.3);text-decoration:none;transition:color .2s;}
-        .sf2-legal a:hover{color:rgba(255,255,255,.65);}
-        .sf2-made{color:rgba(255,255,255,.2);letter-spacing:.04em;}
+        .sf2-legal a{color:var(--brown-light,#9e8a8a);text-decoration:none;transition:color .2s;}
+        .sf2-legal a:hover{color:var(--espresso,#3B2B2B);}
+        .sf2-made{color:var(--brown-light,#9e8a8a);letter-spacing:.04em;}
       `;
       document.head.appendChild(s);
     }
@@ -1831,225 +1831,4 @@
     var observer = new IntersectionObserver(function(entries) {
       // Collect newly-intersecting cards in DOM order
       var entering = [];
-      entries.forEach(function(e) {
-        if (e.isIntersecting && !e.target.classList.contains('in-view')) {
-          entering.push(e.target);
-        }
-      });
-      // Sort by DOM position so stagger reads left→right, top→bottom
-      entering.sort(function(a, b) {
-        var ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
-        if (Math.abs(ra.top - rb.top) > 40) return ra.top - rb.top;
-        return ra.left - rb.left;
-      });
-      entering.forEach(function(card, idx) {
-        card.style.setProperty('--i', idx);
-        card.classList.add('in-view');
-        observer.unobserve(card);
-      });
-    }, { threshold: 0.12 });
-
-    cards.forEach(function(card) { observer.observe(card); });
-  }
-
-  /* ── 15c. MAGNETIC HOVER ────────────────────────────────
-     Subtle 2–4° tilt + scale on .btn-primary and .product-card.
-     Capped and eased so it feels premium, not gimmicky.    */
-
-  function wireMagneticHover() {
-    // Only on non-touch devices
-    if (window.matchMedia('(hover: none)').matches) return;
-
-    // Product cards — very subtle, they already have a lift/shadow hover
-    document.querySelectorAll('.product-card').forEach(function(card) {
-      card.addEventListener('mousemove', function(e) {
-        if (!card.classList.contains('in-view')) return;
-        var r = card.getBoundingClientRect();
-        var x = ((e.clientX - r.left) / r.width  - 0.5) * 2; // -1..1
-        var y = ((e.clientY - r.top)  / r.height - 0.5) * 2;
-        card.style.transform = 'translateY(-3px) rotateX(' + (-y * 2.5) + 'deg) rotateY(' + (x * 2.5) + 'deg)';
-        card.style.transition = 'transform 120ms ease-out, box-shadow var(--dur-med) var(--ease-out)';
-      });
-      card.addEventListener('mouseleave', function() {
-        card.style.transform = '';
-        card.style.transition = '';
-      });
-    });
-
-    // Primary CTAs — slightly stronger tilt
-    document.querySelectorAll('.btn-primary').forEach(function(btn) {
-      btn.addEventListener('mousemove', function(e) {
-        var r = btn.getBoundingClientRect();
-        var x = ((e.clientX - r.left) / r.width  - 0.5) * 2;
-        var y = ((e.clientY - r.top)  / r.height - 0.5) * 2;
-        btn.style.transform = 'translateY(-1px) rotateX(' + (-y * 4) + 'deg) rotateY(' + (x * 4) + 'deg) scale(1.02)';
-        btn.style.transition = 'transform 100ms ease-out';
-      });
-      btn.addEventListener('mouseleave', function() {
-        btn.style.transform = '';
-        btn.style.transition = '';
-      });
-    });
-  }
-
-  /* ── 15d. FLY-TO-CART ───────────────────────────────────
-     Clone the source element and animate it to the cart icon. */
-
-  function flyToCart(sourceEl) {
-    var cartIcon = document.querySelector('.icon-btn[aria-label*="arrello"] .cart-badge');
-    var cartBtn  = cartIcon ? cartIcon.closest('.icon-btn') : null;
-    if (!sourceEl || !cartBtn) return;
-    var start = sourceEl.getBoundingClientRect();
-    var end   = cartBtn.getBoundingClientRect();
-    var clone = sourceEl.cloneNode(true);
-    clone.className = 'fly-thumb';
-    Object.assign(clone.style, {
-      left:   start.left   + 'px',
-      top:    start.top    + 'px',
-      width:  start.width  + 'px',
-      height: start.height + 'px',
-    });
-    document.body.appendChild(clone);
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
-        clone.style.transform = 'translate(' + (end.left - start.left) + 'px, ' + (end.top - start.top) + 'px) scale(0.12)';
-        clone.style.opacity   = '0';
-      });
-    });
-    clone.addEventListener('transitionend', function() { clone.remove(); }, { once: true });
-    // Fallback remove
-    setTimeout(function() { clone.remove(); }, 800);
-  }
-
-
-  /* ── 16. WIRE REVEAL ──────────────────────────────────── */
-
-  function wireReveal() {
-    var els = document.querySelectorAll('.reveal:not(.visible)');
-    if (!els.length) return;
-    var obs = new IntersectionObserver(function(entries) {
-      entries.forEach(function(e) {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          obs.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.15 });
-    els.forEach(function(el) { obs.observe(el); });
-  }
-
-  /* ── 16b. NEWSLETTER SIGNUP ──────────────────────────────── */
-
-  function wireNewsletterForms() {
-    var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    document.querySelectorAll('.newsletter-form, .footer-newsletter-form').forEach(function(form) {
-      if (form.dataset.newsletterBound) return;
-      form.dataset.newsletterBound = '1';
-      form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        var input = form.querySelector('input[type="email"]');
-        var btn   = form.querySelector('button[type="submit"]');
-        var email = input ? input.value.trim() : '';
-        if (!email || !EMAIL_RE.test(email)) {
-          if (input) {
-            input.style.borderColor = '#C4A8B0';
-            input.focus();
-            input.addEventListener('input', function reset() {
-              input.style.borderColor = '';
-              input.removeEventListener('input', reset);
-            });
-          }
-          return;
-        }
-        if (btn && !btn.dataset.busy) {
-          btn.dataset.busy = '1';
-          var orig = btn.innerHTML;
-          btn.innerHTML = '✓ Iscritto!';
-          btn.disabled = true;
-          setTimeout(function() {
-            btn.innerHTML = orig;
-            btn.disabled = false;
-            delete btn.dataset.busy;
-          }, 2600);
-        }
-        if (input) input.value = '';
-      });
-    });
-  }
-
-  /* ── 17. INIT ──────────────────────────────────────────── */
-
-  function init() {
-    injectMarkup();
-    // Restore persisted badge counts from localStorage immediately after
-    // the header is injected — fixes the "badge resets on page change" bug.
-    updateCartBadges();
-    updateWishlistBadge();
-    wireButtons();
-    wireScrollStagger();
-    wireReveal();
-    wireMagneticHover();
-    wireAuth();
-    wireNewsletterForms();
-  }
-
-
-  /* == 18. GLOBAL EXPORTS == */
-
-  window.addToCart           = addToCart;
-  window.flyToCart           = flyToCart;
-  window.openCart            = openCart;
-  window.closeCart           = closeCart;
-  window.openWishlist        = openWishlist;
-  window.closeWishlist       = closeWishlist;
-  window.openSearch          = openSearch;
-  window.closeSearch         = closeSearch;
-  window.appChangeQty        = changeQty;
-  window.appRemove           = removeFromCart;
-  window.wireProductCards    = wireProductCards;
-  window.rewireScrollStagger = function() { wireScrollStagger(); };
-
-  window.appRemoveWishlist = function(id) {
-    var entry  = wishlist.find(function(i) { return i.id === id; });
-    var baseId = entry ? (entry.productId || id) : id;
-    wishlist = wishlist.filter(function(i) { return i.id !== id; });
-    saveWishlist();
-    updateWishlistBadge();
-    renderWishlistItems();
-    if (!wishlist.some(function(i) { return (i.productId || i.id) === baseId; })) {
-      document.querySelectorAll('.product-wishlist[data-id="' + baseId + '"]').forEach(function(btn) {
-        btn.classList.remove('is-wishlisted');
-        btn.setAttribute('aria-label', 'Aggiungi alla wishlist');
-      });
-    }
-  };
-
-  window.appMoveToCart = function(id) {
-    var entry = wishlist.find(function(i) { return i.id === id; });
-    if (!entry) return;
-    var prod  = CATALOG.find(function(p) {
-      return p.id === (entry.productId || entry.id) || entry.id.startsWith(p.id);
-    });
-    var price = prod ? parseFloat((prod.price || '0').replace('\u20ac','').replace(',','.')) || 0 : 0;
-    addToCart({
-      id:      entry.id + '-cart',
-      name:    entry.name,
-      variant: (entry.color || '') + (entry.taglia ? ' · ' + entry.taglia : ''),
-      price:   price,
-      color:   entry.colorKey || 'ph-blush'
-    });
-    window.appRemoveWishlist(id);
-    closeWishlist();
-    openCart();
-  };
-
-  /* == 19. BOOT == */
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-
-})();
-  
+      entr
