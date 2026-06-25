@@ -33,7 +33,7 @@
     }
 
     /* ── header ── */
-    .site-header { position: sticky; top: 0; z-index: 200; }
+    .site-header { position: sticky; top: 0; z-index: 200; background: rgba(255,255,255,.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--beige); }
     .header-inner { max-width: 1280px; margin: 0 auto; padding: 0 var(--space-4);
       height: 64px; display: flex; align-items: center; gap: var(--space-4); }
     .logo { flex: 1; text-align: center; font-family: var(--font-serif);
@@ -593,7 +593,7 @@
   <div data-include="site-footer"></div>
 
   <script src="api-client.js"></script>
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=7"></script>
   <script>
     // Season pill filter
     document.querySelectorAll('.season-pill').forEach(function(pill) {

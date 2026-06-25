@@ -4,7 +4,7 @@ Breakdown of every major JavaScript module.
 
 ---
 
-## E-commerce: `app.js` (v6 — 2054 lines)
+## E-commerce: `app.js` (v7 — ~2180 lines)
 
 Single IIFE that initialises the entire e-commerce frontend. Loaded on all pages.
 
@@ -24,8 +24,33 @@ Single IIFE that initialises the entire e-commerce frontend. Loaded on all pages
 | 10 – Auth logic | ~1540–1660 | getCurrentUser, setCurrentUser, authLogin, authRegister, authLogout, updateAuthUI |
 | 11 – Validation | ~1660–1715 | validateEmailField, validatePwdField, password strength meter |
 | 12 – Event binding | ~1715–1820 | bindEvents() — all click/submit listeners for auth forms, header buttons, overlays |
-| 13 – Scroll stagger | ~1820–2054 | wireScrollStagger() — IntersectionObserver for product card reveal |
-| init() | ~2040–2054 | Calls injectMarkup(), bindEvents(), wireScrollStagger(), updateAuthUI() |
+| 13 – Scroll stagger | ~1820–2040 | wireScrollStagger() — IntersectionObserver for product card reveal |
+| 16b – Icon pulse | ~2040–2070 | pulseIconIfNew() — sessionStorage-based pulse on cart/wishlist icons when count increases |
+| init() | ~2070–2080 | Calls injectMarkup(), bindEvents(), wireScrollStagger(), updateAuthUI(), pulseIconIfNew() |
+
+### New features added v7 (Giugno 2026)
+
+**Editoriali mega-menu** — `injectHeader()` now includes a `.mega-trigger` "Editoriali" nav item that on hover reveals a `.mega-panel--sm` dropdown with links to the 3 seasonal editorial pages (`primavera-estate-2026`, `estate-2025`, `autunno-inverno-2025`).
+
+**View-toggle (column selector)** — Shop and collection pages have buttons with `data-cols="1|2|3"`. Clicking sets `.view-1col` / `.view-2col` / `.view-3col` on `#productGrid`. CSS in `shop.css` handles the grid layout per class.
+
+**Multi-select category filter** — `af.categorie` is now an array (was `af.categoria` string). Filter drawer checkboxes are true multi-select; a product card is shown if `af.categorie.length === 0` OR `af.categorie.includes(card.dataset.categoria)`.
+
+**IT/EU sizing in filter drawer** — shop.html filter drawer now includes IT pants sizes (38, 40, 42, 44, 46, 48) and EU shoe sizes (36, 37, 38, 39, 40, 41) alongside standard S/M/L/XL clothing sizes.
+
+### Section 16b — Icon Pulse (added Giugno 2026)
+
+`pulseIconIfNew()` runs on every page load after the header is injected.
+
+- Compares current `cartCount()` vs `sessionStorage.memi_cart_seen`
+- Compares current `wishlist.length` vs `sessionStorage.memi_wish_seen`
+- If count increased: adds `.icon-pulse` CSS class to the relevant icon button (350ms delay for cart, 450ms for wishlist)
+- Removes class after `animationend` to reset
+- Updates sessionStorage to current count
+
+The pulse keyframe (`iconPulseRing`) is injected as a `<style>` tag on first call. It uses a box-shadow ring in brand blush color (`rgba(201,137,122,.55)`), 3 pulses over 700ms each.
+
+sessionStorage (not localStorage) is used intentionally — resets when the browser tab closes, so the icon pulses again if the user reopens the tab with new items.
 
 ### Key public functions (exposed on `window`)
 
@@ -105,7 +130,7 @@ On any 401 response, clears `memi_admin_token` and redirects to `index.html?sess
 
 ---
 
-## Admin: `js/app.js` (1765 lines)
+## Admin: `js/app.js` (~2180 lines)
 
 jQuery-based admin SPA. Renders views into `#appContent`.
 
@@ -115,23 +140,51 @@ jQuery-based admin SPA. Renders views into `#appContent`.
 |----------|-----------|-------------|
 | `dashboard` | on init | `AdminAPI.dashboard.kpis()` + `AdminAPI.dashboard.recentOrders()` |
 | `orders` | nav click | `AdminAPI.orders.list()` |
+| `orders-drafts` | nav click | `AdminAPI.orders.list()` filtered by status |
+| `orders-abandoned` | nav click | `AdminAPI.orders.list()` filtered by status |
 | `products` | nav click | `AdminAPI.products.listAll()` |
+| `inventory` | nav click | `AdminAPI.products.listAll()` |
 | `customers` | nav click | `AdminAPI.customers.list()` |
 | `discounts` | nav click | `AdminAPI.discounts.list()` |
 | `shipping` | nav click | `AdminAPI.shipping.zones()` + `.couriers()` + `.shipments()` |
+| `couriers` | nav click | `AdminAPI.shipping.couriers()` |
+| `shipping-zones` | nav click | `AdminAPI.shipping.zones()` |
+| `shipments` | nav click | `AdminAPI.shipping.shipments()` |
+| `tracking` | nav click | `AdminAPI.shipping.shipments()` |
 
 ### Key patterns
 
 - `renderView(name)` → calls `VIEWS[name]()` → populates `#appContent`
+- **Real data integration** — `_origRenderView = renderView` override pattern (lines ~2003–2179): intercepts every view call, loads API data into `DATA`, then calls `_origRenderView(name)`. On `.fail()`, falls back to `_origRenderView(name)` with existing mock DATA.
+- `loadDashboardData()` called on init: fetches KPIs + recent orders
+- Transform functions map DB field names → DATA shape (e.g. `order_number` → `id`, `_db_id`, `_raw_status`)
+- `AdminAPI.statusLabel(code)` maps DB enum values to Italian display strings
 - Table rows use `data-id` attributes; click handlers read them for API calls
 - Modals use `showModal(html)` / `closeModal()` helpers
 - Status transitions call `AdminAPI.orders.updateStatus()` inline
 
 ---
 
+## Backend: `src/routes/payments.js` (nuovo — Giugno 2026)
+
+Handles Stripe PaymentIntent creation.
+
+- `POST /api/payments/create-intent` — requires `amount` (cents) in body; creates Stripe PaymentIntent; returns `{ client_secret, payment_intent_id }`
+- Returns 503 if `STRIPE_SECRET_KEY` env var is not set
+- Used by `checkout.html` before placing an order
+
+## Backend: `src/email.js` (nuovo — Giugno 2026)
+
+Nodemailer-based transactional email module.
+
+- `sendOrderConfirmation(order)` — sends branded HTML email with order summary, items table, totale, indirizzo di consegna
+- **Silent no-op** if `SMTP_USER` env var is not set — never throws, safe in dev/staging without SMTP configured
+- SMTP configured via env vars: `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE` (bool), `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`
+- Called from `orders.js` after successful order creation
+
 ## Backend: `src/server.js`
 
-Express entry point. Registers: helmet, cors, rate-limit, body-parser, all route modules, 404 handler, global error handler. Calls `testConnection()` before listening.
+Express entry point. Registers: helmet, cors, rate-limit, body-parser, all route modules (including `/api/payments` → paymentsRoutes), 404 handler, global error handler. Calls `testConnection()` before listening.
 
 ## Backend: `src/db/index.js`
 

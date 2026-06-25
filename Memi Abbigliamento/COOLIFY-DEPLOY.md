@@ -40,6 +40,32 @@ When you have a domain:
 2. In Coolify, go to the resource's **Domains** tab and add the domain.
 3. Coolify provisions a Let's Encrypt SSL certificate automatically once DNS resolves.
 
+## 5. Backend environment variables (required for full functionality)
+
+When deploying the full stack (backend + e-commerce + admin), add these in Coolify's **Environment Variables** tab for the backend service:
+
+**Database**
+- `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `MYSQL_ROOT_PASSWORD`
+
+**Auth**
+- `JWT_SECRET` — 64-char random hex (customer tokens)
+- `JWT_ADMIN_SECRET` — 64-char random hex (admin tokens, must differ from JWT_SECRET)
+
+**Stripe (payment processing)**
+- `STRIPE_SECRET_KEY` — `sk_live_...` in production, `sk_test_...` for testing
+- `STRIPE_PUBLISHABLE_KEY` — `pk_live_...` or `pk_test_...`
+- If not set: checkout shows "Servizio pagamenti non disponibile" but site works otherwise
+
+**Email (order confirmation)**
+- `SMTP_HOST` — e.g. `smtp.gmail.com`
+- `SMTP_PORT` — `587` (STARTTLS) or `465` (SSL)
+- `SMTP_SECURE` — `false` for port 587, `true` for 465
+- `SMTP_USER` — your sending email address
+- `SMTP_PASS` — SMTP password or Google app password
+- `SMTP_FROM` — `"Memi Abbigliamento <info@memi.it>"`
+- If not set: orders save correctly but no confirmation email is sent
+
 ## Notes
 
-- Two unrelated files (`app.js`, `index.html`, `shop-filters.js`) had uncommitted local changes when I checked — I left those alone since they weren't part of this deployment work. Commit/push those separately when you're ready.
+- The e-commerce frontend (`Memi Abbigliamento/`) is a static site — no env vars needed for the nginx container itself. All dynamic logic hits the backend via `/api/` proxy.
+- `app.js` is currently at version `?v=7`. Always bump this version in all HTML files after modifying `app.js`.

@@ -56,8 +56,11 @@ This means e-commerce and admin panels call `/api/...` (relative) and nginx rout
 MEMI Gestionale/
 ├── docker-compose.yml              # All four services, health checks
 ├── api.md                          # API endpoint reference
-├── architecture.md                 # This file
-├── gaps.md                         # Known gaps and TODOs
+├── ARCHITECTURE.md                 # This file
+├── DEBUGGING.md                    # Troubleshooting guide
+├── DEPLOYMENT.md                   # Coolify / Hetzner deploy guide
+├── GAPS-ANALYSIS.md                # Comprehensive gap analysis (priority ordered)
+├── gaps.md                         # Known gaps, recent fixes, TODOs (changelog)
 ├── indexing.md                     # File inventory
 ├── integrations.md                 # How the pieces connect
 ├── modules.md                      # JS module breakdown
@@ -78,11 +81,13 @@ MEMI Gestionale/
 │           ├── auth.js             # /api/auth/*
 │           ├── admin-auth.js       # /api/admin/auth/*
 │           ├── products.js         # /api/products/*
-│           ├── orders.js           # /api/orders/*
+│           ├── orders.js           # /api/orders/* (Stripe verify + inventory deduct + email)
 │           ├── customers.js        # /api/admin/customers/*
 │           ├── discounts.js        # /api/admin/discounts/*
 │           ├── shipping.js         # /api/shipping/*
-│           └── dashboard.js        # /api/admin/dashboard/*
+│           ├── dashboard.js        # /api/admin/dashboard/*
+│           └── payments.js         # /api/payments/* (Stripe PaymentIntent)
+│       └── email.js                # sendOrderConfirmation() — nodemailer
 │
 ├── Memi Abbigliamento/             # E-commerce static site
 │   ├── Dockerfile
@@ -90,7 +95,7 @@ MEMI Gestionale/
 │   ├── tokens.css                  # Design tokens (CSS variables)
 │   ├── shop.css                    # Global styles
 │   ├── app.css                     # Drawer + overlay styles
-│   ├── app.js (v6)                 # Main JS (nav, drawers, cart, auth)
+│   ├── app.js (v7)                 # Main JS (nav + Editoriali mega-menu, drawers, cart, auth, view-toggle, Stripe checkout)
 │   ├── api-client.js               # MemiAPI wrapper (fetch-based)
 │   ├── productsData.js             # window.PRODUCTS array (search source)
 │   ├── index.html                  # Homepage
@@ -103,10 +108,14 @@ MEMI Gestionale/
 │   ├── best-seller.html            # Best sellers ranking
 │   ├── estate-2025.html            # Summer 2025 collection
 │   ├── look.html                   # Shop the Look
-│   ├── editoriali.html             # Editorial content
+│   ├── editoriali.html             # Editorial hub (magazine layout, season filter)
 │   ├── about.html / valori.html    # Brand pages
 │   ├── privacy.html / returns.html # Legal pages
 │   ├── 404.html
+│   ├── editoriali/                 # Individual editorial pages
+│   │   ├── primavera-estate-2026/index.html
+│   │   ├── estate-2025/index.html
+│   │   └── autunno-inverno-2025/index.html
 │   ├── products/                   # 23 individual product PDPs
 │   │   └── {slug}/index.html
 │   └── collections/                # 15 collection landing pages
@@ -169,7 +178,7 @@ Cache-busting uses query-param versioning:
 
 | Asset | Current Version |
 |-------|----------------|
-| `app.js` | `?v=6` |
+| `app.js` | `?v=7` (last changed: Editoriali mega-menu, view-toggle, multi-select filter, Stripe checkout, IT/EU sizing — Giugno 2026) |
 | `tokens.css` | `?v=2` |
 | `shop.css` | `?v=2` |
 
@@ -195,3 +204,11 @@ HTML files are served with `no-cache, must-revalidate` — always re-fetched.
 | `JWT_ADMIN_EXPIRES_IN` | backend | `8h` |
 | `ALLOWED_ORIGINS` | backend | Comma-separated CORS origins |
 | `NODE_ENV` | backend | `production` in Coolify |
+| `STRIPE_SECRET_KEY` | backend | Stripe secret key (`sk_live_...` or `sk_test_...`) |
+| `STRIPE_PUBLISHABLE_KEY` | backend | Stripe publishable key (`pk_live_...` or `pk_test_...`) |
+| `SMTP_HOST` | backend | SMTP server hostname (e.g. `smtp.gmail.com`) |
+| `SMTP_PORT` | backend | SMTP port (587 for STARTTLS, 465 for SSL) |
+| `SMTP_SECURE` | backend | `true` for SSL (port 465), `false` for STARTTLS |
+| `SMTP_USER` | backend | SMTP username / email address |
+| `SMTP_PASS` | backend | SMTP password or app password |
+| `SMTP_FROM` | backend | From address in emails (e.g. `"Memi Abbigliamento <info@memi.it>"`) |

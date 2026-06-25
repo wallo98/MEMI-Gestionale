@@ -66,6 +66,16 @@ services:
       JWT_EXPIRES_IN:        7d
       JWT_ADMIN_EXPIRES_IN:  8h
       ALLOWED_ORIGINS:       ${ALLOWED_ORIGINS:-https://memi.testdemo.it,https://admin.memi.testdemo.it}
+      # Stripe — set real keys in Coolify env vars
+      STRIPE_SECRET_KEY:     ${STRIPE_SECRET_KEY:-}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+      # SMTP / nodemailer — set in Coolify env vars
+      SMTP_HOST:             ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT:             ${SMTP_PORT:-587}
+      SMTP_SECURE:           ${SMTP_SECURE:-false}
+      SMTP_USER:             ${SMTP_USER:-}
+      SMTP_PASS:             ${SMTP_PASS:-}
+      SMTP_FROM:             ${SMTP_FROM:-}
     networks:
       - memi_net
     labels:

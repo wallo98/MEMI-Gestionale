@@ -18,6 +18,7 @@
 const router = require('express').Router();
 const { pool }                           = require('../db');
 const { requireCustomer, requireAdmin, optionalCustomer } = require('../middleware/auth');
+const { sendOrderConfirmation }          = require('../email');
 
 /* ── helpers ── */
 async function nextOrderNumber(conn) {
@@ -40,12 +41,27 @@ router.post('/', optionalCustomer, async (req, res) => {
     items,          // [{product_id, product_name, taglia, colore, price, qty}]
     discount_code,
     payment_method = 'carta',
+    payment_intent_id,      // Stripe PaymentIntent ID (if card payment)
   } = req.body;
 
   if (!nome || !cognome || !email || !indirizzo || !citta || !cap)
     return res.status(400).json({ error: 'Dati di spedizione incompleti' });
   if (!items || !items.length)
     return res.status(400).json({ error: 'Il carrello è vuoto' });
+
+  // Verify Stripe PaymentIntent if provided and secret key is configured
+  if (payment_method === 'carta' && payment_intent_id && process.env.STRIPE_SECRET_KEY) {
+    try {
+      const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+      const pi = await stripe.paymentIntents.retrieve(payment_intent_id);
+      if (pi.status !== 'succeeded') {
+        return res.status(402).json({ error: 'Pagamento non completato. Riprova.' });
+      }
+    } catch (stripeErr) {
+      console.error('Stripe verify error:', stripeErr.message);
+      return res.status(402).json({ error: 'Impossibile verificare il pagamento. Riprova.' });
+    }
+  }
 
   const conn = await pool.getConnection();
   try {
@@ -131,6 +147,14 @@ router.post('/', optionalCustomer, async (req, res) => {
     }
 
     await conn.commit();
+
+    // Send confirmation email (non-blocking — never fails the order response)
+    sendOrderConfirmation({
+      order_number: orderNumber,
+      nome, cognome, email,
+      items, total,
+    }).catch(() => {}); // already logged inside sendOrderConfirmation
+
     return res.status(201).json({ ok: true, order_number: orderNumber, total });
   } catch (err) {
     await conn.rollback();

@@ -4,7 +4,33 @@ Status key: ✅ Fixed | ⚠️ Known limitation | ❌ Missing | 🔄 Workaround 
 
 ---
 
-## Critical — Fixed This Session
+## Critical — Fixed Sprint Giugno 2026 (Phase 2 + 3)
+
+| # | Issue | Fix Applied |
+|---|-------|-------------|
+| 17 | No real payment processing | Stripe Elements + PaymentIntent in checkout.html; `POST /api/payments/create-intent` in payments.js |
+| 18 | Inventory not decremented on order | `orders.js` now runs `UPDATE product_sizes SET stock = stock - qty` for each order item |
+| 19 | Admin panel 100% mock data | `_origRenderView` override pattern in `MEMI/js/app.js` — all views load real API data with mock fallback |
+| 20 | No order confirmation email | `src/email.js` with nodemailer; `sendOrderConfirmation()` triggered from `orders.js` after order creation |
+| 21 | app.js v=6 stale across 56 files | Bumped to v=7 in all 56 HTML files (root pages, products/, collections/, editoriali/) |
+| 22 | filter drawer category = single-select string | Changed `af.categoria` (string) → `af.categorie` (array); multi-select checkboxes now supported |
+| 23 | Vista toggle buttons broken | Fixed `data-cols` attribute + `.view-Ncol` CSS class on `#productGrid` |
+| 24 | No Editoriali mega-menu in nav | Added `.mega-trigger` / `.mega-panel--sm` pattern in `injectHeader()` with 3 season links |
+| 25 | IT/EU sizing missing from filter drawer | Added IT pant sizes (38–48) and EU shoe sizes (36–41) to shop.html filter drawer and productsData.js |
+| 26 | docker-compose.yml missing Stripe/SMTP env vars | Added all vars; nginx.conf Approach A verified on both containers |
+
+## Critical — Fixed This Session (Giugno 2026, Phase 1)
+
+| # | Issue | Root Cause | Fix Applied |
+|---|-------|-----------|-------------|
+| 11 | Category filter checkboxes did nothing | `input[data-cat]` had no `change` listeners wired in `DOMContentLoaded` | Added listener block in shop.html; converted to radio-like single-select |
+| 12 | "Mostra X articoli" button didn't apply filters | Button called `closeFilterDrawer()` directly instead of `applyFilters()` | Changed `onclick` to `applyFilters()` (which already calls close internally) |
+| 13 | Confetti animation on order-confirm.html unwanted | — | Replaced with rose-petal canvas animation (bezier curves, brand pink palette) |
+| 14 | editoriali.html had plain link layout | — | Rewritten to dark-bg magazine layout: cinematic hero, Ken Burns zoom, seasonal filter pills, multiple photo spreads |
+| 15 | No individual editorial pages | — | Created `editoriali/primavera-estate-2026/`, `estate-2025/`, `autunno-inverno-2025/` subcategory pages |
+| 16 | Cart/wishlist icon never pulsed on new items | — | Added sessionStorage-based pulse check in app.js (section 16b) — pulses only when count increased since last visit |
+
+## Critical — Fixed Previous Sessions
 
 | # | Issue | Root Cause | Fix Applied |
 |---|-------|-----------|-------------|
@@ -35,15 +61,11 @@ All product images use Unsplash placeholder URLs or CSS placeholder shapes (`.ph
 
 **What's needed:** Upload real photos for each product and update the `images` JSON field in the `products` DB table OR update the static `data-img-*` attributes in each PDP.
 
-### ❌ Payment processing
-`checkout.html` collects payment method selection (Carta, PayPal, Klarna) but does **not** integrate any real payment gateway. On submit it calls `MemiAPI.orders.place()` which creates the order as `payment_status: 'in_attesa'`.
+### ✅ Payment processing — Risolto (Giugno 2026)
+`checkout.html` ora usa Stripe Elements. Al submit: crea PaymentIntent via `/api/payments/create-intent`, addebita la carta via `stripe.confirmCardPayment()`, poi piazza l'ordine con `payment_intent_id`. Il backend verifica il PaymentIntent prima di salvare.
 
-**What's needed:** Stripe Elements (or similar) for real card processing. Klarna and PayPal would need their respective SDKs.
-
-### ❌ Email notifications
-No email sending is implemented. Customers receive no order confirmation email. Admins receive no new-order alerts.
-
-**What's needed:** Add nodemailer (or SendGrid/Resend) to the backend. Trigger from `POST /api/orders` after order creation.
+### ✅ Email notifications — Risolto (Giugno 2026)
+`src/email.js` implementa `sendOrderConfirmation(order)` tramite nodemailer. Triggered da `orders.js` dopo creazione ordine. Silent no-op se `SMTP_USER` non impostato.
 
 ### ❌ Order tracking page (customer-facing)
 Customers can see order status in account.html but there's no dedicated tracking page with shipment timeline.
@@ -51,10 +73,8 @@ Customers can see order status in account.html but there's no dedicated tracking
 ### ❌ Admin product image upload
 Admin can create/edit products but cannot upload images. The `images` field must be manually set to JSON URL arrays.
 
-### ❌ Inventory deduction on order placement
-`POST /api/orders` does NOT decrement `product_sizes.stock`. It validates the cart but doesn't update stock.
-
-**Fix needed in** `src/routes/orders.js`: after creating order_items, run `UPDATE product_sizes SET stock = stock - qty WHERE product_id=? AND taglia=?` for each item.
+### ✅ Inventory deduction on order placement — Risolto (Giugno 2026)
+`POST /api/orders` ora decrementa `product_sizes.stock` per ogni item ordinato.
 
 ---
 
@@ -87,16 +107,42 @@ Individual PDP breadcrumbs (e.g., `vestiti`) link to `../../collections/vestiti/
 
 ---
 
+## Admin Panel — ✅ Dati Reali (Implementato Giugno 2026)
+
+`MEMI/js/app.js` usa il pattern `_origRenderView` override. Tutte le viste principali caricano dati reali:
+
+| Sezione | Stato |
+|---------|-------|
+| Dashboard KPI | ✅ Reale — `AdminAPI.dashboard.kpis()` + `recentOrders()` |
+| Ordini | ✅ Reale — `AdminAPI.orders.list()` con transform campi |
+| Prodotti | ✅ Reale — `AdminAPI.products.listAll()` |
+| Clienti | ✅ Reale — `AdminAPI.customers.list()`, VIP: spent > 300 |
+| Sconti | ✅ Reale — `AdminAPI.discounts.list()` |
+| Spedizioni/Zone/Corrieri | ✅ Reale — `AdminAPI.shipping.*` |
+| Marketing/Newsletter | ⚠️ Mock |
+| Analytics, Finanza, CMS | ⚠️ Non implementati |
+
+Su errore API: fallback automatico al render con mock data via `.fail()`.
+
+Vedi `GAPS-ANALYSIS.md` per un'analisi completa.
+
+---
+
 ## TODOs for Future Sprints
 
-- [ ] Real product photography upload + image management in admin
-- [ ] Stripe payment integration in checkout.html
-- [ ] Order confirmation email (nodemailer/Resend)
-- [ ] Inventory deduction on order creation
+- [x] ~~Collegare admin panel a dati reali~~ — ✅ Done (Giugno 2026)
+- [x] ~~Stripe payment integration in checkout.html~~ — ✅ Done (Giugno 2026)
+- [x] ~~Order confirmation email (nodemailer)~~ — ✅ Done (Giugno 2026)
+- [x] ~~Inventory deduction on order creation~~ — ✅ Done (Giugno 2026)
 - [ ] Dynamic product loading in shop.html from API (remove hardcoded HTML)
 - [ ] Customer-facing order tracking page
+- [ ] Real product photography upload + image management in admin
 - [ ] Newsletter signup integration
 - [ ] Size guide modal on PDP pages
 - [ ] Product reviews/ratings table + display
 - [ ] Mobile-optimised admin view (current admin is desktop-first)
+- [ ] Email di spedizione con tracking
+- [ ] Recupero password via email
+- [ ] Email di benvenuto alla registrazione
 - [ ] `campagne.html` — decide if this is the same as `editoriali.html` or remove it
+- [ ] `account.html` — wire to real JWT auth flow end-to-end (JWT works, UI polish needed)

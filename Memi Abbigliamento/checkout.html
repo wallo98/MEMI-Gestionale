@@ -285,6 +285,8 @@
     .ph-fig svg{width:65%;opacity:.22;}
   </style>
   <link rel="stylesheet" href="app.css" />
+  <!-- Stripe.js — loads asynchronously, must be loaded from Stripe CDN -->
+  <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 
@@ -488,30 +490,13 @@
           </button>
         </div>
 
-        <!-- Card form -->
+        <!-- Card form — Stripe Elements -->
         <div class="card-field-wrap" id="cardForm">
-          <div class="card-number-field">
-            <input type="text" id="cardNumInput" placeholder="0000 0000 0000 0000" inputmode="numeric" maxlength="19" />
-            <div class="card-icons" id="cardIcons">
-              <span class="card-icon" data-type="visa">VISA</span>
-              <span class="card-icon" data-type="mc">MC</span>
-              <span class="card-icon" data-type="amex">AMEX</span>
-            </div>
-          </div>
-          <div class="field-row two-col" style="margin-bottom:0;">
-            <div class="field">
-              <label>Scadenza</label>
-              <input type="text" id="expiryInput" placeholder="MM / AA" inputmode="numeric" maxlength="7" />
-            </div>
-            <div class="field">
-              <label>CVV</label>
-              <input type="text" id="cvvInput" placeholder="•••" inputmode="numeric" maxlength="4" />
-            </div>
-          </div>
-          <div class="field">
-            <label>Nome sulla carta</label>
-            <input type="text" id="cardName" placeholder="SOFIA ROSSI" style="text-transform:uppercase;" />
-          </div>
+          <div id="stripeCardElement" style="padding:var(--space-3) var(--space-4);border:1.5px solid var(--beige);border-radius:var(--radius-md);background:var(--white);min-height:46px;transition:border-color var(--dur-fast),box-shadow var(--dur-fast);"></div>
+          <div id="stripeCardError" style="display:none;font-size:var(--text-xs);color:var(--blush-dark);margin-top:var(--space-2);"></div>
+          <p style="font-size:var(--text-xs);color:var(--brown-light);margin-top:var(--space-3);">
+            Pagamento crittografato &amp; elaborato da <strong style="color:var(--espresso);">Stripe</strong>. I dati della carta non passano per i nostri server.
+          </p>
         </div>
 
         <!-- PayPal panel (hidden by default) -->
@@ -760,6 +745,8 @@
       }
       currentStep = n;
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Mount Stripe Elements when reaching payment step
+      if (n === 3) { setTimeout(initStripeElements, 80); }
     }
 
     // ── Validation ────────────────────────────────────────────────────────────
@@ -877,6 +864,68 @@
       updateTotals();
     }
 
+    // ── Stripe Elements ───────────────────────────────────────────────────────
+    var stripeInstance  = null;
+    var stripeCardEl    = null;
+    var stripeClientSecret = null;
+    var stripePayIntentId  = null;
+
+    // Publishable key: set window.MEMI_STRIPE_PK before this script, or via
+    // a <meta name="stripe-pk" content="pk_live_..."> tag in the page head.
+    function getStripePK() {
+      if (window.MEMI_STRIPE_PK) return window.MEMI_STRIPE_PK;
+      var meta = document.querySelector('meta[name="stripe-pk"]');
+      return meta ? meta.getAttribute('content') : null;
+    }
+
+    function initStripeElements() {
+      if (stripeCardEl) return; // already mounted
+      var pk = getStripePK();
+      if (!pk || !window.Stripe) return; // Stripe.js or key not available
+
+      stripeInstance = window.Stripe(pk);
+      var elements   = stripeInstance.elements({ locale: 'it' });
+      stripeCardEl   = elements.create('card', {
+        style: {
+          base: {
+            fontFamily: '"DM Sans", "Helvetica Neue", Arial, sans-serif',
+            fontSize: '14px',
+            color: '#3B2B2B',
+            '::placeholder': { color: '#c2a8a8' },
+          },
+          invalid: { color: '#c9897a' },
+        },
+        hidePostalCode: true,
+      });
+      stripeCardEl.mount('#stripeCardElement');
+      stripeCardEl.on('change', function(event) {
+        var errEl = el('stripeCardError');
+        if (errEl) {
+          errEl.textContent = event.error ? event.error.message : '';
+          errEl.style.display = event.error ? 'block' : 'none';
+        }
+      });
+
+      // Create PaymentIntent as soon as Elements mounts (deferred)
+      fetchPaymentIntent();
+    }
+
+    function fetchPaymentIntent() {
+      var amountCents = Math.round((subtotal + shippingCost) * 100);
+      if (!amountCents) return;
+      fetch('/api/payments/create-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount_cents: amountCents }),
+      })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          stripeClientSecret = d.client_secret || null;
+          stripePayIntentId  = d.payment_intent_id || null;
+        })
+        .catch(function() { /* backend may not have Stripe configured — non-fatal */ });
+    }
+
     // ── Payment ───────────────────────────────────────────────────────────────
     function selectPayTab(btn) {
       document.querySelectorAll('.pay-tab').forEach(function(t) { t.classList.remove('active'); });
@@ -894,18 +943,6 @@
       var activeIdx = Array.from(tabs).findIndex(function(t) { return t.classList.contains('active'); });
       var payMethod = ['carta', 'paypal', 'klarna'][activeIdx] || 'carta';
 
-      // Validate card fields if card tab is active
-      if (activeIdx === 0) {
-        var numVal = ((el('cardNumInput') || {}).value || '').replace(/\s/g, '');
-        var exp    = ((el('expiryInput')  || {}).value || '');
-        var cvv    = ((el('cvvInput')     || {}).value || '');
-        var cname  = ((el('cardName')     || {}).value || '').trim();
-        if (numVal.length < 15 || !exp || cvv.length < 3 || !cname) {
-          if (el('paymentError')) el('paymentError').style.display = 'flex';
-          return;
-        }
-      }
-
       // Gather shipping fields
       var nome     = ((el('firstName') || {}).value || '').trim();
       var cognome  = ((el('lastName')  || {}).value || '').trim();
@@ -913,7 +950,7 @@
       var address  = ((el('address')   || {}).value || '').trim();
       var cityVal  = ((el('city')      || {}).value || '').trim();
       var capVal   = ((el('cap')       || {}).value || '').trim();
-      var telEl    = el('telefono');
+      var telEl    = el('phone');
       var telefono = telEl ? telEl.value.trim() : '';
       var countryEl = el('country');
       var paese    = countryEl ? countryEl.options[countryEl.selectedIndex].text : 'Italia';
@@ -946,29 +983,64 @@
 
       // Disable confirm button to prevent double-submit
       var confirmBtn = document.querySelector('.btn-next[onclick="confirmOrder()"]');
-      if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.textContent = 'Elaborazione…'; }
+      function setLoading(on) {
+        if (confirmBtn) {
+          confirmBtn.disabled = on;
+          confirmBtn.textContent = on ? 'Elaborazione…' : 'Conferma ordine';
+        }
+      }
+      function placeOrder(piId) {
+        if (piId) orderData.payment_intent_id = piId;
+        if (window.MemiAPI) {
+          window.MemiAPI.orders.place(orderData)
+            .then(function(data) {
+              try { sessionStorage.setItem('memi_last_order', JSON.stringify({ order_number: data.order_number, total: data.total })); } catch(_) {}
+              try { localStorage.removeItem('memi_cart'); sessionStorage.removeItem('memi_cart'); } catch(_) {}
+              window.location.href = 'order-confirm.html';
+            })
+            .catch(function(err) {
+              setLoading(false);
+              var msg = (err && err.error) || 'Errore durante il checkout. Riprova.';
+              var errEl = el('paymentError');
+              if (errEl) { errEl.textContent = msg; errEl.style.display = 'flex'; }
+              else alert(msg);
+            });
+        } else {
+          // Graceful degradation — dev without backend
+          try { sessionStorage.setItem('memi_last_order', JSON.stringify({ order_number: '#DEMO', total: subtotal })); } catch(_) {}
+          window.location.href = 'order-confirm.html';
+        }
+      }
 
-      if (window.MemiAPI) {
-        window.MemiAPI.orders.place(orderData)
-          .then(function(data) {
-            // Persist order number for the confirmation page
-            try { sessionStorage.setItem('memi_last_order', JSON.stringify({ order_number: data.order_number, total: data.total })); } catch(_) {}
-            // Clear cart
-            try { localStorage.removeItem('memi_cart'); sessionStorage.removeItem('memi_cart'); } catch(_) {}
-            window.location.href = 'order-confirm.html';
-          })
-          .catch(function(err) {
-            if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = 'Conferma ordine'; }
-            var msg = (err && err.error) || 'Errore durante il checkout. Riprova.';
-            // Show error near payment section
+      setLoading(true);
+
+      // Card payment: go through Stripe
+      if (activeIdx === 0 && stripeInstance && stripeCardEl && stripeClientSecret) {
+        stripeInstance.confirmCardPayment(stripeClientSecret, {
+          payment_method: {
+            card: stripeCardEl,
+            billing_details: { name: nome + ' ' + cognome, email: emailVal },
+          },
+        }).then(function(result) {
+          if (result.error) {
+            setLoading(false);
             var errEl = el('paymentError');
-            if (errEl) { errEl.textContent = msg; errEl.style.display = 'flex'; }
-            else alert(msg);
-          });
+            if (errEl) { errEl.textContent = result.error.message; errEl.style.display = 'flex'; }
+          } else if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
+            placeOrder(result.paymentIntent.id);
+          } else {
+            setLoading(false);
+            var errEl = el('paymentError');
+            if (errEl) { errEl.textContent = 'Pagamento non completato. Riprova.'; errEl.style.display = 'flex'; }
+          }
+        });
+      } else if (activeIdx === 0 && !stripeClientSecret) {
+        // Stripe not configured / PaymentIntent not ready — place order without card verification
+        // (fallback for dev/test without real Stripe keys)
+        placeOrder(null);
       } else {
-        // API not loaded — graceful degradation (useful in dev without backend)
-        try { sessionStorage.setItem('memi_last_order', JSON.stringify({ order_number: '#DEMO', total: subtotal })); } catch(_) {}
-        window.location.href = 'order-confirm.html';
+        // PayPal / Klarna — place order directly (these go through external redirect flows)
+        placeOrder(null);
       }
     }
 
@@ -1057,7 +1129,6 @@
     document.addEventListener('DOMContentLoaded', function() {
       loadCart();
       wireShippingOptions();
-      wireCardInputs();
       wireInputValidation();
       prefillFromAccount();
       applyUrlPayParam();
@@ -1067,6 +1138,6 @@
     });
   </script>
   <script src="api-client.js"></script>
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>

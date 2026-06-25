@@ -59,6 +59,7 @@
     // Active for any shop/collection page
     const shopActive = cur.startsWith('shop') ? ' mega-label--active' : '';
     const aboutActive = cur.startsWith('about') ? ' mega-label--active' : '';
+    const editorialiActive = cur.startsWith('editoriali') ? ' mega-label--active' : '';
 
     // LEFT group — Novità, Saldi + Shop mega-trigger (sits left of the centered
     // logo; Saldi moved here from the right side so the right side — which
@@ -116,7 +117,20 @@
     const desktopNavRight =
       '<nav class="desktop-nav desktop-nav-right" aria-label="Altri link">' +
         '<a href="/look"' + ac('look') + '>Look</a>' +
-        '<a href="/editoriali"' + ac('editoriali') + '>Editoriali</a>' +
+        '<div class="mega-trigger" data-mega="editoriali">' +
+          '<span class="mega-label' + editorialiActive + '">' +
+            'Editoriali' +
+            '<svg class="mega-arrow" viewBox="0 0 10 6" fill="none"><polyline points="1 1 5 5 9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>' +
+          '</span>' +
+          '<div class="mega-panel mega-panel--sm" role="navigation" aria-label="Editoriali">' +
+            '<div class="mega-col">' +
+              '<a href="/editoriali" class="mega-link">Tutti gli Editoriali</a>' +
+              '<a href="/editoriali/primavera-estate-2026/" class="mega-link">Primavera Estate 2026</a>' +
+              '<a href="/editoriali/estate-2025/" class="mega-link">Estate 2025</a>' +
+              '<a href="/editoriali/autunno-inverno-2025/" class="mega-link">Autunno Inverno 2025</a>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
         '<div class="mega-trigger" data-mega="about">' +
           '<span class="mega-label' + aboutActive + '">' +
             'Chi Siamo' +

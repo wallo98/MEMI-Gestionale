@@ -17,7 +17,8 @@ The e-commerce site (`Memi Abbigliamento/`) is a **static HTML/CSS/JS** site. Pr
 | Update profile | `PUT /api/auth/me` | account.html |
 | My orders | `GET /api/orders/my` | account.html |
 | Validate discount | `POST /api/orders/validate-discount` | checkout.html |
-| Place order | `POST /api/orders` | checkout.html |
+| **Create PaymentIntent** | `POST /api/payments/create-intent` | checkout.html (Stripe flow, step 1) |
+| Place order | `POST /api/orders` | checkout.html (after Stripe confirms, step 2) |
 | Shipping zones | `GET /api/shipping/zones` | checkout.html |
 
 ### What does NOT use the API (static)
@@ -34,7 +35,20 @@ HTML page loads
   → tokens.css, shop.css, app.css (styles)
   → [productsData.js] (only on search.html — sets window.PRODUCTS)
   → api-client.js (sets window.MemiAPI)
-  → app.js?v=6 (init() → injectMarkup → bindEvents → updateAuthUI)
+  → app.js?v=7 (init() → injectMarkup → bindEvents → updateAuthUI)
+```
+
+### Stripe checkout flow
+
+```
+checkout.html
+  → Stripe.js (cdn.stripe.com)
+  → mountCardElement() → CardElement rendered in #card-element div
+  → user clicks "Paga"
+  → POST /api/payments/create-intent → { client_secret, payment_intent_id }
+  → stripe.confirmCardPayment(client_secret, { payment_method: { card: cardElement } })
+  → on success: MemiAPI.orders.place({ ...orderData, payment_intent_id })
+  → on failure: show Italian error message to user
 ```
 
 `app.js` replaces `data-include="site-header"` and `data-include="site-footer"` placeholders with the full nav/footer HTML via `injectHeader()` and `injectFooter()`.
@@ -96,6 +110,20 @@ Since admin nginx proxies `/api/*` to the backend, this works without any enviro
 In development (running files locally without Docker), set the meta content to `http://localhost:3000/api`.
 
 ---
+
+## Backend ↔ Stripe
+
+`src/routes/payments.js` uses the official `stripe` Node.js SDK:
+- Requires `STRIPE_SECRET_KEY` env var
+- Creates PaymentIntents with `stripe.paymentIntents.create()`
+- `orders.js` verifies PaymentIntents with `stripe.paymentIntents.retrieve()` before saving orders
+
+## Backend ↔ SMTP (Email)
+
+`src/email.js` uses `nodemailer`:
+- Creates transport from `SMTP_*` env vars on first call
+- `sendOrderConfirmation(order)` builds branded HTML email and sends async
+- Errors are logged but never thrown — safe to call in any context
 
 ## Backend ↔ Database
 

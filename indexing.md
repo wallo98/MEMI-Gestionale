@@ -10,12 +10,14 @@ Complete inventory of every file and what it does.
 |------|---------|
 | `docker-compose.yml` | Defines all 4 services: mysql, backend, ecommerce, admin |
 | `api.md` | API endpoint reference |
-| `architecture.md` | System overview, containers, data flows |
-| `gaps.md` | Known issues, missing features, TODOs |
+| `ARCHITECTURE.md` | System overview, containers, data flows |
+| `DEBUGGING.md` | Troubleshooting guide |
+| `DEPLOYMENT.md` | Coolify / Hetzner deploy guide |
+| `GAPS-ANALYSIS.md` | Comprehensive gap analysis — what's missing and priority order |
+| `gaps.md` | Known issues, recent fixes, TODOs (changelog style) |
 | `indexing.md` | This file |
 | `integrations.md` | How frontend, backend, admin connect |
 | `modules.md` | JS module breakdown |
-| `DEBUGGING.md` | Troubleshooting guide |
 
 ---
 
@@ -34,11 +36,13 @@ Complete inventory of every file and what it does.
 | `src/routes/auth.js` | POST /register, POST /login, GET /me, PUT /me, POST /logout |
 | `src/routes/admin-auth.js` | POST /login, GET /me (admin) |
 | `src/routes/products.js` | Full CRUD + stock management |
-| `src/routes/orders.js` | Place order, my orders, admin order management |
+| `src/routes/orders.js` | Place order (with Stripe verification + inventory deduction), my orders, admin order management |
 | `src/routes/customers.js` | Admin customer CRUD |
 | `src/routes/discounts.js` | Admin discount code CRUD |
 | `src/routes/shipping.js` | Zones, couriers, shipments |
 | `src/routes/dashboard.js` | KPIs, revenue chart, top products, recent orders |
+| `src/routes/payments.js` | POST /api/payments/create-intent — creates Stripe PaymentIntent, returns client_secret |
+| `src/email.js` | sendOrderConfirmation(order) — nodemailer branded HTML email, silent no-op if SMTP_USER unset |
 
 ---
 
@@ -56,7 +60,7 @@ Complete inventory of every file and what it does.
 | `tokens.css` (`?v=2`) | CSS custom properties: colors, spacing, typography |
 | `shop.css` (`?v=2`) | Global component styles: product cards, badges, buttons |
 | `app.css` | Drawer + overlay styles (cart, wishlist, search, auth) |
-| `app.js` (`?v=6`) | Main JS: nav injection, drawers, cart, wishlist, auth |
+| `app.js` (`?v=7`) | Main JS: nav injection (incl. Editoriali mega-menu), drawers, cart, wishlist, auth, view-toggle, Stripe Elements checkout |
 | `api-client.js` | window.MemiAPI fetch wrapper |
 | `productsData.js` | window.PRODUCTS array (used by search.html) |
 
@@ -68,18 +72,27 @@ Complete inventory of every file and what it does.
 | `product.html` | PDP via ?id= query param (legacy / linked from nowhere) |
 | `account.html` | Customer account: profile, orders (JWT-protected) |
 | `checkout.html` | Multi-step checkout: address → payment → confirm |
-| `order-confirm.html` | Order confirmation page |
+| `order-confirm.html` | Order confirmation — rose petal canvas animation |
 | `search.html` | Search results (uses window.PRODUCTS) |
 | `best-seller.html` | Best sellers with rank badges for top 3 |
 | `estate-2025.html` | Summer 2025 collection with ec-filterbar |
 | `look.html` | Shop the Look: 4 looks, dynamic hotspots |
-| `editoriali.html` | Editorial / campaign content |
+| `editoriali.html` | Editorial hub — dark magazine layout, season filter pills |
 | `about.html` | Chi siamo / About brand |
 | `valori.html` | Brand values |
 | `privacy.html` | Privacy policy |
 | `returns.html` | Return policy |
 | `404.html` | Error page |
 | `campagne.html` | Alias / legacy (renamed to editoriali) |
+
+### Editorial subcategory pages — `editoriali/{slug}/index.html`
+3 individual editorial pages, dark-background magazine style. Each has back nav, photo spreads, pull quote, shop CTA, and prev/next pagination.
+
+| Slug | Title |
+|------|-------|
+| `primavera-estate-2026` | Spring Summer 2026 |
+| `estate-2025` | Estate 2025 — Dance Collection |
+| `autunno-inverno-2025` | Fall Winter 2025 |
 
 ### Product PDPs — `products/{slug}/index.html`
 23 individual static PDP pages. Data stored in `data-*` attributes on `<main id="pdpRoot">`. Linked from shop.html, collections, best-seller.html, etc.

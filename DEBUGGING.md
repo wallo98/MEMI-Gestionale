@@ -30,13 +30,13 @@ Check: open DevTools → Network → filter for `app.js`. If it's absent, the pa
 Every page must have near the closing `</body>`:
 ```html
 <script src="api-client.js"></script>   <!-- or ../../api-client.js for nested pages -->
-<script src="app.js?v=5"></script>      <!-- bump version number after each deploy -->
+<script src="app.js?v=7"></script>      <!-- bump version number after each deploy -->
 ```
 
 Depth guide:
-- Root pages (`/shop`, `/about`, etc.): `src="app.js?v=5"`
-- One level deep (`/look`, `/editoriali`): `src="app.js?v=5"`
-- Two levels deep (`/collections/novita/`): `src="../../app.js?v=5"`
+- Root pages (`/shop`, `/about`, etc.): `src="app.js?v=7"`
+- One level deep (`/look`, `/editoriali`): `src="app.js?v=7"`
+- Two levels deep (`/collections/novita/`): `src="../../app.js?v=7"`
 
 **Root cause B — `app.js` loads but throws a runtime error.**
 
@@ -90,6 +90,31 @@ window._af  // not exposed — add temporarily for debugging
 ```
 
 The `af` object (inside the IIFE) tracks current filters. If `af.categoria = 'novita'` but no cards have `badge-new`, all cards will be hidden.
+
+---
+
+## Symptom: Category filter checkboxes do nothing
+
+**Root cause** — The `input[data-cat]` checkboxes in the filter drawer have no `change` event listeners wired up in `DOMContentLoaded`.
+
+`shop.html` has an `af` object tracking active filters and an `applyFilters()` function, but the `DOMContentLoaded` block must explicitly add listeners to checkboxes:
+
+```javascript
+document.querySelectorAll('input[data-cat]').forEach(function(cb) {
+  cb.addEventListener('change', function() {
+    if (cb.checked) {
+      af.categorie.push(cb.dataset.cat);
+    } else {
+      af.categorie = af.categorie.filter(function(c) { return c !== cb.dataset.cat; });
+    }
+    applyFilters();
+  });
+});
+```
+
+Also check the "Mostra X articoli" button — it must call `applyFilters()`, not `closeFilterDrawer()` directly. `applyFilters()` already closes the drawer internally.
+
+**Note:** `af.categorie` is an **array** (multi-select). Cards are shown if `af.categorie` is empty (no filter) OR if their `data-categoria` appears in the array. This replaced the old `af.categoria` single-string approach. If you see old code referencing `af.categoria` (singular), update it to `af.categorie` (plural, array).
 
 ---
 
@@ -165,6 +190,41 @@ If `JWT_ADMIN_SECRET` is missing, all admin logins return 500.
 
 ---
 
+## Symptom: Stripe payment fails / checkout hangs
+
+**Step 1 — Check STRIPE_SECRET_KEY is set on backend**
+```bash
+docker compose exec backend printenv STRIPE_SECRET_KEY
+# Should print sk_live_... or sk_test_...
+```
+If empty, the `/api/payments/create-intent` endpoint returns 503 and checkout stops at "Elaborazione pagamento...".
+
+**Step 2 — Check Stripe publishable key in checkout.html**
+
+`checkout.html` calls `Stripe(STRIPE_PUBLISHABLE_KEY)` where the key is fetched from `/api/payments/config` or hardcoded as `data-pk` on the script tag. If wrong, Stripe.js throws `IntegrationError: Invalid API Key`.
+
+**Step 3 — Check browser console for Stripe errors**
+
+Stripe errors bubble up as JavaScript exceptions. Common codes:
+- `card_declined` — test card rejected; use `4242 4242 4242 4242` for success
+- `insufficient_funds` — use `4000 0000 0000 9995` to simulate
+- `incorrect_cvc` — wrong 3-digit code
+
+**Step 4 — PaymentIntent verification fails in backend**
+
+If `POST /api/orders` returns 400 "Pagamento non verificato", the `payment_intent_id` sent from frontend doesn't match any Stripe PaymentIntent, or the PaymentIntent status is not `succeeded`. Check Stripe Dashboard → Payments for the intent ID.
+
+**Step 5 — SMTP / email errors after order**
+
+If the order is saved but the customer reports no confirmation email:
+```bash
+docker compose logs backend --tail=50 | grep -i email
+# Look for: Email sent: <messageId> or Email error: ...
+```
+If `SMTP_USER` is not set, `sendOrderConfirmation()` silently skips sending — no error, no email. This is intentional for dev environments.
+
+---
+
 ## Symptom: MySQL data lost after redeploy
 
 The `docker-compose.yml` uses a named volume:
@@ -205,13 +265,16 @@ When you push code changes:
 
 | Changed file | Action needed |
 |---|---|
-| `app.js` | Bump `?v=N` in every HTML file that loads it |
+| `app.js` | Bump `?v=N` in every HTML file that loads it (56 files total: root pages, products/, collections/, editoriali/) |
 | `tokens.css` / `shop.css` / `app.css` | Bump `?v=N` in every HTML file that loads it |
 | `api-client.js` | Bump `?v=N` in every HTML file that loads it |
 | HTML files only | No version bump needed |
 | Backend `.js` files | Rebuild + redeploy `backend` service in Coolify |
+| `src/email.js` | Part of backend build — rebuild + redeploy `backend` |
 | `docker-compose.yml` | Rebuild + redeploy all services |
 | `nginx.conf` | Rebuild + redeploy `ecommerce` or `admin` service |
+
+**Current versions:** `app.js?v=7`, `tokens.css?v=2`, `shop.css?v=2`
 
 After deploying, always verify in DevTools → Network that the new file version is being served (check response headers for the file).
 
@@ -256,7 +319,9 @@ console.log('admin token:', !!localStorage.getItem('memi_admin_token') ? 'presen
 | `MEMI-Backend/src/routes/auth.js` | Customer register/login/profile |
 | `MEMI-Backend/src/routes/admin-auth.js` | Admin login/profile |
 | `MEMI-Backend/src/routes/products.js` | Product CRUD |
-| `MEMI-Backend/src/routes/orders.js` | Orders (place, admin manage) |
+| `MEMI-Backend/src/routes/orders.js` | Orders (place with Stripe verify + inventory deduct + email, admin manage) |
+| `MEMI-Backend/src/routes/payments.js` | POST /api/payments/create-intent — Stripe PaymentIntent creation |
+| `MEMI-Backend/src/email.js` | sendOrderConfirmation() — nodemailer, silent no-op if SMTP_USER unset |
 | `MEMI/js/admin-api.js` | Admin jQuery API client — exposes `window.AdminAPI` |
-| `MEMI/js/app.js` | Admin SPA — views, routing, event handling |
-| `docker-compose.yml` | Defines all 4 services + `mysql_data` volume + `memi_net` network |
+| `MEMI/js/app.js` | Admin SPA — views, routing, event handling, real data via _origRenderView pattern |
+| `docker-compose.yml` | Defines all 4 services + `mysql_data` volume + `memi_net` network + Stripe/SMTP env vars |

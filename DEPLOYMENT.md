@@ -63,6 +63,16 @@ node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 | `JWT_SECRET`          | 64-char hex secret for customer JWTs            |
 | `JWT_ADMIN_SECRET`    | 64-char hex secret for admin JWTs (different!)  |
 | `ALLOWED_ORIGINS`     | `https://memi.it,https://admin.memi.it`         |
+| `STRIPE_SECRET_KEY`   | Stripe secret key — `sk_live_...` for prod, `sk_test_...` for staging |
+| `STRIPE_PUBLISHABLE_KEY` | Stripe publishable key — `pk_live_...` or `pk_test_...` |
+| `SMTP_HOST`           | SMTP server (e.g. `smtp.gmail.com`, `smtp.sendgrid.net`) |
+| `SMTP_PORT`           | `587` (STARTTLS) or `465` (SSL)                 |
+| `SMTP_SECURE`         | `true` if port 465, `false` if port 587         |
+| `SMTP_USER`           | SMTP username / email address                   |
+| `SMTP_PASS`           | SMTP password or app-specific password          |
+| `SMTP_FROM`           | Sender name + address, e.g. `"Memi Abbigliamento <info@memi.it>"` |
+
+**Note on optional vars:** If `STRIPE_SECRET_KEY` is not set, `/api/payments/create-intent` returns 503 (checkout won't work but site won't crash). If `SMTP_USER` is not set, order confirmation emails are silently skipped (orders still save correctly).
 
 ---
 
@@ -226,3 +236,6 @@ find /backups -name "memi_*.sql.gz" -mtime +30 -delete
 | Products not loading | DB not seeded | Run schema.sql manually via Coolify terminal |
 | "Token admin mancante" | admin-api.js loaded after app.js | Verify script order in dashboard.html |
 | Checkout submits but no order | API unreachable from frontend | Check nginx proxy_pass block or CORS config |
+| Checkout shows "Servizio pagamenti non disponibile" | `STRIPE_SECRET_KEY` not set | Add Stripe env vars in Coolify |
+| Order saved but no confirmation email | `SMTP_USER` not set or SMTP error | Check backend logs: `docker compose logs backend \| grep -i email`; add SMTP env vars |
+| Stripe card error in browser | Wrong `STRIPE_PUBLISHABLE_KEY` | Verify pk_ key matches sk_ key environment (test vs live) |

@@ -99,6 +99,18 @@ Default admin credentials: `admin@memi.it` / `memi2026admin`
 
 ---
 
+## Payments — `/api/payments`
+
+| Method | Path | Auth | Body | Returns |
+|--------|------|------|------|---------|
+| POST | `/payments/create-intent` | None | `{amount}` (cents, integer) | `{client_secret, payment_intent_id}` |
+
+Returns **503** if `STRIPE_SECRET_KEY` environment variable is not set.
+
+Used by `checkout.html`: call this first, then `stripe.confirmCardPayment(client_secret)`, then `POST /api/orders` with `payment_intent_id`.
+
+---
+
 ## Shipping — `/api/shipping`
 
 | Method | Path | Auth | Returns |
