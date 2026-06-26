@@ -1134,4 +1134,9 @@ html { overflow-x: clip; }
   letter-spacing: 0.04em;
 }
 
-/* ── 
+/* ── Mega-panel hidden by default (for pages that don't use shop.css) ── */
+.mega-panel { position: fixed; top: 64px; left: 0; right: 0; z-index: 190; visibility: hidden; opacity: 0; pointer-events: none; }
+.mega-trigger { position: relative; display: inline-flex; align-items: center; }
+.mega-label { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; user-select: none; }
+.mega-arrow { width: 10px; height: 6px; flex-shrink: 0; }
+.nav-right
