@@ -1,0 +1,12 @@
+{
+  "name": "memi-platform",
+  "private": true,
+  "version": "1.0.0",
+  "description": "MEMI Abbigliamento — convenience scripts to run the verification suite. The local stack must be up (docker compose -f docker-compose.yml -f docker-compose.local.yml up --build).",
+  "scripts": {
+    "test": "npm test --prefix MEMI-Backend",
+    "test:e2e": "npm run test:e2e --prefix e2e",
+    "test:all": "npm test && npm run test:e2e",
+    "smoke": "bash smoke-test.sh"
+  }
+}

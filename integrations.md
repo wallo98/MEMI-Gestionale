@@ -5,12 +5,18 @@ How the e-commerce, admin, and backend connect.
 
 ## E-commerce ↔ Backend
 
-The e-commerce site (`Memi Abbigliamento/`) is a **static HTML/CSS/JS** site. Products are hardcoded in HTML for fast page loads and SEO. The backend API is used for runtime interactions only.
+The e-commerce site (`Memi Abbigliamento/`) is HTML/CSS/JS served by nginx. **The product catalog is now read LIVE from the API — the MySQL database (driven by the admin panel) is the single source of truth. No catalog content is hardcoded.** Non-catalog chrome (heroes, marquees, footer) remains static.
 
 ### What uses the API
 
 | Feature | API Call | File |
 |---------|----------|------|
+| **Shop listing** | `GET /api/products?limit=200` | shop.html → `initShopCatalog()` |
+| **Collection pages** (15 `collections/<slug>/`, `estate-2025.html`) | `GET /api/products?collection=<slug>` | `catalog-loader.js` |
+| **Best-sellers** (`best-seller.html`) | `GET /api/products` (popularity DESC) | `catalog-loader.js` (`mode:'best-seller'`) |
+| **Product detail** | `GET /api/products/:id` | product.html (`?id=`) ; static `products/<slug>/` now redirect here |
+| **Search** | `GET /api/products?limit=300` → filtered client-side | search.html (builds `window.PRODUCTS` from API) |
+| **Home "Nuovi Arrivi"** | `GET /api/products?novita=1` | index.html |
 | Register | `POST /api/auth/register` | app.js → `authRegister()` |
 | Login | `POST /api/auth/login` | app.js → `authLogin()` |
 | Account profile | `GET /api/auth/me` | account.html |
@@ -26,20 +32,30 @@ The e-commerce site (`Memi Abbigliamento/`) is a **static HTML/CSS/JS** site. Pr
 
 ### What does NOT use the API (static)
 
-- Product catalog (shop.html, collections/) — hardcoded HTML
-- Product detail pages (products/{slug}/index.html) — data-attributes in HTML
-- Search (search.html) — uses `window.PRODUCTS` from `productsData.js`
-- Cart, wishlist — stored in localStorage (`memi_cart`, `memi_wishlist`)
+- Page chrome only: editorial heroes, marquee strips, footer/nav (`data-include`), value/about/editorial pages.
+- Cart, wishlist — stored in localStorage (`memi_cart`, `memi_wishlist`).
+
+### Catalog: single source of truth (no drift)
+
+- Every product surface renders from `GET /api/products*`. `catalog-loader.js` is the shared loader for all collection-style pages; it also re-publishes `window.PRODUCTS` from the API so any legacy reader can't drift.
+- `productsData.js` is **no longer a runtime source of truth** — it is not loaded by any customer page; it remains only as the input for the optional build scripts (`scripts/generate-*.js`), which are now superseded by the runtime loader.
+- The 15 `collections/<slug>/index.html`, `best-seller.html`, `estate-2025.html` have **no hardcoded cards or counts** — counts come from the live result set.
+- The 23 static `products/<slug>/index.html` are now thin redirects to the canonical dynamic PDP `/product?id=<slug>` (old URLs keep working; `rel=canonical` + `noindex`).
+- Admin image upload pipeline: `POST /api/products/:id/images` (multer→sharp→WebP variants) stored on the `uploads_data` volume, served at `/api/uploads/<file>`; product `images` JSON references those URLs.
 
 ### JavaScript flow
 
 ```
 HTML page loads
   → tokens.css, shop.css, app.css (styles)
-  → [productsData.js] (only on search.html — sets window.PRODUCTS)
   → api-client.js (sets window.MemiAPI)
-  → app.js?v=7 (init() → injectMarkup → bindEvents → updateAuthUI)
+  → app.js?v=9 (init() → injectMarkup → bindEvents → updateAuthUI)
+  → [catalog-loader.js?v=1] (collection-style pages: fetch GET /api/products?collection=<slug>,
+       render real cards, set counts, re-publish window.PRODUCTS)
 ```
+
+> Note: `app.js` is cache-busted with `?v=N`; the catalog loader is a **separate** file
+> (`catalog-loader.js?v=1`), so making the catalog dynamic did not require touching `app.js`.
 
 ### Stripe checkout flow
 
@@ -89,6 +105,9 @@ dashboard.html loads
 | `products.update()` | `PUT /api/products/:id` |
 | `products.delete()` | `DELETE /api/products/:id` |
 | `products.updateStock()` | `PUT /api/products/:id/stock` |
+| `products.uploadImages()` | `POST /api/products/:id/images` (multipart; sharp→WebP) |
+| `products.deleteImage()` | `DELETE /api/products/:id/images` |
+| (public) image served | `GET /api/uploads/:file` (static, from `uploads_data`) |
 | `orders.list()` | `GET /api/orders/admin/list` |
 | `orders.get()` | `GET /api/orders/admin/:id` |
 | `orders.updateStatus()` | `PUT /api/orders/admin/:id/status` |

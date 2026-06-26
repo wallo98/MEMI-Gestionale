@@ -76,34 +76,28 @@ Tutti i route che il frontend richiede sono implementati:
 
 ---
 
-## 4. Catalogo prodotti — ⚠️ Parzialmente dinamico
+## 4. Catalogo prodotti — ✅ Completamente dinamico (Giugno 2026)
 
-**Stato:** ✅ Dinamico per `shop.html`, `index.html`, `search.html`, `product.html` — ⚠️ `collections/*`, `best-seller.html`, `estate-2025.html` e le pagine `products/*` restano statiche con conteggi hardcoded (vedi gap sotto)
+**Stato:** ✅ **Ogni superficie del catalogo legge live dal database via API. Niente è più hardcoded.**
 
-`shop.html` ora carica i prodotti dinamicamente tramite `GET /api/products`. La funzione `initShopCatalog()` (IIFE in fondo a shop.html) costruisce le card con i `data-*` attributes corretti che il motore di filtro legge. Il banner editoriale viene re-inserito dopo la 4ª card come nella versione statica. Il motore filter+pagination rimane invariato.
+`shop.html` carica i prodotti via `GET /api/products` (`initShopCatalog()`). `index.html` ("Nuovi Arrivi") via `?novita=1`. `search.html` via `MemiAPI.products.list()`. `product.html` via `GET /api/products/:id`.
 
-**Pagine già dinamiche (API-driven):** `shop.html`, `index.html` (sezione "Nuovi Arrivi", resa dinamica Giugno 2026 — prima erano 8 card hardcoded), `search.html` (ora usa `MemiAPI.products.list()`, non più `productsData.js`), `product.html`.
+**Risolto il gap delle pagine statiche** — introdotto `catalog-loader.js`, un loader condiviso (strategia 2 sotto) usato da:
 
-**Aggiornamento automatico:** i prodotti creati dall'admin appaiono automaticamente in `shop.html`, `index.html` e `search.html` dopo il refresh.
+| Pagina | Prima | Ora |
+|---|---|---|
+| `collections/{slug}/index.html` (15) | card + `resultCount` hardcoded | `GET /api/products?collection={slug}`, card + conteggi reali |
+| `estate-2025.html` | 12 card statiche | `?collection=estate-2025`, filtro per categoria live |
+| `best-seller.html` | 11 card statiche | `GET /api/products` ordinati per popolarità (top‑3 + resto) |
+| `products/{slug}/index.html` (23) | dettaglio pre‑renderizzato da `productsData.js` | **redirect** a `/product?id={slug}` (URL invariato, `rel=canonical`, `noindex`) |
 
-### ⚠️ GAP APERTO — Pagine con prodotti/conteggi HARDCODED
+Per le pagine prodotto si è scelta la **strategia 1 (redirect alla PDP dinamica canonica)** — più sicura e senza dettagli che si possano sclerotizzare; per le collezioni la **strategia 2 (loader dinamico)**, che mantiene gli URL `/collections/…` e l'esperienza editoriale.
 
-Diverse pagine mostrano **card prodotto statiche e conteggi "N articoli" congelati**, scritti a mano (generati una tantum da `productsData.js`, 23 prodotti). Questi numeri **non riflettono il catalogo reale** del database: per esempio una collezione può mostrare "9 articoli" anche se l'admin ne ha caricati di più o di meno. Questo causa il disallineamento visibile tra le pagine dinamiche (`/shop?categoria=…`, che conta i prodotti reali dell'API) e quelle statiche.
+**`productsData.js` non è più una fonte di verità a runtime:** non è caricato da nessuna pagina cliente. `catalog-loader.js` ri-pubblica `window.PRODUCTS` dall'API, così nessun consumatore legacy può divergere dal DB.
 
-| Pagina | Cosa è hardcoded |
-|---|---|
-| `collections/{slug}/index.html` (15 pagine) | Card prodotto statiche + `id="resultCount"` fisso (shop‑all 23, novita 9, accessori 11, top 3, vestiti 2, …) + conteggi categoria nel filtro `(2)`, `(3)`… |
-| `best-seller.html` | 11 card prodotto statiche |
-| `estate-2025.html` | 12 card prodotto statiche |
-| `products/{slug}/index.html` (23 pagine) | Pagine dettaglio prodotto pre-renderizzate da `productsData.js` |
+**Aggiornamento automatico:** un prodotto creato/modificato/eliminato dall'admin (con immagini) appare/cambia/sparisce su shop, collezione, ricerca e PDP al refresh — senza passaggi manuali.
 
-**Linking misto:** il mega-menu *Shop* punta alle pagine dinamiche `/shop?categoria=…`, ma molti link (card prodotto, "vedi tutto", footer, pagine prodotto) puntano ancora alle pagine statiche `/collections/…`. Da qui i conteggi incoerenti.
-
-**Decisione (Giugno 2026):** mantenere queste pagine **statiche per ora** — sono curate visivamente e vanno bene esteticamente in questa fase. Da migrare in un secondo momento, con una delle due strategie:
-1. **Redirect** delle 15 pagine `collections/{slug}/` verso `/shop?categoria={slug}` (singola fonte di verità, meno codice; cambia gli URL `/collections/`).
-2. **Rendere dinamica** ogni pagina (loader condiviso che legge lo slug e fa `GET /api/products?collection={slug}`, rendendo card + conteggio reali; mantiene gli URL).
-
-`scripts/generate-collections.js` e `scripts/generate-products.js` rigenerano queste pagine statiche da `productsData.js` — se si resta sullo statico, vanno ri-eseguiti dopo ogni modifica al catalogo per evitare numeri obsoleti.
+**Verifica:** vedi `MEMI-Backend/test/` (integrazione + immagini) e `e2e/` (Playwright, round‑trip end‑to‑end); più la sezione [7] del `smoke-test.sh`.
 
 ---
 
@@ -177,14 +171,19 @@ Flusso completo quando un cliente fa un ordine:
 
 ---
 
-## 10. Upload immagini admin — Assente
+## 10. Upload immagini admin — ✅ Implementato (correzione: la nota precedente era errata)
 
-**Stato:** ❌ Non implementato
+**Stato:** ✅ Implementato e verificato.
 
-L'admin non ha un sistema di upload immagini prodotto. Le immagini attuali sono URL Unsplash (placeholder). Per aggiungere prodotti reali servirebbe:
-- Un componente upload nel pannello admin
-- Storage (es. AWS S3, Cloudinary, o cartella locale)
-- Endpoint `POST /api/upload` nel backend
+> Questa sezione affermava per errore "Assente". Il codice dice il contrario (vedi `DEPLOYMENT.md` Phase 6). Pipeline reale:
+
+- **Ricezione:** `multer` (memory storage), campo `images`, limite `MAX_UPLOAD_MB` (default 8 MB), max 10 file, solo `image/*` → `MEMI-Backend/src/routes/products.js`.
+- **Elaborazione:** `sharp` genera varianti WebP responsive `thumb`/`card`/`full`, auto‑orienta da EXIF, nomi con hash del contenuto (idempotente) → `MEMI-Backend/src/images.js`.
+- **Storage:** volume Docker `uploads_data` montato su `UPLOADS_DIR` (`/app/uploads`).
+- **Serving:** `express.static` su `GET /api/uploads/<file>` (passa dal proxy nginx `/api`, niente CORS).
+- **Endpoint:** `POST /api/products/:id/images` (upload), `DELETE /api/products/:id/images` (rimuove URL + file). Il `images` JSON del prodotto referenzia gli URL.
+- **Admin UI:** `AdminAPI.products.uploadImages()` (FormData) in `MEMI/js/admin-api.js`.
+- **Verifica:** test immagini in `MEMI-Backend/test/catalog.test.mjs` (upload → 200 + `content-type: image/webp` → referenziato nel JSON) e sezione [7] di `smoke-test.sh`.
 
 ---
 
@@ -217,11 +216,47 @@ Nessuna sezione recensioni nelle schede prodotto. Mancano:
 
 **Stato:** ⚠️ Rischio
 
-Il file `productsData.js` è la "fonte di verità" per cart/wishlist/filtri. Se un prodotto viene modificato nell'admin (quando l'admin avrà un'integrazione reale), il file JS non si aggiornerà automaticamente. Serve un meccanismo di sync o abbandonare il file statico a favore di chiamate API.
+✅ **Risolto (Giugno 2026).** `productsData.js` è stato **abbandonato come fonte di verità a runtime**: nessuna pagina cliente lo carica. Tutte le superfici leggono dall'API e `catalog-loader.js` ri-pubblica `window.PRODUCTS` dal DB, eliminando ogni possibilità di drift. Il file resta solo come input opzionale per gli script di build `scripts/generate-*.js` (ora superflui).
 
 ---
 
 ## 14. Problemi tecnici minori
 
-- **`app.js` versioning:** `?v=7` in tutti e 56 i file HTML — aggiornare a v=8 se si modifica app.js
-- **Immagini:** tutte le immagini prodotto sono placeholder Unsplash; il campo `images` in DB è J
+- **`app.js` versioning:** `?v=9` nei file HTML — aggiornare se si modifica app.js. Il catalogo dinamico è in `catalog-loader.js?v=1` (file separato), quindi non ha richiesto modifiche a `app.js`.
+- **Immagini:** upload admin implementato (sharp→WebP, `/api/uploads/…`); i prodotti seed usano ancora placeholder Unsplash finché non si caricano immagini reali.
+- **SEO:** ✅ index.html e shop.html hanno og:tags + JSON-LD; le PDP statiche `products/{slug}/` ora reindirizzano alla PDP dinamica (`noindex` + `canonical`).
+- **Performance:** tutte le superfici catalogo caricano da API; `productsData.js` non più caricato a runtime da nessuna pagina.
+- **Admin mobile:** ✅ `MEMI/css/style.css` ha breakpoint 600px (bottom nav) + 600–920px (collapsed sidebar)
+- **Newsletter:** ✅ `POST /api/newsletter/subscribe` + tabella DB; il form footer di shop.html è cablato; altri footer (iniettati da app.js) ancora non cablati
+
+---
+
+## Priorità suggerite
+
+### ✅ Sprint 1 — Risolto (Giugno 2026)
+1. ~~Pagamenti reali (Stripe)~~ → **✅ Stripe Elements + PaymentIntent**
+2. ~~Salvataggio ordini nel backend~~ → **✅ orders.js completo**
+3. ~~Email conferma ordine~~ → **✅ nodemailer in email.js**
+4. ~~Autenticazione cliente~~ → **✅ JWT implementato**
+5. ~~Admin dati reali~~ → **✅ _origRenderView pattern**
+6. ~~Inventario deducibile~~ → **✅ stock decrementato su acquisto**
+
+### ✅ Sprint 2 — Risolto (Giugno 2026)
+7. ~~Catalogo dinamico shop.html~~ → **✅ API-driven con initShopCatalog()**
+8. ~~Email spedizione con tracking~~ → **✅ sendShippingConfirmation()**
+9. ~~Recupero password~~ → **✅ forgot/reset con JWT 1h + reset-password.html**
+10. ~~Email di benvenuto~~ → **✅ sendWelcomeEmail() su register**
+11. ~~Tracking ordini in account~~ → **✅ courier + tracking_number visualizzati**
+12. ~~Newsletter backend~~ → **✅ POST /api/newsletter/subscribe + tabella DB**
+13. ~~Guida taglie~~ → **✅ size-guide.html creata**
+14. ~~SEO meta tags~~ → **✅ og:tags + JSON-LD su index/shop/PDP**
+15. ~~Admin mobile~~ → **✅ breakpoint 600px bottom nav in style.css**
+
+### 🟠 Prossimo sprint — ancora mancanti
+- Catalogo dinamico per le 15 collections/ (ancora statiche)
+- Upload immagini nel pannello admin (campo `images` JSON va impostato manualmente)
+- Tracking pubblico guest (senza login) — `order-tracking.html`
+- Gestione resi self-service
+- Recensioni prodotto (UI + backend + moderazione)
+- SEO per i rimanenti 22 PDP (copiare template da vestito-lino-cannes)
+- Newsletter nell'header/footer iniettato da app.js (ora solo shop.html è cablato)
