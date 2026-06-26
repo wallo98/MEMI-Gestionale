@@ -76,17 +76,34 @@ Tutti i route che il frontend richiede sono implementati:
 
 ---
 
-## 4. Catalogo prodotti — ✅ Dinamico (shop.html)
+## 4. Catalogo prodotti — ⚠️ Parzialmente dinamico
 
-**Stato:** ✅ Risolto per shop.html (Giugno 2026) — collections/ ancora statiche
+**Stato:** ✅ Dinamico per `shop.html`, `index.html`, `search.html`, `product.html` — ⚠️ `collections/*`, `best-seller.html`, `estate-2025.html` e le pagine `products/*` restano statiche con conteggi hardcoded (vedi gap sotto)
 
 `shop.html` ora carica i prodotti dinamicamente tramite `GET /api/products`. La funzione `initShopCatalog()` (IIFE in fondo a shop.html) costruisce le card con i `data-*` attributes corretti che il motore di filtro legge. Il banner editoriale viene re-inserito dopo la 4ª card come nella versione statica. Il motore filter+pagination rimane invariato.
 
-**Ancora statico:**
-- Le 15 pagine `collections/{slug}/index.html` hanno ancora card HTML statiche
-- `productsData.js` ancora usato da `search.html`
+**Pagine già dinamiche (API-driven):** `shop.html`, `index.html` (sezione "Nuovi Arrivi", resa dinamica Giugno 2026 — prima erano 8 card hardcoded), `search.html` (ora usa `MemiAPI.products.list()`, non più `productsData.js`), `product.html`.
 
-**Aggiornamento automatico:** da oggi i prodotti creati dall'admin appaiono automaticamente in shop.html dopo il refresh.
+**Aggiornamento automatico:** i prodotti creati dall'admin appaiono automaticamente in `shop.html`, `index.html` e `search.html` dopo il refresh.
+
+### ⚠️ GAP APERTO — Pagine con prodotti/conteggi HARDCODED
+
+Diverse pagine mostrano **card prodotto statiche e conteggi "N articoli" congelati**, scritti a mano (generati una tantum da `productsData.js`, 23 prodotti). Questi numeri **non riflettono il catalogo reale** del database: per esempio una collezione può mostrare "9 articoli" anche se l'admin ne ha caricati di più o di meno. Questo causa il disallineamento visibile tra le pagine dinamiche (`/shop?categoria=…`, che conta i prodotti reali dell'API) e quelle statiche.
+
+| Pagina | Cosa è hardcoded |
+|---|---|
+| `collections/{slug}/index.html` (15 pagine) | Card prodotto statiche + `id="resultCount"` fisso (shop‑all 23, novita 9, accessori 11, top 3, vestiti 2, …) + conteggi categoria nel filtro `(2)`, `(3)`… |
+| `best-seller.html` | 11 card prodotto statiche |
+| `estate-2025.html` | 12 card prodotto statiche |
+| `products/{slug}/index.html` (23 pagine) | Pagine dettaglio prodotto pre-renderizzate da `productsData.js` |
+
+**Linking misto:** il mega-menu *Shop* punta alle pagine dinamiche `/shop?categoria=…`, ma molti link (card prodotto, "vedi tutto", footer, pagine prodotto) puntano ancora alle pagine statiche `/collections/…`. Da qui i conteggi incoerenti.
+
+**Decisione (Giugno 2026):** mantenere queste pagine **statiche per ora** — sono curate visivamente e vanno bene esteticamente in questa fase. Da migrare in un secondo momento, con una delle due strategie:
+1. **Redirect** delle 15 pagine `collections/{slug}/` verso `/shop?categoria={slug}` (singola fonte di verità, meno codice; cambia gli URL `/collections/`).
+2. **Rendere dinamica** ogni pagina (loader condiviso che legge lo slug e fa `GET /api/products?collection={slug}`, rendendo card + conteggio reali; mantiene gli URL).
+
+`scripts/generate-collections.js` e `scripts/generate-products.js` rigenerano queste pagine statiche da `productsData.js` — se si resta sullo statico, vanno ri-eseguiti dopo ogni modifica al catalogo per evitare numeri obsoleti.
 
 ---
 
@@ -207,40 +224,4 @@ Il file `productsData.js` è la "fonte di verità" per cart/wishlist/filtri. Se 
 ## 14. Problemi tecnici minori
 
 - **`app.js` versioning:** `?v=7` in tutti e 56 i file HTML — aggiornare a v=8 se si modifica app.js
-- **Immagini:** tutte le immagini prodotto sono placeholder Unsplash; il campo `images` in DB è JSON — admin non ha ancora UI upload
-- **SEO:** ✅ index.html e shop.html hanno og:tags + JSON-LD; ✅ vestito-lino-cannes ha JSON-LD Product; gli altri 22 PDP mancano ancora — aggiungere con template uguale
-- **Performance:** shop.html ora carica da API (nessun JS hardcoded); `productsData.js` ancora usato solo da search.html
-- **Admin mobile:** ✅ `MEMI/css/style.css` ha breakpoint 600px (bottom nav) + 600–920px (collapsed sidebar)
-- **Newsletter:** ✅ `POST /api/newsletter/subscribe` + tabella DB; il form footer di shop.html è cablato; altri footer (iniettati da app.js) ancora non cablati
-
----
-
-## Priorità suggerite
-
-### ✅ Sprint 1 — Risolto (Giugno 2026)
-1. ~~Pagamenti reali (Stripe)~~ → **✅ Stripe Elements + PaymentIntent**
-2. ~~Salvataggio ordini nel backend~~ → **✅ orders.js completo**
-3. ~~Email conferma ordine~~ → **✅ nodemailer in email.js**
-4. ~~Autenticazione cliente~~ → **✅ JWT implementato**
-5. ~~Admin dati reali~~ → **✅ _origRenderView pattern**
-6. ~~Inventario deducibile~~ → **✅ stock decrementato su acquisto**
-
-### ✅ Sprint 2 — Risolto (Giugno 2026)
-7. ~~Catalogo dinamico shop.html~~ → **✅ API-driven con initShopCatalog()**
-8. ~~Email spedizione con tracking~~ → **✅ sendShippingConfirmation()**
-9. ~~Recupero password~~ → **✅ forgot/reset con JWT 1h + reset-password.html**
-10. ~~Email di benvenuto~~ → **✅ sendWelcomeEmail() su register**
-11. ~~Tracking ordini in account~~ → **✅ courier + tracking_number visualizzati**
-12. ~~Newsletter backend~~ → **✅ POST /api/newsletter/subscribe + tabella DB**
-13. ~~Guida taglie~~ → **✅ size-guide.html creata**
-14. ~~SEO meta tags~~ → **✅ og:tags + JSON-LD su index/shop/PDP**
-15. ~~Admin mobile~~ → **✅ breakpoint 600px bottom nav in style.css**
-
-### 🟠 Prossimo sprint — ancora mancanti
-- Catalogo dinamico per le 15 collections/ (ancora statiche)
-- Upload immagini nel pannello admin (campo `images` JSON va impostato manualmente)
-- Tracking pubblico guest (senza login) — `order-tracking.html`
-- Gestione resi self-service
-- Recensioni prodotto (UI + backend + moderazione)
-- SEO per i rimanenti 22 PDP (copiare template da vestito-lino-cannes)
-- Newsletter nell'header/footer iniettato da app.js (ora solo shop.html è cablato)
+- **Immagini:** tutte le immagini prodotto sono placeholder Unsplash; il campo `images` in DB è J
