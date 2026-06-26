@@ -3681,9 +3681,11 @@ $(function(){
       api.products.listAll().done(function(list) {
         if (!Array.isArray(list)) list = [];
         DATA.products = list.map(function(p) {
-          var totalStock = 0;
-          if (p.taglie && Array.isArray(p.taglie)) {
-            p.taglie.forEach(function(t) { totalStock += (parseInt(t.stock) || 0); });
+          // The list endpoint returns stock_total (sum across sizes). Fall back to
+          // summing per-size stock only if individual sizes carry stock (detail shape).
+          var totalStock = (p.stock_total != null) ? (parseInt(p.stock_total) || 0) : 0;
+          if (!totalStock && p.taglie && Array.isArray(p.taglie)) {
+            p.taglie.forEach(function(t) { totalStock += (parseInt(t && t.stock) || 0); });
           }
           var _iconMap = {
             dress:'👗', bag:'👜', shoe:'👟', ring:'💍', earring:'👂', necklace:'💎',

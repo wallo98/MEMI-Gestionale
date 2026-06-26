@@ -54,7 +54,7 @@ router.get('/', async (req, res) => {
   try {
     const { categoria, colore, saldi, novita, q, collection, status, limit = 100, offset = 0 } = req.query;
 
-    let sql    = 'SELECT p.*, GROUP_CONCAT(ps.taglia ORDER BY ps.taglia SEPARATOR ",") AS taglie_str FROM products p LEFT JOIN product_sizes ps ON ps.product_id = p.id WHERE 1=1';
+    let sql    = 'SELECT p.*, GROUP_CONCAT(ps.taglia ORDER BY ps.taglia SEPARATOR ",") AS taglie_str, COALESCE(SUM(ps.stock), 0) AS stock_total FROM products p LEFT JOIN product_sizes ps ON ps.product_id = p.id WHERE 1=1';
     const params = [];
 
     if (categoria) { sql += ' AND p.categoria = ?'; params.push(categoria); }
@@ -82,6 +82,7 @@ router.get('/', async (req, res) => {
       collections: parseJSON(r.collections, []),
       images:      parseJSON(r.images, []),
       taglie:      r.taglie_str  ? r.taglie_str.split(',')   : [],
+      stock_total: Number(r.stock_total) || 0,   // total units across all sizes (for admin inventory)
       is_new:      !!r.is_new,
     }));
 
