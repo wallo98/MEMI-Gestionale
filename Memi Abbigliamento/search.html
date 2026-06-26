@@ -305,4 +305,50 @@
       icon:          p.icon || 'dress',
       altColor:      p.alt_color || 'ph-flat',
       popularity:    p.popularity || 999,
-   
+      collections:   Array.isArray(p.collections) ? p.collections : [],
+      taglie:        Array.isArray(p.taglie) ? p.taglie : ['unica'],
+    };
+  }
+
+  function init() {
+    var q = new URLSearchParams(window.location.search).get('q') || '';
+
+    function start() {
+      runSearch(q);
+      var input = document.getElementById('searchPageInput');
+      var form  = document.getElementById('searchPageForm');
+      if (form) {
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var val = input ? input.value.trim() : '';
+          history.replaceState(null, '', val ? '/search?q=' + encodeURIComponent(val) : '/search');
+          runSearch(val);
+        });
+      }
+      if (input) {
+        input.addEventListener('input', function () { runSearch(input.value.trim()); });
+      }
+    }
+
+    if (window.MemiAPI && window.MemiAPI.products) {
+      window.MemiAPI.products.list({ limit: 300 })
+        .then(function (res) {
+          var list = Array.isArray(res) ? res : (res && res.products) || [];
+          window.PRODUCTS = list.map(mapApiToProduct);
+        })
+        .catch(function () { window.PRODUCTS = window.PRODUCTS || []; })
+        .finally(start);
+    } else {
+      start();
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

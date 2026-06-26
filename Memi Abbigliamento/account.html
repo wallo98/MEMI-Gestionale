@@ -442,4 +442,85 @@
     })();
 
     // Profile update
-    var profileFor
+    var profileForm = document.getElementById('profileForm');
+    if (profileForm) {
+      profileForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var msgEl = document.getElementById('profileMsg');
+        var btn   = profileForm.querySelector('[type=submit]');
+        btn.disabled = true;
+        window.MemiAPI.auth.updateMe({
+          nome:      document.getElementById('pfNome').value.trim(),
+          cognome:   document.getElementById('pfCognome').value.trim(),
+          email:     document.getElementById('pfEmail').value.trim(),
+          telefono:  document.getElementById('pfTel').value.trim(),
+          indirizzo: document.getElementById('pfAddr').value.trim(),
+          citta:     document.getElementById('pfCitta').value.trim(),
+          cap:       document.getElementById('pfCap').value.trim(),
+          paese:     document.getElementById('pfPaese').value.trim(),
+        }).then(function() {
+          msgEl.style.color = '#3a7a4a';
+          msgEl.textContent = 'Modifiche salvate.';
+          setTimeout(function() { msgEl.textContent = ''; }, 3000);
+        }).catch(function(err) {
+          msgEl.style.color = '#c0453a';
+          msgEl.textContent = (err && err.error) || 'Errore. Riprova.';
+        }).finally(function() { btn.disabled = false; });
+      });
+    }
+
+    // Password change
+    var passForm = document.getElementById('passwordForm');
+    if (passForm) {
+      passForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var newPass  = document.getElementById('pfPassNew').value;
+        var confPass = document.getElementById('pfPassConf').value;
+        var msgEl    = document.getElementById('passMsg');
+        var btn      = passForm.querySelector('[type=submit]');
+        if (!newPass) return;
+        if (newPass.length < 8) { msgEl.style.color='#c0453a'; msgEl.textContent='Minimo 8 caratteri.'; return; }
+        if (newPass !== confPass) { msgEl.style.color='#c0453a'; msgEl.textContent='Le password non coincidono.'; return; }
+        btn.disabled = true;
+        window.MemiAPI.auth.updateMe({ password: newPass })
+          .then(function() {
+            msgEl.style.color = '#3a7a4a';
+            msgEl.textContent = 'Password aggiornata.';
+            passForm.reset();
+            setTimeout(function() { msgEl.textContent = ''; }, 3000);
+          })
+          .catch(function(err) {
+            msgEl.style.color = '#c0453a';
+            msgEl.textContent = (err && err.error) || 'Errore. Riprova.';
+          })
+          .finally(function() { btn.disabled = false; });
+      });
+    }
+  }
+
+  // ── Init ────────────────────────────────────────────────
+  if (!window.MemiAPI || !window.MemiAPI.auth.isLoggedIn()) {
+    window.location.href = 'index.html?login=required';
+    return;
+  }
+
+  var userPromise   = window.MemiAPI.auth.me();
+  var ordersPromise = window.MemiAPI.orders.myOrders().catch(function() { return []; });
+
+  Promise.all([userPromise, ordersPromise])
+    .then(function(results) {
+      var user   = results[0].user || results[0];
+      var orders = Array.isArray(results[1]) ? results[1] : (results[1].orders || []);
+      loadedOrders = orders;
+      renderPage(user, orders);
+    })
+    .catch(function() {
+      // Token expired
+      window.MemiAPI.auth.logout();
+      window.location.href = 'index.html?session=expired';
+    });
+
+})();
+</script>
+</body>
+</html>

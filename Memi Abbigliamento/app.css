@@ -6,6 +6,15 @@
    ============================================================ */
 
 /* ============================================================
+   RESPONSIVE SAFETY NET
+   Prevents stray horizontal scroll on phones / narrow ("minimized")
+   desktop windows if any single element slightly overflows. `clip`
+   is used instead of `hidden` so the sticky site-header keeps working
+   (hidden would turn <html> into a scroll container and break it).
+   ============================================================ */
+html { overflow-x: clip; }
+
+/* ============================================================
    DESKTOP NAV — ACTIVE STATE
    The header itself is injected by app.js (injectHeader) from one
    shared nav list, so this single rule now styles the active link
@@ -1125,9 +1134,4 @@
   letter-spacing: 0.04em;
 }
 
-/* ── Mega-panel hidden by default (for pages that don't use shop.css) ── */
-.mega-panel { position: fixed; top: 64px; left: 0; right: 0; z-index: 190; visibility: hidden; opacity: 0; pointer-events: none; }
-.mega-trigger { position: relative; display: inline-flex; align-items: center; }
-.mega-label { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; user-select: none; }
-.mega-arrow { width: 10px; height: 6px; flex-shrink: 0; }
-.nav-right
+/* ── 
