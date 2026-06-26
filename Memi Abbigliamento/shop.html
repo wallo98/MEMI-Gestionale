@@ -863,7 +863,8 @@ window.submitNewsletter = function (form) {
 
   function buildCard(p) {
     var slug      = p.id; // product id IS the slug
-    var href      = 'products/' + slug + '/index.html';
+    // Link to the dynamic PDP (works for every DB/admin product, shows real images)
+    var href      = '/product?id=' + encodeURIComponent(slug);
     var taglie    = Array.isArray(p.taglie) ? p.taglie : [];
     var taglieStr = taglie.map(function(t){ return t.toLowerCase(); }).join(' ') || 'unica';
     var isAcc     = ACCESSORI_CATS.indexOf(p.categoria) !== -1;

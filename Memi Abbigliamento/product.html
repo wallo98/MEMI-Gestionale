@@ -569,165 +569,198 @@
     </div>
   </section>
 
-  <script>
-    // Load correct product from URL ?id= param
-    var _p = (function() {
-      var PRODUCTS = {
-        'vestito-lino-cannes':   { name: 'Vestito Lino Cannes',   color: 'Rosa Cipria',      colorKey: 'ph-blush',    price: 89,  priceStr: '€89,00',  category: 'Vestiti',   desc: 'Il Vestito Lino Cannes è la definizione di eleganza estiva. Realizzato in puro lino italiano al 100%, questo abito coniuga il comfort di un tessuto naturale con la silhouette sciolta e femminile che ha reso Memi famosa.' },
-        'blazer-sartoriale-mia': { name: 'Blazer Sartoriale Mia', color: 'Verde Salvia',     colorKey: 'ph-sage',     price: 105, priceStr: '€105,00', category: 'Blazer',    desc: 'Il Blazer Sartoriale Mia reinterpreta la giacca classica con leggerezza contemporanea. Struttura pulita, spalle arrotondate e un verde salvia che cattura la luce del mattino.' },
-        'top-seta-lucida-aria':  { name: 'Top Seta Lucida Aria',  color: 'Lavanda',          colorKey: 'ph-lavender', price: 65,  priceStr: '€65,00',  category: 'Top',       desc: 'Il Top Seta Lucida Aria è un\'ode alla leggerezza. In seta lavanda con finitura brillante, scivola sul corpo con una fluidità ineguagliabile. Perfetto per le serate estive.' },
-        'gonna-plisse-nuvola':   { name: 'Gonna Plissé Nuvola',   color: 'Avorio Naturale',  colorKey: 'ph-cream',    price: 79,  priceStr: '€79,00',  category: 'Gonne',     desc: 'La Gonna Plissé Nuvola è il capo must-have della stagione. Il plissé fine danza ad ogni passo, creando un movimento poetico. L\'avorio naturale si abbina a qualsiasi top.' },
-        'camicia-cotone-brisa':  { name: 'Camicia Cotone Brisa',  color: 'Corallo Pastello', colorKey: 'ph-blush',    price: 55,  priceStr: '€55,00',  category: 'Top',       desc: 'La Camicia Cotone Brisa porta con sé l\'aria del Mediterraneo. Il corallo pastello scalda la pelle, mentre il cotone leggero lascia respirare.' },
-        'giacca-kimono-fresca':  { name: 'Giacca Kimono Fresca',  color: 'Verde Menta',      colorKey: 'ph-sage',     price: 72,  priceStr: '€72,00',  category: 'Accessori', desc: 'La Giacca Kimono Fresca fonde l\'estetica orientale con la sensibilità italiana. Le maniche ampie e la schiena fluida creano una silhouette armoniosa.' },
-        'set-coordinato-viola':  { name: 'Set Coordinato Viola',  color: 'Lilla Morbido',    colorKey: 'ph-lavender', price: 130, priceStr: '€130,00', category: 'Set',       desc: 'Il Set Coordinato Viola è un\'opera di stile totale. Il lilla morbido avvolge in un\'aura romantica — indossali insieme per un look ricercato, o separatamente per due outfit distinti.' },
-        'pantalone-culotte-zen': { name: 'Pantalone Culotte Zen', color: 'Verde Muschio',    colorKey: 'ph-sage',     price: 88,  priceStr: '€88,00',  category: 'Pantaloni', desc: 'Il Pantalone Culotte Zen reinterpreta la silhouette culotte con eleganza zen. Il verde muschio si fonde con la natura, mentre il taglio ampio regala libertà di movimento.' },
-        'vestito-midi-fiori':    { name: 'Vestito Midi Fiori',    color: 'Rosa Antico',      colorKey: 'ph-blush',    price: 115, priceStr: '€115,00', category: 'Vestiti',   desc: 'Il Vestito Midi Fiori cattura la poesia della primavera in piena estate. Il rosa antico porta calore senza eccessi, mentre la lunghezza midi equilibra femminilità e riservatezza.' },
-        'gonna-wrap-salvia':     { name: 'Gonna Wrap Salvia',     color: 'Verde Salvia',     colorKey: 'ph-sage',     price: 70,  priceStr: '€70,00',  category: 'Gonne',     desc: 'La Gonna Wrap Salvia abbraccia il corpo con un gesto avvolgente. Il verde salvia aggiunge un tocco botanico al guardaroba. L\'apertura frontale regala movimento ad ogni passo.' },
-        'maxi-cardigan-nuvola':  { name: 'Maxi Cardigan Nuvola',  color: 'Grigio Cipria',    colorKey: 'ph-lavender', price: 85,  priceStr: '€85,00',  category: 'Accessori', desc: 'Il Maxi Cardigan Nuvola è il compagno ideale delle serate fresche. La lunghezza maxi e il grigio cipria lo rendono un pezzo versatile che completa ogni outfit.' },
-        'top-bustier-perla':     { name: 'Top Bustier Perla',     color: 'Avorio Madreperla',colorKey: 'ph-cream',    price: 48,  priceStr: '€48,00',  category: 'Top',       desc: 'Il Top Bustier Perla è un gioiello di semplicità. L\'avorio madreperla riflette la luce con delicatezza, mentre la struttura bustier valorizza la silhouette con discreta sensualità.' },
-      };
+    <script>
+    /* ============================================================
+       DYNAMIC PDP — loads the product by ?id= from the live API
+       (GET /api/products/:id), so EVERY product in the database —
+       including ones created/edited in the admin — renders here with
+       its real images, price, sizes (stock-aware) and description.
+       Replaces the previous hardcoded 12-product map.
+       ============================================================ */
+    (function () {
+      'use strict';
       var id = new URLSearchParams(window.location.search).get('id');
-      var p  = PRODUCTS[id];
-      if (!p) return null;
+      var PRODUCT = null, selectedSize = null, selectedColor = '', selectedColorKey = 'ph-blush';
 
-      document.title = p.name + ' — Memi Abbigliamento';
-      var bcSpan = document.querySelector('.breadcrumb span[style]');
-      if (bcSpan) bcSpan.textContent = p.name;
-      var titleEl = document.querySelector('.product-title');
-      if (titleEl) titleEl.textContent = p.name;
-      var priceEl = document.querySelector('.price-main');
-      if (priceEl) priceEl.textContent = p.priceStr;
-      var mainImg = document.getElementById('mainImg');
-      if (mainImg) mainImg.className = 'ph-fig ' + p.colorKey;
-      var descP = document.querySelector('.accordion-body p');
-      if (descP) descP.textContent = p.desc;
-      var colorLabelEl = document.getElementById('colorLabel');
-      if (colorLabelEl) colorLabelEl.textContent = '— ' + p.color;
-      return p;
-    })();
+      function eur(n) { return '€' + (Number(n) || 0).toFixed(2).replace('.', ','); }
+      function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+      function cap(s) { s = String(s || ''); return s.charAt(0).toUpperCase() + s.slice(1); }
+      function pickImg(x, size) { return !x ? null : (typeof x === 'string' ? x : (x[size] || x.full || x.card || x.thumb)); }
 
-    // Gallery thumbnail swap
-    function selectThumb(btn, src) {
-      document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('mainImg').src = src;
-    }
+      // Button handlers (exposed globally; referenced by generated markup)
+      window.selectThumb = function (btn, src) {
+        document.querySelectorAll('.thumb').forEach(function (t) { t.classList.remove('active'); });
+        btn.classList.add('active');
+        var m = document.getElementById('mainImg'); if (m) m.src = src;
+      };
+      window.selectSize = function (btn, size) {
+        document.querySelectorAll('.size-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        selectedSize = size;
+        var l = document.getElementById('sizeLabel'); if (l) l.textContent = '— ' + size;
+        var a = document.getElementById('atcBtn'); if (a) { a.disabled = false; a.style.opacity = '1'; a.style.cursor = 'pointer'; }
+      };
+      window.selectColor = function (btn, name) {
+        document.querySelectorAll('.color-swatch').forEach(function (s) { s.classList.remove('active'); });
+        btn.classList.add('active');
+        selectedColor = name;
+        var l = document.getElementById('colorLabel'); if (l) l.textContent = '— ' + name;
+      };
+      window.toggleAccordion = function (btn) { btn.parentElement.classList.toggle('open'); };
 
-    // Product data
-    const PRODUCT_NAME      = document.querySelector('.product-title')?.textContent.trim() || 'Vestito Lino Cannes';
-    const PRODUCT_PRICE     = _p ? _p.price    : 89;
-    const PRODUCT_COLOR_KEY = _p ? _p.colorKey : 'ph-blush';
+      function hydrate(p) {
+        PRODUCT = p;
+        var name = p.name || '';
+        selectedColor = p.color_label || p.colore || '';
+        selectedColorKey = p.colore ? ('ph-' + p.colore) : 'ph-blush';
 
-    // Color selector
-    let selectedColor = 'Rosa Cipria';
-    let selectedColorKey = PRODUCT_COLOR_KEY;
-    const colorKeyMap = { 'Rosa Cipria': 'ph-blush', 'Verde Salvia': 'ph-sage', 'Lavanda': 'ph-lavender', 'Avorio': 'ph-cream' };
+        document.title = name + ' — Memi Abbigliamento';
 
-    function selectColor(btn, name) {
-      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-      btn.classList.add('active');
-      selectedColor = name;
-      selectedColorKey = colorKeyMap[name] || PRODUCT_COLOR_KEY;
-      document.getElementById('colorLabel').textContent = '— ' + name;
-    }
+        // Breadcrumb: category link -> dynamic shop filter, last span -> name
+        var bcCat = document.querySelector('.breadcrumb a[href*="collections/"], .breadcrumb a[href*="categoria="]');
+        if (bcCat && p.categoria) { bcCat.textContent = cap(p.categoria); bcCat.href = '/shop?categoria=' + encodeURIComponent(p.categoria); }
+        var bcSpan = document.querySelector('.breadcrumb span'); if (bcSpan) bcSpan.textContent = name;
 
-    // Size selector
-    let selectedSize = null;
-    function selectSize(btn, size) {
-      document.querySelectorAll('.size-btn:not(.oos)').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedSize = size;
-      document.getElementById('sizeLabel').textContent = '— ' + size;
-      document.getElementById('atcBtn').disabled = false;
-      document.getElementById('atcBtn').style.opacity = '1';
-    }
+        var titleEl = document.querySelector('.product-title'); if (titleEl) titleEl.textContent = name;
 
-    // ATC button — morph state machine + flying thumbnail
-    const atcBtn = document.getElementById('atcBtn');
-    atcBtn.style.opacity = '0.5';
-    atcBtn.style.cursor = 'not-allowed';
+        // Price (+ optional discount)
+        var priceRow = document.querySelector('.product-price-row');
+        if (priceRow) {
+          var html = '<span class="price-main">' + eur(p.price) + '</span>';
+          if (p.original_price && p.discount_pct) {
+            html += ' <span class="price-old">' + eur(p.original_price) + '</span>';
+            html += ' <span class="price-tag">−' + p.discount_pct + '%</span>';
+          }
+          priceRow.innerHTML = html;
+        }
 
-    atcBtn.addEventListener('click', function () {
-      if (!selectedSize || this.classList.contains('is-loading') || this.classList.contains('is-done')) return;
+        // Colour: show the product's actual single colour
+        var colorLabelEl = document.getElementById('colorLabel'); if (colorLabelEl) colorLabelEl.textContent = '— ' + selectedColor;
+        var swatches = document.querySelector('.color-swatches');
+        if (swatches) {
+          var hexMap = { blush: '#F2C4BD', salvia: '#C4D4C0', lavanda: '#D6CEEA', avorio: '#E8DDD0', espresso: '#3B2B2B', antico: '#d4a5a0', menta: '#b5ceb5', cream: '#E8DDD0' };
+          var hex = hexMap[p.colore] || '#E8DDD0';
+          swatches.innerHTML = '<button class="color-swatch active" style="background:' + hex + ';" aria-label="' + esc(selectedColor) + '"></button>';
+        }
 
-      // Phase 1: spinner
-      this.classList.add('is-loading');
-      const self = this;
+        // Description (first description accordion body)
+        var descP = document.querySelector('.accordion-body p'); if (descP && p.description) descP.textContent = p.description;
 
-      setTimeout(function () {
-        // Phase 2: checkmark + add to cart
-        self.classList.remove('is-loading');
-        self.classList.add('is-done');
+        // Sizes from DB (stock-aware)
+        var sizes = Array.isArray(p.taglie) ? p.taglie : [];
+        var grid = document.querySelector('.size-grid');
+        var sizeWrap = grid ? grid.parentElement : null;
+        if (grid) {
+          var real = sizes.filter(function (s) { var t = (typeof s === 'string') ? s : s.taglia; return t && String(t).toLowerCase() !== 'unica'; });
+          if (!real.length) {
+            // Single / one-size product: no size choice needed
+            if (sizeWrap) sizeWrap.style.display = 'none';
+            selectedSize = null;
+            var a0 = document.getElementById('atcBtn'); if (a0) { a0.disabled = false; a0.style.opacity = '1'; a0.style.cursor = 'pointer'; }
+          } else {
+            if (sizeWrap) sizeWrap.style.display = '';
+            grid.innerHTML = real.map(function (s) {
+              var t = (typeof s === 'string') ? s : s.taglia;
+              var stock = (typeof s === 'object') ? (s.stock == null ? 1 : s.stock) : 1;
+              var label = esc(String(t).toUpperCase());
+              if (stock <= 0) return '<button class="size-btn oos" aria-label="' + label + ' — esaurito">' + label + '</button>';
+              return '<button class="size-btn" onclick="selectSize(this,\'' + esc(t) + '\')">' + label + '</button>';
+            }).join('');
+          }
+        }
 
-        if (typeof window.addToCart === 'function') {
-          const id = PRODUCT_NAME.toLowerCase().replace(/\s+/g, '-') + '-' + selectedColor.toLowerCase().replace(/\s+/g, '-') + '-' + selectedSize.toLowerCase();
-          window.addToCart({
-            id:      id,
-            name:    PRODUCT_NAME,
-            variant: selectedColor + ' · ' + selectedSize,
-            price:   PRODUCT_PRICE,
-            color:   selectedColorKey
+        // Gallery from real uploaded images
+        var imgs = Array.isArray(p.images) ? p.images : [];
+        var main = document.getElementById('mainImg');
+        var thumbs = document.querySelector('.gallery-thumbs');
+        if (imgs.length && main) {
+          var full0 = pickImg(imgs[0], 'full');
+          if (full0) { main.src = full0; main.alt = name; }
+          if (thumbs) {
+            thumbs.innerHTML = imgs.map(function (im, i) {
+              var full = pickImg(im, 'full'), th = pickImg(im, 'thumb') || full;
+              return '<button class="thumb' + (i === 0 ? ' active' : '') + '" onclick="selectThumb(this,\'' + full + '\')" aria-label="Vista ' + (i + 1) + '">' +
+                '<img src="' + th + '" alt="" style="width:100%;height:100%;object-fit:cover;"></button>';
+            }).join('');
+          }
+        }
+
+        window.__PDP = { id: p.id, name: name, price: Number(p.price) || 0, colorKey: selectedColorKey };
+        if (window.__pdpSyncWish) window.__pdpSyncWish();
+      }
+
+      function notFound() {
+        var main = document.querySelector('.pdp');
+        if (main) main.innerHTML = '<div style="text-align:center;padding:5rem 1.5rem;max-width:520px;margin:0 auto;">' +
+          '<h1 style="font-family:var(--font-serif);font-weight:300;font-size:2rem;margin-bottom:1rem;">Prodotto non trovato</h1>' +
+          '<p style="color:var(--brown-mid);margin-bottom:1.75rem;">Questo prodotto non è più disponibile o l\'indirizzo non è corretto.</p>' +
+          '<a href="/shop" style="display:inline-block;padding:.85rem 2rem;background:var(--espresso);color:#fff;border-radius:9999px;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600;">Torna allo shop</a></div>';
+      }
+
+      function wireActions() {
+        var atc = document.getElementById('atcBtn');
+        if (atc) {
+          atc.style.opacity = '0.5'; atc.style.cursor = 'not-allowed';
+          atc.addEventListener('click', function () {
+            var P = window.__PDP; if (!P) return;
+            var sizes = (PRODUCT && Array.isArray(PRODUCT.taglie)) ? PRODUCT.taglie : [];
+            var hasReal = sizes.some(function (s) { var t = (typeof s === 'string') ? s : s.taglia; return t && String(t).toLowerCase() !== 'unica'; });
+            if (hasReal && !selectedSize) return;
+            if (this.classList.contains('is-loading') || this.classList.contains('is-done')) return;
+            this.classList.add('is-loading');
+            var self = this;
+            setTimeout(function () {
+              self.classList.remove('is-loading'); self.classList.add('is-done');
+              if (typeof window.addToCart === 'function') {
+                window.addToCart({
+                  id: P.id + (selectedSize ? '-' + selectedSize.toLowerCase() : ''),
+                  name: P.name,
+                  variant: [selectedColor, selectedSize].filter(Boolean).join(' · '),
+                  price: P.price,
+                  color: P.colorKey
+                });
+              }
+              var g = document.getElementById('mainImg');
+              if (g && typeof window.flyToCart === 'function') window.flyToCart(g);
+              setTimeout(function () { window.openCart && window.openCart(); }, 450);
+              setTimeout(function () { self.classList.remove('is-done'); }, 1800);
+            }, 320);
+          });
+          atc.addEventListener('mouseenter', function () { if (!this.disabled) this.style.cursor = 'pointer'; });
+        }
+
+        var wb = document.getElementById('wishlistBtn');
+        if (wb) {
+          function sync() {
+            try {
+              var P = window.__PDP || {};
+              var wl = JSON.parse(localStorage.getItem('memi_wishlist')) || [];
+              var on = wl.some(function (i) { return i.productId === P.id || i.id === P.id; });
+              var h = document.getElementById('wishlistHeart');
+              var l = document.getElementById('wishlistBtnLabel');
+              wb.classList.toggle('active', on); wb.classList.toggle('is-wishlisted', on);
+              if (h) h.style.fill = on ? 'var(--blush-dark)' : 'none';
+              if (l) l.textContent = on ? 'Nella wishlist ✓' : 'Salva nella wishlist';
+            } catch (_) {}
+          }
+          window.__pdpSyncWish = sync;
+          wb.addEventListener('click', function () {
+            var P = window.__PDP || {};
+            if (typeof window.toggleWishlist === 'function') window.toggleWishlist(P.id, P.name, selectedColor, P.colorKey, selectedSize);
+            sync();
           });
         }
-
-        // Flying thumbnail from the main gallery image
-        var galleryEl = document.getElementById('mainImg');
-        if (galleryEl && typeof window.flyToCart === 'function') {
-          window.flyToCart(galleryEl);
-        }
-
-        // Phase 3: open cart after thumbnail lands
-        setTimeout(function () {
-          window.openCart && window.openCart();
-        }, 450);
-
-        // Reset button
-        setTimeout(function () {
-          self.classList.remove('is-done');
-        }, 1800);
-
-      }, 320);
-    });
-    atcBtn.addEventListener('mouseenter', function() { if (!this.disabled) this.style.cursor = 'pointer'; });
-
-    // Wishlist button
-    const wishlistBtn = document.getElementById('wishlistBtn');
-
-    function pdpWishId() {
-      var base = PRODUCT_NAME.toLowerCase().replace(/\s+/g, '-');
-      return base;
-    }
-
-    function pdpSyncWishBtn() {
-      try {
-        var wl  = JSON.parse(localStorage.getItem('memi_wishlist')) || [];
-        var baseId = pdpWishId();
-        var wishId = baseId + (selectedSize ? '-sz-' + selectedSize : '');
-        var id  = wishId;
-        var on  = wl.some(function(i) { return i.id === wishId || i.productId === baseId; });
-        var inWish = document.getElementById('wishlistHeart');
-        var label  = document.getElementById('wishlistBtnLabel');
-        wishlistBtn.classList.toggle('active', on);
-        if (inWish) inWish.style.fill = on ? 'var(--blush-dark)' : 'none';
-        if (label)  label.textContent  = on ? 'Nella wishlist ✓' : 'Salva nella wishlist';
-      } catch (_) {}
-    }
-
-    pdpSyncWishBtn();
-
-    wishlistBtn.addEventListener('click', function () {
-      var id = pdpWishId();
-      if (typeof window.toggleWishlist === 'function') {
-        window.toggleWishlist(id, PRODUCT_NAME, selectedColor, selectedColorKey, selectedSize);
       }
-      pdpSyncWishBtn();
-    });
 
-    // Accordion
-    function toggleAccordion(btn) {
-      const item = btn.parentElement;
-      item.classList.toggle('open');
-    }
+      document.addEventListener('DOMContentLoaded', function () {
+        wireActions();
+        if (!id) { notFound(); return; }
+        fetch('/api/products/' + encodeURIComponent(id))
+          .then(function (r) { if (!r.ok) throw new Error('not found'); return r.json(); })
+          .then(function (p) { if (!p || !p.id) { notFound(); return; } hydrate(p); })
+          .catch(function () { notFound(); });
+      });
+    })();
   </script>
 
   <script src="api-client.js?v=2"></script>

@@ -228,7 +228,7 @@
       return '<button class="size-chip">' + (t === 'unica' ? 'Unica' : t.toUpperCase()) + '</button>';
     }).join('');
 
-    return '<a class="product-card-link" href="/products/' + p.id + '/">' +
+    return '<a class="product-card-link" href="/product?id=' + encodeURIComponent(p.id) + '">' +
       '<article class="product-card" style="--i:' + idx + '" ' +
         'data-categoria="' + p.categoria + '" data-colore="' + p.colore + '" ' +
         'data-prezzo="' + p.price + '" data-popularity="' + (p.popularity || 999) + '">' +
