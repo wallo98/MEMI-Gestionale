@@ -35,8 +35,6 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
-    networks:
-      - memi_net
 
   # ── Backend API ──────────────────────────────────────────────
   backend:
@@ -87,8 +85,6 @@ services:
     volumes:
       # Persistent storage for uploaded product images (survives redeploys).
       - uploads_data:/app/uploads
-    networks:
-      - memi_net
     labels:
       # Coolify / Traefik labels — adjust host rules to your domain
       - "traefik.enable=true"
@@ -109,8 +105,6 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-    networks:
-      - memi_net
     labels:
       - "traefik.enable=true"
       # HTTPS router
@@ -132,8 +126,6 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-    networks:
-      - memi_net
     labels:
       - "traefik.enable=true"
       # HTTPS router
@@ -152,7 +144,3 @@ volumes:
     driver: local
   uploads_data:
     driver: local
-
-networks:
-  memi_net:
-    driver: bridge
