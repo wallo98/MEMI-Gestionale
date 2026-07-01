@@ -13,7 +13,7 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body { background: #0e0b09; color: var(--espresso);
+    body { background: #FBF9F5; color: var(--espresso);
       font-family: var(--font-sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
     img { display: block; width: 100%; object-fit: cover; }
     a { color: inherit; text-decoration: none; }
@@ -84,7 +84,7 @@
     .ed-hero img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
     .ed-hero-veil {
       position: absolute; inset: 0;
-      background: linear-gradient(to bottom, rgba(14,11,9,.3) 0%, rgba(14,11,9,.05) 40%, rgba(14,11,9,.7) 85%, rgba(14,11,9,.95) 100%);
+      background: linear-gradient(to bottom, rgba(59,43,43,.12) 0%, rgba(59,43,43,0) 38%, rgba(59,43,43,.34) 82%, rgba(59,43,43,.55) 100%);
     }
     .ed-hero-body {
       position: absolute; z-index: 2;
@@ -99,17 +99,17 @@
 
     /* ── Intro text ── */
     .ed-intro {
-      background: #0e0b09;
+      background: #FBF9F5;
       padding: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 5vw, 4rem);
       max-width: 640px;
     }
     .ed-intro-label { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
-      color: rgba(255,255,255,.3); margin-bottom: var(--space-4); }
+      color: var(--brown-light); margin-bottom: var(--space-4); }
     .ed-intro-text { font-family: var(--font-serif); font-size: clamp(1.35rem, 2.5vw, 1.8rem);
-      font-weight: 300; line-height: 1.45; color: rgba(255,255,255,.75); font-style: italic; }
+      font-weight: 300; line-height: 1.45; color: var(--espresso); font-style: italic; }
 
     /* ── Photo spreads ── */
-    .ed-spread { background: #0e0b09; padding: 0 clamp(1.5rem, 5vw, 4rem) clamp(2rem, 4vw, 3rem); }
+    .ed-spread { background: #FBF9F5; padding: 0 clamp(1.5rem, 5vw, 4rem) clamp(2rem, 4vw, 3rem); }
     .ed-spread + .ed-spread { padding-top: 6px; }
 
     .spread-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
@@ -136,8 +136,8 @@
       gap: var(--space-3);
     }
     .ed-photo-cap-name { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
-      font-weight: 500; color: rgba(255,255,255,.5); }
-    .ed-photo-cap-price { font-size: 11px; color: rgba(255,255,255,.3); }
+      font-weight: 500; color: var(--espresso); }
+    .ed-photo-cap-price { font-size: 11px; color: var(--brown-light); }
 
     /* Full-bleed */
     .ed-fullbleed { width: 100%; overflow: hidden; }
@@ -146,7 +146,7 @@
 
     /* Pull quote */
     .ed-quote {
-      background: #0e0b09;
+      background: var(--lavender-light);
       padding: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 5vw, 4rem);
       text-align: center;
     }
@@ -155,7 +155,7 @@
       font-size: clamp(1.5rem, 3.5vw, 3rem);
       font-weight: 300;
       font-style: italic;
-      color: rgba(255,255,255,.55);
+      color: var(--espresso);
       line-height: 1.4;
       max-width: 800px;
       margin: 0 auto;
@@ -167,7 +167,7 @@
       letter-spacing: 0.2em;
       text-transform: uppercase;
       font-style: normal;
-      color: rgba(255,255,255,.2);
+      color: var(--brown-light);
     }
 
     /* Shop CTA strip */
@@ -198,8 +198,8 @@
 
     /* Pagination between editorials */
     .ed-pagination {
-      background: #0e0b09;
-      border-top: 1px solid rgba(255,255,255,.08);
+      background: #FFFFFF;
+      border-top: 1px solid var(--beige);
       display: grid;
       grid-template-columns: 1fr 1fr;
     }
@@ -208,12 +208,12 @@
       display: flex; flex-direction: column; gap: 6px;
       transition: background 200ms;
     }
-    .ed-pag-item:hover { background: rgba(255,255,255,.04); }
-    .ed-pag-item + .ed-pag-item { border-left: 1px solid rgba(255,255,255,.08); }
+    .ed-pag-item:hover { background: var(--bg-soft); }
+    .ed-pag-item + .ed-pag-item { border-left: 1px solid var(--beige); }
     .ed-pag-label { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
-      color: rgba(255,255,255,.25); }
+      color: var(--brown-light); }
     .ed-pag-title { font-family: var(--font-serif); font-size: clamp(1rem, 2.5vw, 1.5rem);
-      font-weight: 300; color: rgba(255,255,255,.65); font-style: italic; }
+      font-weight: 300; color: var(--brown-mid); font-style: italic; }
     .ed-pag-item:last-child { text-align: right; }
   </style>
 </head>
@@ -345,6 +345,6 @@
 
   <div data-include="site-footer"></div>
   <script src="../../api-client.js?v=3"></script>
-  <script src="../../app.js?v=11"></script>
+  <script src="../../app.js?v=12"></script>
 </body>
 </html>

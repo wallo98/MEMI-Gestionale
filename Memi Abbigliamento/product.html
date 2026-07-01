@@ -759,18 +759,72 @@
         }
       }
 
+      // ── SEO: set title/description/OG + Product JSON-LD from the live product ──
+      function setMeta(attr, key, val) {
+        var m = document.head.querySelector('meta[' + attr + '="' + key + '"]');
+        if (!m) { m = document.createElement('meta'); m.setAttribute(attr, key); document.head.appendChild(m); }
+        m.setAttribute('content', val);
+      }
+      function setCanonical(href) {
+        var l = document.head.querySelector('link[rel="canonical"]');
+        if (!l) { l = document.createElement('link'); l.setAttribute('rel', 'canonical'); document.head.appendChild(l); }
+        l.setAttribute('href', href);
+      }
+      function injectSeo(p) {
+        try {
+          var base = 'https://memiabbigliamento.it';
+          var url  = base + '/product?id=' + encodeURIComponent(p.id);
+          var imgs = Array.isArray(p.images) ? p.images : [];
+          var img  = '';
+          if (imgs.length) { var x = imgs[0]; img = (typeof x === 'string') ? x : (x.full || x.card || x.thumb || ''); }
+          if (img && img.indexOf('http') !== 0) img = base + img;
+          var desc = (p.description || (p.name + ' — Memi Abbigliamento, moda femminile curata.'))
+            .replace(/\s+/g, ' ').trim().slice(0, 300);
+          document.title = p.name + ' — Memi Abbigliamento';
+          setMeta('name', 'description', desc);
+          setMeta('property', 'og:type', 'product');
+          setMeta('property', 'og:title', p.name + ' — Memi Abbigliamento');
+          setMeta('property', 'og:description', desc);
+          setMeta('property', 'og:url', url);
+          setMeta('property', 'og:site_name', 'Memi Abbigliamento');
+          setMeta('property', 'og:locale', 'it_IT');
+          setMeta('name', 'twitter:card', 'summary_large_image');
+          setMeta('name', 'twitter:title', p.name + ' — Memi Abbigliamento');
+          setMeta('name', 'twitter:description', desc);
+          if (img) { setMeta('property', 'og:image', img); setMeta('name', 'twitter:image', img); }
+          setCanonical(url);
+          var offer = {
+            '@type': 'Offer', url: url, priceCurrency: 'EUR',
+            price: (Number(p.price) || 0).toFixed(2),
+            availability: (p.status === 'esaurito') ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
+            itemCondition: 'https://schema.org/NewCondition'
+          };
+          var ld = {
+            '@context': 'https://schema.org', '@type': 'Product',
+            name: p.name, description: desc, sku: String(p.id),
+            brand: { '@type': 'Brand', name: 'Memi Abbigliamento' },
+            offers: offer
+          };
+          if (img) ld.image = [img];
+          var old = document.getElementById('pdp-ld'); if (old) old.remove();
+          var s = document.createElement('script'); s.type = 'application/ld+json'; s.id = 'pdp-ld';
+          s.textContent = JSON.stringify(ld);
+          document.head.appendChild(s);
+        } catch (_) { /* SEO is best-effort */ }
+      }
+
       document.addEventListener('DOMContentLoaded', function () {
         wireActions();
         if (!id) { notFound(); return; }
         fetch('/api/products/' + encodeURIComponent(id))
           .then(function (r) { if (!r.ok) throw new Error('not found'); return r.json(); })
-          .then(function (p) { if (!p || !p.id) { notFound(); return; } hydrate(p); })
+          .then(function (p) { if (!p || !p.id) { notFound(); return; } hydrate(p); injectSeo(p); })
           .catch(function () { notFound(); });
       });
     })();
   </script>
 
   <script src="api-client.js?v=3"></script>
-  <script src="app.js?v=11"></script>
+  <script src="app.js?v=12"></script>
 </body>
 </html>

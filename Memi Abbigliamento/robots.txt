@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# Private / transactional pages — no SEO value, keep out of the index
+Disallow: /checkout
+Disallow: /checkout.html
+Disallow: /account
+Disallow: /account.html
+Disallow: /order-confirm
+Disallow: /order-confirm.html
+Disallow: /reset-password
+Disallow: /reset-password.html
+Disallow: /forgot-password
+Disallow: /forgot-password.html
+Disallow: /clear-cart.html
+Disallow: /api/
+
+# Search results are thin/duplicate — allow crawl of the page, not query variants
+Disallow: /search?
+Disallow: /*?*sort=
+Disallow: /*?*page=
+
+Sitemap: https://memiabbigliamento.it/sitemap.xml
