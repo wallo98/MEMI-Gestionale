@@ -3919,11 +3919,22 @@ $(function(){
       }).fail(function() { _origRenderView(name); });
 
     } else if (name === 'shipping' || name === 'couriers' || name === 'shipping-zones') {
-      $.when(api.shipping.couriers(), api.shipping.zones()).done(function(courRes, zoneRes) {
+      $.when(api.shipping.couriers(), api.shipping.zones(), api.shipping.shipments()).done(function(courRes, zoneRes, shipRes) {
         var couriers = Array.isArray(courRes[0]) ? courRes[0] : [];
         var zones    = Array.isArray(zoneRes[0]) ? zoneRes[0] : [];
+        var ships    = Array.isArray(shipRes[0]) ? shipRes[0] : [];
+        // Real per-courier counters (was hardcoded 0/0/0).
+        var byCourier = {};
+        ships.forEach(function(s) {
+          var c = (s.courier_code || '').toLowerCase();
+          if (!byCourier[c]) byCourier[c] = { sped: 0, consegnati: 0, ritardi: 0 };
+          byCourier[c].sped++;
+          if (s.stato === 'consegnato') byCourier[c].consegnati++;
+          if (s.stato === 'problema')   byCourier[c].ritardi++;
+        });
         DATA.couriers = couriers.map(function(c) {
-          return { code: c.code, nome: c.nome, slug: c.slug || c.code.toUpperCase(), rate: 'EUR ' + parseFloat(c.rate || 0).toFixed(2), rate_raw: parseFloat(c.rate || 0), attivo: !!c.attivo, tracking_url_template: c.tracking_url_template || '', sped: 0, consegnati: 0, ritardi: 0 };
+          var st = byCourier[(c.code || '').toLowerCase()] || { sped: 0, consegnati: 0, ritardi: 0 };
+          return { code: c.code, nome: c.nome, slug: c.slug || c.code.toUpperCase(), rate: 'EUR ' + parseFloat(c.rate || 0).toFixed(2), rate_raw: parseFloat(c.rate || 0), attivo: !!c.attivo, tracking_url_template: c.tracking_url_template || '', sped: st.sped, consegnati: st.consegnati, ritardi: st.ritardi };
         });
         DATA.zones = zones.map(function(z) {
           return { _db_id: z.id, nome: z.nome, paesi: z.paesi, metodo: z.metodo, prezzo: 'EUR ' + parseFloat(z.prezzo || 0).toFixed(2), grat: z.spedizione_gratuita_da ? 'EUR ' + z.spedizione_gratuita_da : '-' };
@@ -4008,7 +4019,7 @@ $(function(){
         _origRenderView(name);
       }).fail(function() { DATA.staff = DATA.staff || []; _origRenderView(name); });
 
-    } else if (name === 'settings') {
+    } else if (name === 'settings' || name === 'taxes') {
       api.settings.get().done(function(data) {
         DATA.settings = data || {};
         _origRenderView(name);

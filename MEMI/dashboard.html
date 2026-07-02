@@ -45,7 +45,7 @@
         <div class="nav-children">
           <a href="#" class="nav-item child" data-view="orders">Tutti gli ordini</a>
           <a href="#" class="nav-item child" data-view="orders-drafts">Bozze <span class="badge badge-soft" id="badgeDrafts" style="display:none"></span></a>
-          <a href="#" class="nav-item child" data-view="orders-abandoned">Carrelli abbandonati <span class="badge badge-soft" id="badgeAbandoned" style="display:none"></span></a>
+          <!-- <a href="#" class="nav-item child" data-view="orders-abandoned">Carrelli abbandonati</a> — ghost: no abandoned-cart backend (storefront cart is localStorage only) -->
           <a href="#" class="nav-item child" data-view="returns">Resi</a>
           <a href="#" class="nav-item child" data-view="invoices">Fatture</a>
         </div>
@@ -230,6 +230,6 @@
 
 <!-- Admin API client — must load before app.js -->
 <script src="js/admin-api.js?v=15"></script>
-<script src="js/app.js?v=22"></script>
+<script src="js/app.js?v=23"></script>
 </body>
 </html>

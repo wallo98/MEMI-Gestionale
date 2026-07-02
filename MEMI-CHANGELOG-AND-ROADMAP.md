@@ -144,3 +144,38 @@ Express/MySQL backend untouched** (same `/api`). Do it in your VS Code, one slic
 - **Run `node --check "Memi Abbigliamento/app.js"`** on your machine after pulling (the sandbox's
   file-sync truncates large files, so JS checks are unreliable there — not a code issue).
 - **Don't run `docker compose down -v`** against production (destroys the DB + uploads volumes).
+
+---
+
+# Part 4 — Admin sidebar audit (Luglio 2026)
+
+Audited every sidebar tab against the backend. **The admin is far more real than the docs implied:
+22 of 39 views are genuinely data-backed with working CRUD** (dashboard, orders, resi, invoices,
+products, inventory, giftcards, customers, loyalty, reviews, campagne, newsletter, discounts, CMS
+pages/blog, shipments, shipping-zones, pickup, finance, payouts, integrations, staff, settings).
+
+**Pure-mock views were already hidden** in the sidebar (chat, live view, menus, pop-up, spese,
+report, segmenti, automazioni). This pass fixed the remaining honesty gaps in *visible* tabs:
+- **Removed `orders-abandoned` (Carrelli abbandonati)** from the sidebar — it could only ever render
+  empty (no abandoned-cart backend; the storefront cart lives in localStorage only). Misleading as a
+  visible tab, so commented out.
+- **`taxes` (Tasse)** now loads real settings (added it to the render ladder alongside `settings`),
+  so the standard VAT rate comes from `store_vat_rate` on cold load instead of the `22%` fallback.
+  (Reduced-rate 10% and the €10.000 EU OSS threshold shown are factual regulatory references.)
+- **`couriers` per-card stats** (spedizioni / consegnati / ritardi) now compute from the real
+  `shipments` table per courier, instead of the hardcoded `0/0/0`.
+- Admin cache bumped: `dashboard.html` → `app.js?v=23`.
+
+**Still PARTIAL / display-only (real data, no CRUD — acceptable):** collections & categories (live
+counts, read-only), analytics (real KPIs + chart; "Fonti traffico" needs a GA integration), files
+(URL-only media library), tracking (searches own shipments; no external courier API), Bozze (= orders
+in `in_attesa`, not true draft orders).
+
+**Dead orphan templates** still in `app.js` but unreachable from any nav: `transfers`,
+`online-store`, `pos`, `social`, `apps`. Safe to delete in a future cleanup (kept for now to avoid
+churn in the 2,200-line file — they don't render anywhere).
+
+**Genuinely missing (needs new backend — roadmap, not built):** abandoned-cart capture, real
+courier-tracking API integration, Stripe refund action wired to resi, richer tax/VAT config,
+store-expenses/payouts reconciliation, web-analytics (GA4) for traffic sources, suppliers/purchase
+orders. These are new features, not fixes — best tackled during/after the React migration (Part 3).
