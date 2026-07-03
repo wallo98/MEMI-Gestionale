@@ -216,9 +216,29 @@ app.use((err, req, res, _next) => {
 });
 
 // ── Startup ───────────────────────────────────────────────────
+// Wait for MySQL instead of dying on the first refused connection. On a FRESH
+// volume, mysql reports "healthy" (mysqladmin ping) before its initdb.d seed
+// finishes and while its entrypoint bounces the temp init-server — so the very
+// first connection attempts can be refused. Without this retry the backend
+// exit(1)'d, its restart policy brought it back, but `docker compose up` had
+// already reported "dependency backend failed to start" (a scary failed first
+// boot needing a manual retry). Retrying here makes the first boot clean.
+async function connectWithRetry(maxAttempts = 30, delayMs = 2000) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      await testConnection();
+      return;
+    } catch (err) {
+      if (attempt === maxAttempts) throw err;
+      console.log(`⏳  MySQL not ready (attempt ${attempt}/${maxAttempts}: ${err.code || err.message}), retrying in ${delayMs}ms...`);
+      await new Promise(r => setTimeout(r, delayMs));
+    }
+  }
+}
+
 (async () => {
   try {
-    await testConnection();
+    await connectWithRetry();
     // Ensure feature tables added after the initial schema exist (idempotent)
     try {
       const { runMigrations } = require('./db/migrations');
