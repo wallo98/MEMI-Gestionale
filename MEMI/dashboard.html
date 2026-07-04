@@ -1,235 +1,239 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
-<meta charset="UTF-8">
-<meta name="memi-api" content="/api">
-<title>MEMI - Dashboard</title>
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="css/style.css">
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="memi-api" content="/api">
+  <title>MEMI - Dashboard</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
+
 <body>
-<div class="app">
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-brand">
-      <div class="brand-logo small">M</div>
-      <div>
-        <strong>MEMI Store</strong>
-        <small>memi.myshop.it</small>
-      </div>
-      <button class="icon-btn collapse-btn" title="Comprimi">‹</button>
-    </div>
-
-    <div class="store-switch">
-      <span>🏬</span>
-      <div>
-        <strong>MEMI Italia</strong>
-        <small>Piano Pro</small>
-      </div>
-      <span class="chev">▾</span>
-    </div>
-
-    <nav class="side-nav">
-      <a href="#" class="nav-item active" data-view="dashboard">
-        <span class="ic">🏠</span> <span class="lbl">Home</span>
-      </a>
-
-      <!-- ORDINI -->
-      <div class="nav-parent" data-group="orders">
-        <a href="#" class="nav-item" data-view="orders">
-          <span class="ic">🧾</span> <span class="lbl">Ordini</span>
-          <span class="badge badge-pink" id="badgeOrders" style="display:none"></span>
-          <span class="chev">▾</span>
-        </a>
-        <div class="nav-children">
-          <a href="#" class="nav-item child" data-view="orders">Tutti gli ordini</a>
-          <a href="#" class="nav-item child" data-view="orders-drafts">Bozze <span class="badge badge-soft" id="badgeDrafts" style="display:none"></span></a>
-          <!-- <a href="#" class="nav-item child" data-view="orders-abandoned">Carrelli abbandonati</a> — ghost: no abandoned-cart backend (storefront cart is localStorage only) -->
-          <a href="#" class="nav-item child" data-view="returns">Resi</a>
-          <a href="#" class="nav-item child" data-view="invoices">Fatture</a>
+  <div class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-logo small">M</div>
+        <div>
+          <strong>MEMI Store</strong>
+          <small>memi.myshop.it</small>
         </div>
+        <button class="icon-btn collapse-btn" title="Comprimi">‹</button>
       </div>
 
-      <!-- PRODOTTI -->
-      <div class="nav-parent" data-group="products">
-        <a href="#" class="nav-item" data-view="products">
-          <span class="ic">👕</span> <span class="lbl">Prodotti</span>
-          <span class="chev">▾</span>
-        </a>
-        <div class="nav-children">
-          <a href="#" class="nav-item child" data-view="products">Catalogo</a>
-          <a href="#" class="nav-item child" data-view="inventory">Magazzino</a>
-          <a href="#" class="nav-item child" data-view="collections">Collezioni</a>
-          <a href="#" class="nav-item child" data-view="categories">Categorie</a>
-          <a href="#" class="nav-item child" data-view="giftcards">Gift card</a>
+      <div class="store-switch">
+        <span>🏬</span>
+        <div>
+          <strong>MEMI Italia</strong>
+          <small>Piano Pro</small>
         </div>
+        <span class="chev">▾</span>
       </div>
 
-      <!-- CLIENTI -->
-      <div class="nav-parent" data-group="customers">
-        <a href="#" class="nav-item" data-view="customers">
-          <span class="ic">👥</span> <span class="lbl">Clienti</span>
-          <span class="chev">▾</span>
+      <nav class="side-nav">
+        <a href="#" class="nav-item active" data-view="dashboard">
+          <span class="ic">🏠</span> <span class="lbl">Home</span>
         </a>
-        <div class="nav-children">
-          <a href="#" class="nav-item child" data-view="customers">Tutti i clienti</a>
-          <a href="#" class="nav-item child" data-view="loyalty">Fedeltà & Punti</a>
-          <!-- <a href="#" class="nav-item child" data-view="segments">Segmenti</a> — ghost, no backend -->
-          <a href="#" class="nav-item child" data-view="reviews">Recensioni</a>
-        </div>
-      </div>
 
-      <!-- MARKETING -->
-      <div class="nav-parent" data-group="marketing">
-        <a href="#" class="nav-item" data-view="marketing">
-          <span class="ic">📣</span> <span class="lbl">Marketing</span>
-          <span class="chev">▾</span>
+        <!-- ORDINI -->
+        <div class="nav-parent" data-group="orders">
+          <a href="#" class="nav-item" data-view="orders">
+            <span class="ic">🧾</span> <span class="lbl">Ordini</span>
+            <span class="badge badge-pink" id="badgeOrders" style="display:none"></span>
+            <span class="chev">▾</span>
+          </a>
+          <div class="nav-children">
+            <a href="#" class="nav-item child" data-view="orders">Tutti gli ordini</a>
+            <a href="#" class="nav-item child" data-view="orders-drafts">Bozze <span class="badge badge-soft"
+                id="badgeDrafts" style="display:none"></span></a>
+            <!-- <a href="#" class="nav-item child" data-view="orders-abandoned">Carrelli abbandonati</a> — ghost: no abandoned-cart backend (storefront cart is localStorage only) -->
+            <a href="#" class="nav-item child" data-view="returns">Resi</a>
+            <a href="#" class="nav-item child" data-view="invoices">Fatture</a>
+          </div>
+        </div>
+
+        <!-- PRODOTTI -->
+        <div class="nav-parent" data-group="products">
+          <a href="#" class="nav-item" data-view="products">
+            <span class="ic">👕</span> <span class="lbl">Prodotti</span>
+            <span class="chev">▾</span>
+          </a>
+          <div class="nav-children">
+            <a href="#" class="nav-item child" data-view="products">Catalogo</a>
+            <a href="#" class="nav-item child" data-view="inventory">Magazzino</a>
+            <a href="#" class="nav-item child" data-view="collections">Collezioni</a>
+            <a href="#" class="nav-item child" data-view="categories">Categorie</a>
+            <a href="#" class="nav-item child" data-view="giftcards">Gift card</a>
+          </div>
+        </div>
+
+        <!-- CLIENTI -->
+        <div class="nav-parent" data-group="customers">
+          <a href="#" class="nav-item" data-view="customers">
+            <span class="ic">👥</span> <span class="lbl">Clienti</span>
+            <span class="chev">▾</span>
+          </a>
+          <div class="nav-children">
+            <a href="#" class="nav-item child" data-view="customers">Tutti i clienti</a>
+            <a href="#" class="nav-item child" data-view="loyalty">Fedeltà & Punti</a>
+            <!-- <a href="#" class="nav-item child" data-view="segments">Segmenti</a> — ghost, no backend -->
+            <a href="#" class="nav-item child" data-view="reviews">Recensioni</a>
+          </div>
+        </div>
+
+        <!-- MARKETING -->
+        <div class="nav-parent" data-group="marketing">
+          <a href="#" class="nav-item" data-view="marketing">
+            <span class="ic">📣</span> <span class="lbl">Marketing</span>
+            <span class="chev">▾</span>
+          </a>
+          <div class="nav-children">
+            <a href="#" class="nav-item child" data-view="marketing">Campagne</a>
+            <!-- <a href="#" class="nav-item child" data-view="automations">Automazioni</a> — ghost, no backend -->
+            <a href="#" class="nav-item child" data-view="newsletter">Newsletter</a>
+            <!-- <a href="#" class="nav-item child" data-view="popups">Pop-up</a> — ghost, no backend -->
+          </div>
+        </div>
+
+        <a href="#" class="nav-item" data-view="discounts">
+          <span class="ic">🏷</span> <span class="lbl">Sconti</span>
+          <span class="badge badge-green" id="badgeDiscounts" style="display:none"></span>
         </a>
-        <div class="nav-children">
-          <a href="#" class="nav-item child" data-view="marketing">Campagne</a>
-          <!-- <a href="#" class="nav-item child" data-view="automations">Automazioni</a> — ghost, no backend -->
-          <a href="#" class="nav-item child" data-view="newsletter">Newsletter</a>
-          <!-- <a href="#" class="nav-item child" data-view="popups">Pop-up</a> — ghost, no backend -->
-        </div>
-      </div>
 
-      <a href="#" class="nav-item" data-view="discounts">
-        <span class="ic">🏷</span> <span class="lbl">Sconti</span>
-        <span class="badge badge-green" id="badgeDiscounts" style="display:none"></span>
-      </a>
-
-      <!-- Chat clienti — hidden until a real messaging backend exists (was a front-end mock).
+        <!-- Chat clienti — hidden until a real messaging backend exists (was a front-end mock).
       <a href="#" class="nav-item" data-view="chat">
         <span class="ic">💬</span> <span class="lbl">Chat clienti</span>
         <span class="badge badge-pink" id="badgeChat" style="display:none"></span>
       </a>
       -->
 
-      <!-- ANALYTICS -->
-      <div class="nav-parent" data-group="analytics">
-        <a href="#" class="nav-item" data-view="analytics">
-          <span class="ic">📊</span> <span class="lbl">Statistiche</span>
-          <span class="chev">▾</span>
+        <!-- ANALYTICS -->
+        <div class="nav-parent" data-group="analytics">
+          <a href="#" class="nav-item" data-view="analytics">
+            <span class="ic">📊</span> <span class="lbl">Statistiche</span>
+            <span class="chev">▾</span>
+          </a>
+          <div class="nav-children">
+            <a href="#" class="nav-item child" data-view="analytics">Panoramica</a>
+            <!-- <a href="#" class="nav-item child" data-view="reports">Report</a> — ghost, no backend -->
+            <!-- <a href="#" class="nav-item child" data-view="liveview">Live view</a> — ghost, no backend -->
+          </div>
+        </div>
+
+        <!-- CONTENUTI -->
+        <div class="nav-parent" data-group="content">
+          <a href="#" class="nav-item" data-view="content">
+            <span class="ic">📝</span> <span class="lbl">Contenuti</span>
+            <span class="chev">▾</span>
+          </a>
+          <div class="nav-children">
+            <a href="#" class="nav-item child" data-view="content">Pagine</a>
+            <a href="#" class="nav-item child" data-view="blog">Blog</a>
+            <a href="#" class="nav-item child" data-view="files">File</a>
+            <!-- <a href="#" class="nav-item child" data-view="menus">Menu di navigazione</a> — ghost, no backend -->
+          </div>
+        </div>
+
+        <!-- SPEDIZIONI -->
+        <div class="nav-parent open" data-group="shipping">
+          <a href="#" class="nav-item" data-view="couriers">
+            <span class="ic">🚚</span> <span class="lbl">Spedizioni</span>
+            <span class="badge badge-green">SDA</span>
+            <span class="chev">▾</span>
+          </a>
+          <div class="nav-children">
+            <a href="#" class="nav-item child" data-view="couriers">Corrieri</a>
+            <a href="#" class="nav-item child" data-view="shipments">Spedizioni in corso</a>
+            <a href="#" class="nav-item child" data-view="tracking">Tracking</a>
+            <a href="#" class="nav-item child" data-view="shipping-zones">Zone & Tariffe</a>
+            <a href="#" class="nav-item child" data-view="pickup">Punti di ritiro</a>
+          </div>
+        </div>
+
+        <!-- FINANZE -->
+        <div class="nav-parent" data-group="finance">
+          <a href="#" class="nav-item" data-view="finance">
+            <span class="ic">💳</span> <span class="lbl">Finanza</span>
+            <span class="chev">▾</span>
+          </a>
+          <div class="nav-children">
+            <a href="#" class="nav-item child" data-view="finance">Panoramica</a>
+            <a href="#" class="nav-item child" data-view="payouts">Pagamenti ricevuti</a>
+            <!-- <a href="#" class="nav-item child" data-view="bills">Fatture & Spese</a> — ghost, no backend -->
+            <a href="#" class="nav-item child" data-view="taxes">Tasse</a>
+          </div>
+        </div>
+
+        <div class="nav-divider"></div>
+        <div class="nav-group-title">Strumenti</div>
+
+        <a href="#" class="nav-item" data-view="integrations">
+          <span class="ic">🔌</span> <span class="lbl">Integrazioni</span>
         </a>
-        <div class="nav-children">
-          <a href="#" class="nav-item child" data-view="analytics">Panoramica</a>
-          <!-- <a href="#" class="nav-item child" data-view="reports">Report</a> — ghost, no backend -->
-          <!-- <a href="#" class="nav-item child" data-view="liveview">Live view</a> — ghost, no backend -->
-        </div>
-      </div>
-
-      <!-- CONTENUTI -->
-      <div class="nav-parent" data-group="content">
-        <a href="#" class="nav-item" data-view="content">
-          <span class="ic">📝</span> <span class="lbl">Contenuti</span>
-          <span class="chev">▾</span>
+        <a href="#" class="nav-item" data-view="staff">
+          <span class="ic">👤</span> <span class="lbl">Staff & Permessi</span>
         </a>
-        <div class="nav-children">
-          <a href="#" class="nav-item child" data-view="content">Pagine</a>
-          <a href="#" class="nav-item child" data-view="blog">Blog</a>
-          <a href="#" class="nav-item child" data-view="files">File</a>
-          <!-- <a href="#" class="nav-item child" data-view="menus">Menu di navigazione</a> — ghost, no backend -->
-        </div>
-      </div>
-
-      <!-- SPEDIZIONI -->
-      <div class="nav-parent open" data-group="shipping">
-        <a href="#" class="nav-item" data-view="couriers">
-          <span class="ic">🚚</span> <span class="lbl">Spedizioni</span>
-          <span class="badge badge-green">SDA</span>
-          <span class="chev">▾</span>
+        <a href="#" class="nav-item" data-view="settings">
+          <span class="ic">⚙</span> <span class="lbl">Impostazioni</span>
         </a>
-        <div class="nav-children">
-          <a href="#" class="nav-item child" data-view="couriers">Corrieri</a>
-          <a href="#" class="nav-item child" data-view="shipments">Spedizioni in corso</a>
-          <a href="#" class="nav-item child" data-view="tracking">Tracking</a>
-          <a href="#" class="nav-item child" data-view="shipping-zones">Zone & Tariffe</a>
-          <a href="#" class="nav-item child" data-view="pickup">Punti di ritiro</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-mini">
+          <div class="avatar">A</div>
+          <div>
+            <strong>Admin</strong>
+            <small>admin@memi.it</small>
+          </div>
         </div>
+        <a href="index.html" class="logout-btn" title="Esci">⎋</a>
       </div>
+    </aside>
 
-      <!-- FINANZE -->
-      <div class="nav-parent" data-group="finance">
-        <a href="#" class="nav-item" data-view="finance">
-          <span class="ic">💳</span> <span class="lbl">Finanza</span>
-          <span class="chev">▾</span>
-        </a>
-        <div class="nav-children">
-          <a href="#" class="nav-item child" data-view="finance">Panoramica</a>
-          <a href="#" class="nav-item child" data-view="payouts">Pagamenti ricevuti</a>
-          <!-- <a href="#" class="nav-item child" data-view="bills">Fatture & Spese</a> — ghost, no backend -->
-          <a href="#" class="nav-item child" data-view="taxes">Tasse</a>
+    <!-- MAIN -->
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-btn mobile-menu" id="mobileMenu">☰</button>
+        <div class="search">
+          <input type="text" id="topSearch" placeholder="Cerca prodotti, ordini, clienti, articoli del blog...">
         </div>
-      </div>
-
-      <div class="nav-divider"></div>
-      <div class="nav-group-title">Strumenti</div>
-
-      <a href="#" class="nav-item" data-view="integrations">
-        <span class="ic">🔌</span> <span class="lbl">Integrazioni</span>
-      </a>
-      <a href="#" class="nav-item" data-view="staff">
-        <span class="ic">👤</span> <span class="lbl">Staff & Permessi</span>
-      </a>
-      <a href="#" class="nav-item" data-view="settings">
-        <span class="ic">⚙</span> <span class="lbl">Impostazioni</span>
-      </a>
-    </nav>
-
-    <div class="sidebar-footer">
-      <div class="user-mini">
-        <div class="avatar">A</div>
-        <div>
-          <strong>Admin</strong>
-          <small>admin@memi.it</small>
+        <div class="top-actions">
+          <button class="icon-btn" title="Aiuto">?</button>
+          <button class="icon-btn" title="Notifiche">🔔<span class="dot"></span></button>
+          <button class="icon-btn" title="Messaggi">💬</button>
+          <div class="divider"></div>
+          <div class="user-mini compact">
+            <div class="avatar small">A</div>
+            <span class="lbl-name">Admin</span>
+          </div>
         </div>
-      </div>
-      <a href="index.html" class="logout-btn" title="Esci">⎋</a>
-    </div>
-  </aside>
+      </header>
 
-  <!-- MAIN -->
-  <main class="main">
-    <header class="topbar">
-      <button class="icon-btn mobile-menu" id="mobileMenu">☰</button>
-      <div class="search">
-        <input type="text" id="topSearch" placeholder="Cerca prodotti, ordini, clienti, articoli del blog...">
-      </div>
-      <div class="top-actions">
-        <button class="icon-btn" title="Aiuto">?</button>
-        <button class="icon-btn" title="Notifiche">🔔<span class="dot"></span></button>
-        <button class="icon-btn" title="Messaggi">💬</button>
-        <div class="divider"></div>
-        <div class="user-mini compact">
-          <div class="avatar small">A</div>
-          <span class="lbl-name">Admin</span>
-        </div>
-      </div>
-    </header>
-
-    <section id="viewContainer" class="view-container">
-      <!-- Le viste vengono iniettate da jQuery -->
-    </section>
-  </main>
-</div>
-
-<!-- MODAL -->
-<div class="modal-backdrop" id="modalBackdrop">
-  <div class="modal">
-    <div class="modal-head">
-      <h3 id="modalTitle">Dettagli</h3>
-      <button class="icon-btn" id="modalClose">✕</button>
-    </div>
-    <div class="modal-body" id="modalBody"></div>
+      <section id="viewContainer" class="view-container">
+        <!-- Le viste vengono iniettate da jQuery -->
+      </section>
+    </main>
   </div>
-</div>
 
-<!-- TOAST -->
-<div id="toast" class="toast"></div>
+  <!-- MODAL -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="modalTitle">Dettagli</h3>
+        <button class="icon-btn" id="modalClose">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
 
-<!-- Admin API client — must load before app.js -->
-<script src="js/admin-api.js?v=15"></script>
-<script src="js/app.js?v=24"></script>
+  <!-- TOAST -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Admin API client — must load before app.js -->
+  <script src="js/admin-api.js?v=15"></script>
+  <script src="js/app.js?v=24"></script>
 </body>
+
 </html>
