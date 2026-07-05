@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice">
+  <rect width="400" height="500" fill="#EDECF6"/>
+  <rect x="14" y="14" width="372" height="472" fill="none" stroke="#8F8FC1" stroke-width="2" stroke-dasharray="10 8" rx="10"/>
+  <g transform="translate(200 220)" fill="none" stroke="#6B6BA3" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="-46" y="-30" width="92" height="66" rx="8"/>
+    <circle cx="0" cy="3" r="18"/>
+    <path d="M-30 -30 l10 -14 h40 l10 14"/>
+  </g>
+  <text x="200" y="300" text-anchor="middle" font-family="'DM Sans',system-ui,sans-serif" font-size="24" font-weight="600" letter-spacing="1" fill="#565690">Foto in arrivo</text>
+  <text x="200" y="330" text-anchor="middle" font-family="'DM Sans',system-ui,sans-serif" font-size="14" fill="#8F8FC1">memì</text>
+</svg>
