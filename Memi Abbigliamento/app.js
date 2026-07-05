@@ -2490,6 +2490,24 @@
     wireAuth();
     wireNewsletterForms();
     wireCookieConsent();
+    handleAuthUrlParam();
+  }
+
+  // Open the auth drawer from a URL param (e.g. index.html?auth=register), and
+  // prefill the register email from localStorage if a page stashed one (used by
+  // the order-confirmation "create account" nudge and the account redirect).
+  function handleAuthUrlParam() {
+    try {
+      var a = new URLSearchParams(location.search).get('auth');
+      if (a !== 'register' && a !== 'login') return;
+      openAuthDrawer(a);
+      var pf = localStorage.getItem('memi_prefill_email');
+      if (pf) {
+        var e = document.getElementById('authRegEmail');
+        if (e) e.value = pf;
+        localStorage.removeItem('memi_prefill_email');
+      }
+    } catch (_) {}
   }
 
 
@@ -2507,6 +2525,8 @@
   window.appRemove           = removeFromCart;
   window.wireProductCards    = wireProductCards;
   window.rewireScrollStagger = function() { wireScrollStagger(); };
+  window.openAuthDrawer      = openAuthDrawer;
+  window.openAuthModal       = openAuthModal;
 
   window.appRemoveWishlist = function(id) {
     var entry  = wishlist.find(function(i) { return i.id === id; });

@@ -514,6 +514,23 @@
       <p>Una conferma d'ordine è stata inviata a <strong id="emailDisplay"></strong>. Controlla la cartella spam se non la vedi entro qualche minuto.</p>
     </div>
 
+    <!-- Create-account nudge (guests only) -->
+    <div class="card" id="createAccountCard" style="display:none;max-width:560px;width:100%;animation:fadeUp 500ms 480ms both">
+      <div class="delivery-row">
+        <div class="delivery-icon" style="background:var(--blush)">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="delivery-text">
+          <strong>Crea un account e traccia il tuo ordine</strong>
+          <span>Registrati con la stessa email dell'ordine per seguire la spedizione in tempo reale, rivedere i tuoi ordini e velocizzare i prossimi acquisti.</span>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px">
+            <button type="button" class="btn-primary" id="createAccountBtn" style="width:auto;padding:12px 22px">Crea il tuo account</button>
+            <a href="order-tracking.html" class="btn-secondary" style="width:auto;padding:11px 20px">Traccia come ospite</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- CTAs -->
     <div class="cta-group">
       <a href="collections/shop-all/index.html" class="btn-primary">
@@ -654,6 +671,28 @@
     localStorage.removeItem(CART_KEY);
     sessionStorage.removeItem('memi_confirm_cart');
     sessionStorage.removeItem('memi_last_order'); // regenerate next visit
+
+    // ── Create-account nudge (guests only) ────────────────
+    (function () {
+      var card = document.getElementById('createAccountCard');
+      if (!card) return;
+      var loggedIn = !!(window.MemiAPI && MemiAPI.auth && MemiAPI.auth.isLoggedIn && MemiAPI.auth.isLoggedIn());
+      if (loggedIn) return;                       // already has an account → no nudge
+      card.style.display = 'block';
+      var btn = document.getElementById('createAccountBtn');
+      if (btn) btn.addEventListener('click', function () {
+        try { if (orderEmail) localStorage.setItem('memi_prefill_email', orderEmail); } catch (_) {}
+        if (typeof window.openAuthDrawer === 'function') {
+          window.openAuthDrawer('register');
+          setTimeout(function () {
+            var e = document.getElementById('authRegEmail');
+            if (e && orderEmail) e.value = orderEmail;
+          }, 60);
+        } else {
+          window.location.href = 'index.html?auth=register';
+        }
+      });
+    })();
 
     // ── Petali di rosa ────────────────────────────────────
     (function petals() {

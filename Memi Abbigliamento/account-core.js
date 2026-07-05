@@ -445,6 +445,7 @@
 
   /* ══════════════════ PROFILE (read-only → edit) ══════════════════ */
   var profileEditing = false;
+  var sizesEditing = false;
   function dataRow(label, val){ return '<div class="ap-datarow"><span class="ap-datalabel">' + label + '</span><span class="ap-dataval">' + (esc(val)||'—') + '</span></div>'; }
   function renderProfile(user){
     if (!profileEditing){
@@ -538,8 +539,22 @@
 
   /* ══════════════════ SIZES ══════════════════ */
   var SIZE_OPTS = { alpha:['XS','S','M','L','XL','XXL'], shoe:['35','36','37','38','39','40','41','42'] };
+  var EDIT_ICON = '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:-2px;margin-right:6px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
   function renderSizes(){
     var s = lget('memi_sizes', {});
+    // Display mode — mirrors "I miei dati": saved values as rows + Edit button.
+    if (!sizesEditing){
+      return '<p class="ap-intro">' + t('sizes.intro') + '</p>' +
+        '<div class="ap-block">' +
+          dataRow(t('sizes.top'), s.top) +
+          dataRow(t('sizes.bottom'), s.bottom) +
+          dataRow(t('sizes.dress'), s.dress) +
+          dataRow(t('sizes.shoe'), s.shoe) +
+          dataRow(t('sizes.notes'), s.notes) +
+          '<div class="ap-actions"><button class="btn-primary-solid" id="sizesEditBtn">' + EDIT_ICON + t('btn.edit') + '</button></div>' +
+        '</div>';
+    }
+    // Edit mode — the form.
     function sel(id, opts, val){
       return '<select class="field-input" id="' + id + '"><option value="">' + t('sizes.pick') + '</option>' +
         opts.map(function(o){ return '<option value="' + o + '"' + (val===o?' selected':'') + '>' + o + '</option>'; }).join('') + '</select>';
@@ -551,7 +566,9 @@
         '<div><label class="field-label">' + t('sizes.dress') + '</label>' + sel('szDress', SIZE_OPTS.alpha, s.dress) + '</div>' +
         '<div><label class="field-label">' + t('sizes.shoe') + '</label>' + sel('szShoe', SIZE_OPTS.shoe, s.shoe) + '</div>' +
         '<div class="field-full"><label class="field-label">' + t('sizes.notes') + '</label><input class="field-input" id="szNotes" value="' + esc(s.notes||'') + '" placeholder="' + t('sizes.notes.ph') + '" /></div>' +
-        '<div class="profile-form-footer"><button type="submit" class="btn-primary-solid">' + t('btn.save') + '</button><span id="sizesMsg" class="ap-msg"></span></div>' +
+        '<div class="profile-form-footer"><button type="submit" class="btn-primary-solid">' + t('btn.save') + '</button>' +
+          '<button type="button" class="btn-outline" id="sizesCancelBtn">' + t('btn.cancel') + '</button>' +
+          '<span id="sizesMsg" class="ap-msg"></span></div>' +
       '</form>';
   }
 
@@ -822,6 +839,8 @@
     var adel = e.target.closest('[data-addr-del]'); if (adel){ deleteAddress(adel.getAttribute('data-addr-del')); return; }
     if (e.target.closest('#profileEditBtn')){ profileEditing = true; rerenderPanel(); return; }
     if (e.target.closest('#profileCancelBtn')){ profileEditing = false; rerenderPanel(); return; }
+    if (e.target.closest('#sizesEditBtn')){ sizesEditing = true; rerenderPanel(); return; }
+    if (e.target.closest('#sizesCancelBtn')){ sizesEditing = false; rerenderPanel(); return; }
     var pc = e.target.closest('[data-pref-cat]'); if (pc){ togglePref('categories', pc.getAttribute('data-pref-cat'), pc); return; }
     var pcol = e.target.closest('[data-pref-color]'); if (pcol){ togglePref('colors', pcol.getAttribute('data-pref-color'), pcol); return; }
     var ntp = e.target.closest('[data-news-topic]'); if (ntp){ ntp.classList.toggle('on'); return; }
@@ -876,7 +895,11 @@
       e.preventDefault();
       var data = { top:el('szTop').value, bottom:el('szBottom').value, dress:el('szDress').value, shoe:el('szShoe').value, notes:el('szNotes').value.trim() };
       lset('memi_sizes', data);
-      apiSave(el('sizesMsg'), window.MemiAPI && window.MemiAPI.auth.saveSizes && window.MemiAPI.auth.saveSizes(data));
+      var p = window.MemiAPI && window.MemiAPI.auth.saveSizes && window.MemiAPI.auth.saveSizes(data);
+      apiSave(el('sizesMsg'), p);
+      // Return to the read-only view after saving (mirrors "I miei dati").
+      if (p && p.then) p.then(function(){ setTimeout(function(){ sizesEditing = false; rerenderPanel(); }, 700); });
+      else setTimeout(function(){ sizesEditing = false; rerenderPanel(); }, 700);
     });
 
     var psb = el('prefSaveBtn');
@@ -958,7 +981,9 @@
       box.classList.add('open');
     }
     function query(q){
-      var url = 'https://photon.komoot.io/api/?lang=it&limit=6&bbox=6.6,35.4,18.6,47.1&q=' + encodeURIComponent(q);
+      // Photon supports lang: default|de|en|fr — "it" returns HTTP 400, which
+      // silently killed the whole autocomplete. "default" gives local (Italian) names.
+      var url = 'https://photon.komoot.io/api/?lang=default&limit=6&bbox=6.6,35.4,18.6,47.1&q=' + encodeURIComponent(q);
       try { if (controller) controller.abort(); } catch(_){}
       controller = ('AbortController' in window) ? new AbortController() : null;
       fetch(url, controller ? { signal: controller.signal } : {})
