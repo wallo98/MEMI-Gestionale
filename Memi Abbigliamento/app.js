@@ -45,9 +45,18 @@
     return page + window.location.search;
   }
 
+  // A page opts into the "classic" header — circular favicon.svg logo +
+  // Novità / Saldi / Look in the top nav (Editoriali & Chi Siamo on the right)
+  // — with <meta name="memi-nav" content="classic"> in its <head>.
+  function isClassicNav() {
+    var m = document.querySelector('meta[name="memi-nav"]');
+    return !!(m && String(m.content || '').trim() === 'classic');
+  }
+
   function injectHeader() {
     const hosts = document.querySelectorAll('[data-include="site-header"]');
     if (!hosts.length) return;
+    const classicNav = isClassicNav();
     const cur = currentHrefKey();
     const ROOT = collectionsRoot();
     const curSlug = currentCollectionSlug();
@@ -67,6 +76,10 @@
     // heavier than the left, keeping Memi. visually centered)
     const desktopNavLeft =
       '<nav class="desktop-nav desktop-nav-left" aria-label="Navigazione principale">' +
+        (classicNav
+          ? '<a href="/shop?categoria=novita"' + ac('shop?categoria=novita') + '>Novità</a>' +
+            '<a href="/shop?saldi=1" class="nav-saldi' + (cur === 'shop?saldi=1' ? ' active' : '') + '">Saldi</a>'
+          : '') +
         '<div class="mega-trigger" data-mega="shop">' +
           '<span class="mega-label' + shopActive + '">' +
             'Shop' +
@@ -109,6 +122,7 @@
             '</div>' +
           '</div>' +
         '</div>' +
+        (classicNav ? '<a href="/look"' + ac('look') + '>Look</a>' : '') +
       '</nav>';
 
     // These two (Editoriali, Chi Siamo) now render in the LEFT group next to Shop
@@ -151,15 +165,20 @@
     // storefront is Italian-only HTML, so the toggle had nothing to swap to.
     // The .lang-switch CSS + wireLangSwitch() remain dormant for easy re-add.
 
+    const logoImg = classicNav
+      ? '<img src="/favicon.svg" alt="Memì" class="logo-img logo-img--circle" />'
+      : '<img src="/logo.svg" alt="Memì" class="logo-img" />';
     const headerHtml =
       '<header class="site-header" id="siteHeader">' +
         '<div class="header-inner">' +
           '<button class="burger" aria-label="Apri menu" aria-expanded="false"><span></span><span></span><span></span></button>' +
-          '<div class="nav-left-group">' + desktopNavLeft + desktopNavRight + '</div>' +
-          '<a href="/" class="logo" aria-label="Memi Abbigliamento — Home">' +
-            '<img src="/logo.svg" alt="Memì" class="logo-img" />' +
-          '</a>' +
-          '<div class="nav-right-group">' + headerActions + '</div>' +
+          (classicNav
+            ? desktopNavLeft
+            : '<div class="nav-left-group">' + desktopNavLeft + desktopNavRight + '</div>') +
+          '<a href="/" class="logo" aria-label="Memi Abbigliamento — Home">' + logoImg + '</a>' +
+          (classicNav
+            ? '<div class="nav-right-group">' + desktopNavRight + headerActions + '</div>'
+            : '<div class="nav-right-group">' + headerActions + '</div>') +
         '</div>' +
       '</header>';
 
@@ -636,7 +655,7 @@
     document.body.insertAdjacentHTML('beforeend', `
       <nav class="mobile-nav-drawer" id="mobileNavDrawer" role="navigation" aria-label="Menu principale">
         <div class="mobile-nav-header">
-          <a href="/" class="mobile-nav-logo"><img src="/logo.svg" alt="Memì" class="mobile-nav-logo-img" /></a>
+          <a href="/" class="mobile-nav-logo">${isClassicNav() ? '<img src="/favicon.svg" alt="Memì" class="mobile-nav-logo-img mobile-nav-logo-img--circle" />' : '<img src="/logo.svg" alt="Memì" class="mobile-nav-logo-img" />'}</a>
           <button class="mobile-nav-close" id="mobileNavClose" aria-label="Chiudi menu">
             <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -1128,6 +1147,9 @@
       }
       .logo:hover .logo-img { transform: scale(1.04); opacity: .85; }
       @media (min-width: 900px) { .logo-img { height: 56px; } }
+      /* Classic header: favicon.svg cropped to a circle (width follows height) */
+      .logo-img--circle { border-radius: 50%; object-fit: cover; aspect-ratio: 1; width: auto; }
+      .mobile-nav-logo-img--circle { border-radius: 50%; object-fit: cover; aspect-ratio: 1; width: auto; }
       /* Mobile: wrapper is transparent so the burger layout is unchanged */
       .nav-left-group { display: contents; }
 
