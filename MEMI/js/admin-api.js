@@ -127,6 +127,25 @@
       });
     },
     importTemplateUrl: function() { return API_BASE + '/admin/products/import/template'; },
+    // Bulk product photos from ONE .zip. dryRun=true → preview matches only.
+    // mode: 'append' (default) or 'replace' (wipe each product's photos first).
+    bulkImagesZip: function(file, dryRun, mode) {
+      var fd = new FormData();
+      fd.append('zip', file);
+      var qs = [];
+      if (dryRun) qs.push('dryRun=1');
+      if (mode)   qs.push('mode=' + encodeURIComponent(mode));
+      var token = getToken();
+      return $.ajax({
+        url:         API_BASE + '/admin/products/bulk-images' + (qs.length ? '?' + qs.join('&') : ''),
+        method:      'POST',
+        data:        fd,
+        processData: false,
+        contentType: false,
+        headers:     token ? { Authorization: 'Bearer ' + token } : {},
+        dataType:    'json',
+      });
+    },
   };
 
   /* ═══════════════════════════════════════════════════════

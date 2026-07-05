@@ -42,6 +42,7 @@ The e-commerce site (`Memi Abbigliamento/`) is HTML/CSS/JS served by nginx. **Th
 - The 15 `collections/<slug>/index.html`, `best-seller.html`, `estate-2025.html` have **no hardcoded cards or counts** — counts come from the live result set.
 - The 23 static `products/<slug>/index.html` are now thin redirects to the canonical dynamic PDP `/product?id=<slug>` (old URLs keep working; `rel=canonical` + `noindex`).
 - Admin image upload pipeline: `POST /api/products/:id/images` (multer→sharp→WebP variants) stored on the `uploads_data` volume, served at `/api/uploads/<file>`; product `images` JSON references those URLs.
+- **Admin bulk photo import**: `POST /api/admin/products/bulk-images` (multipart `zip`; `?dryRun=1` preview, `?mode=replace|append`). Unzips (`adm-zip`), auto-matches each image to a product by folder slug or filename slug (`<slug>-1.jpg` / `<slug>/1.jpg`), orders by trailing number, runs each through the same sharp→WebP pipeline. Admin UI: **Prodotti → Importa foto (ZIP)** (`js-import-photos`, `AdminAPI.products.bulkImagesZip`). Also reachable in bulk via the CSV importer's `image_urls` column (public URLs).
 
 ### JavaScript flow
 

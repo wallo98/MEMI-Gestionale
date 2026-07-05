@@ -20,9 +20,48 @@ const router = require('express').Router();
 const multer = require('multer');
 const { pool } = require('../db');
 const { requireAdmin } = require('../middleware/auth');
-const { processAndStore } = require('../images');
+const { processAndStore, deleteVariants } = require('../images');
+const AdmZip = require('adm-zip');
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } });
+
+// Larger limit for the bulk-photo ZIP (a folder of product photos).
+const MAX_ZIP_MB = (parseInt(process.env.MAX_UPLOAD_MB, 10) || 8) * 30;
+const uploadZip = multer({ storage: multer.memoryStorage(), limits: { fileSize: MAX_ZIP_MB * 1024 * 1024, files: 1 } });
+function zipUploadMw(req, res, next) {
+  uploadZip.single('zip')(req, res, function (err) {
+    if (err) {
+      const msg = err.code === 'LIMIT_FILE_SIZE' ? ('ZIP troppo grande (max ' + MAX_ZIP_MB + ' MB)') : (err.message || 'Upload non valido');
+      return res.status(400).json({ error: msg });
+    }
+    next();
+  });
+}
+
+const IMG_EXT = /\.(jpe?g|png|webp|gif|avif|tiff?)$/i;
+function byOrder(a, b) { return (a.order - b.order) || (a.name < b.name ? -1 : 1); }
+function imagesArr(v) {
+  let a = []; try { a = JSON.parse(v) || []; } catch (_) {}
+  if (!Array.isArray(a)) a = [];
+  return a.map(function (x) { return (typeof x === 'string') ? { full: x, card: x, thumb: x } : x; });
+}
+// Work out which product a zip entry belongs to (folder slug OR filename slug)
+// and its order within that product (trailing -1 / _2 / (3) suffix).
+function deriveTarget(entryName) {
+  const parts = String(entryName).replace(/\\/g, '/').split('/').filter(function (p) { return p && p !== '.'; });
+  const file = parts[parts.length - 1] || '';
+  if (!IMG_EXT.test(file) || /(^|\/)__MACOSX/.test(entryName) || file.charAt(0) === '.') return null;
+  const folder = parts.length > 1 ? parts[parts.length - 2] : null;
+  const base = file.replace(/\.[^.]+$/, '');
+  const m = base.match(/[\s._-]*\(?(\d+)\)?\s*$/);
+  return {
+    file: file,
+    folderSlug: folder ? folder.trim().toLowerCase() : null,
+    fullSlug: base.trim().toLowerCase(),                                   // keep digits (slugs like estate-2025)
+    fileSlug: base.replace(/[\s._-]*\(?\d+\)?\s*$/, '').trim().toLowerCase(), // strip ordering suffix
+    order: m ? parseInt(m[1], 10) : 0,
+  };
+}
 
 const COLUMNS = ['id','name','categoria','colore','color_label','price','original_price',
   'discount_pct','is_new','popularity','collections','description','status','sizes','image_urls'];
@@ -234,6 +273,83 @@ router.get('/import/template', (req, res) => {
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
   res.setHeader('Content-Disposition', 'attachment; filename="memi-import-template.csv"');
   res.send(csv);
+});
+
+/* ─────────────────────────────────────────────────────────────
+ * POST /bulk-images  — attach product photos in bulk from ONE .zip.
+ *   ?dryRun=1                preview matches only, no writes
+ *   ?mode=replace|append     replace = clear a product's existing
+ *                            photos first (default: append)
+ *   body: multipart file "zip"
+ *
+ * Matching is auto-detected: a photo is attached to the product whose
+ * id (slug) equals EITHER the folder it's in (vestito-lino-cannes/1.jpg)
+ * OR its file name with any trailing "-1 / _2 / (3)" order suffix removed
+ * (vestito-lino-cannes-1.jpg). Order within a product follows that number.
+ * ───────────────────────────────────────────────────────────── */
+router.post('/bulk-images', requireAdmin, zipUploadMw, async (req, res) => {
+  const dryRun  = req.query.dryRun === '1' || req.query.dryRun === 'true';
+  const replace = req.query.mode === 'replace';
+  if (!req.file || !req.file.buffer || !req.file.buffer.length) {
+    return res.status(400).json({ error: 'Nessun file ZIP ricevuto' });
+  }
+
+  let zip;
+  try { zip = new AdmZip(req.file.buffer); }
+  catch (e) { return res.status(400).json({ error: 'ZIP non leggibile: ' + e.message }); }
+
+  const entries = zip.getEntries().filter(function (e) { return !e.isDirectory; });
+  if (!entries.length) return res.status(400).json({ error: 'Lo ZIP è vuoto' });
+
+  // Known product ids (slugs), lower-cased for matching.
+  const [rows] = await pool.execute('SELECT id FROM products');
+  const ids = new Set(rows.map(function (r) { return String(r.id).toLowerCase(); }));
+
+  const groups = {};          // pid -> [{order, name, entry}]
+  const unmatched = [];
+  for (const e of entries) {
+    const d = deriveTarget(e.entryName);
+    if (!d) continue;         // skip non-images / junk (__MACOSX, dotfiles)
+    let pid = null;
+    if (d.folderSlug && ids.has(d.folderSlug)) pid = d.folderSlug;
+    else if (ids.has(d.fullSlug)) pid = d.fullSlug;
+    else if (ids.has(d.fileSlug)) pid = d.fileSlug;
+    if (!pid) { unmatched.push({ file: e.entryName, reason: 'nessun prodotto corrispondente' }); continue; }
+    (groups[pid] = groups[pid] || []).push({ order: d.order, name: d.file, entry: e });
+  }
+
+  const matched = Object.keys(groups).map(function (pid) {
+    return { id: pid, count: groups[pid].length, files: groups[pid].slice().sort(byOrder).map(function (x) { return x.name; }) };
+  }).sort(function (a, b) { return a.id < b.id ? -1 : 1; });
+  const totalImages = entries.filter(function (e) { return deriveTarget(e.entryName); }).length;
+
+  if (dryRun) {
+    return res.json({ ok: true, dryRun: true, mode: replace ? 'replace' : 'append',
+      totalImages: totalImages, matchedProducts: matched.length, matched: matched, unmatched: unmatched });
+  }
+
+  let added = 0, failed = 0;
+  const results = [];
+  for (const pid of Object.keys(groups)) {
+    const list = groups[pid].slice().sort(byOrder);
+    const [[product]] = await pool.execute('SELECT id, images FROM products WHERE id = ?', [pid]);
+    if (!product) continue;
+    const old = imagesArr(product.images);
+    let images = replace ? [] : old.slice();
+    let n = 0;
+    for (const item of list) {
+      try { images.push(await processAndStore(item.entry.getData())); n++; added++; }
+      catch (e) { failed++; }
+    }
+    await pool.execute('UPDATE products SET images = ? WHERE id = ?', [JSON.stringify(images), pid]);
+    if (replace) {
+      const keepUrls = new Set(images.map(function (im) { return im.full; }));
+      old.forEach(function (im) { if (!keepUrls.has(im.full)) deleteVariants(im); });
+    }
+    results.push({ id: pid, added: n });
+  }
+  return res.json({ ok: true, mode: replace ? 'replace' : 'append',
+    added: added, failed: failed, products: results.length, results: results, unmatched: unmatched });
 });
 
 module.exports = router;

@@ -64,6 +64,11 @@ ok(serverJs.includes("codeProbeLimiter"),                      "rate limit on gi
 ok(productsR.includes("validateBody(createProductSchema)"),    "zod validation on product create");
 ok(productsR.includes("logAdminAction"),                       "audit logging on product mutations");
 
+const productsImport = read('MEMI-Backend/src/routes/products-import.js');
+console.log('Bulk product photos (ZIP) contract:');
+ok(adminApi.includes("/admin/products/bulk-images"),           "admin bulkImagesZip() -> /admin/products/bulk-images");
+ok(productsImport.includes("router.post('/bulk-images'"),      "backend defines POST /admin/products/bulk-images");
+
 console.log('Order-lifecycle correctness invariants:');
 ok(orders.includes("paymentStatus = 'pagato'"),         "verified Stripe payment sets payment_status=pagato");
 ok(orders.includes("Number(pi.amount) !== expected"),   "Stripe amount is verified against the order total");

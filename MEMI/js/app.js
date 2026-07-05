@@ -400,6 +400,7 @@ VIEWS.products = function(){
     ${pageHead("Prodotti","Gestisci catalogo, varianti, prezzi e magazzino.",`
       <button class="btn btn-ghost btn-sm js-export-products"><i class="ti ti-file-export"></i> Esporta CSV</button>
       <button class="btn btn-soft btn-sm js-import-products"><i class="ti ti-file-import"></i> Importa CSV</button>
+      <button class="btn btn-soft btn-sm js-import-photos"><i class="ti ti-photo-up"></i> Importa foto (ZIP)</button>
       <button class="btn btn-primary btn-sm js-new-product">+ Nuovo prodotto</button>
     `)}
     <div class="card" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
@@ -2452,6 +2453,55 @@ $(function(){
       if (window.toast) toast('Import: '+(r.created+r.updated)+' prodotti', 'success');
       setTimeout(function(){ if (window.closeModal) closeModal(); if (window.renderView) renderView('products'); }, 1600);
     }).fail(function(x){ msg.html('<span style="color:#c0453a">Errore: '+((x.responseJSON&&x.responseJSON.error)||'import fallito')+'</span>'); btn.prop('disabled', false).text('Importa'); });
+  });
+
+  /* ── Bulk product photos from a ZIP ── */
+  function _photoEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function _photosZip(){ var f = document.getElementById('photosZip'); return f && f.files && f.files[0]; }
+  function _photosMode(){ return (document.getElementById('photosReplace')||{}).checked ? 'replace' : 'append'; }
+  $(document).on('click','.js-import-photos', function(){
+    openModal('Importa foto prodotti (ZIP)',
+      '<p style="color:var(--muted);font-size:.88rem;line-height:1.6;margin-bottom:12px">' +
+        'Carica <strong>un file .zip</strong> con le foto. Ogni foto viene abbinata a un prodotto tramite il suo <strong>ID (slug)</strong>, in uno di questi modi:' +
+        '<br>• nel nome file: <code>vestito-lino-cannes-1.jpg</code>, <code>vestito-lino-cannes-2.jpg</code>…' +
+        '<br>• oppure una cartella per prodotto: <code>vestito-lino-cannes/1.jpg</code>' +
+        '<br>L\'ordine segue il numero finale. Le foto sono convertite in WebP automaticamente.' +
+      '</p>' +
+      '<input type="file" id="photosZip" accept=".zip,application/zip,application/x-zip-compressed" style="margin-bottom:10px;display:block"/>' +
+      '<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;margin-bottom:12px">' +
+        '<input type="checkbox" id="photosReplace"/> Sostituisci le foto esistenti (invece di aggiungerle)' +
+      '</label>' +
+      '<div id="photosMsg" style="font-size:.85rem;margin-bottom:8px;min-height:18px"></div>' +
+      '<div id="photosPreview" style="max-height:320px;overflow:auto"></div>' +
+      '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">' +
+        '<button class="btn btn-soft btn-sm js-photos-preview">Anteprima</button>' +
+        '<button class="btn btn-primary btn-sm js-photos-run" disabled>Carica foto</button>' +
+      '</div>'
+    );
+  });
+  $(document).on('click','.js-photos-preview', function(){
+    var file = _photosZip(), msg = $('#photosMsg');
+    if (!file){ msg.html('<span style="color:#c0453a">Seleziona un file ZIP.</span>'); return; }
+    msg.text('Analisi ZIP in corso…'); $('#photosPreview').empty(); $('.js-photos-run').prop('disabled', true);
+    AdminAPI.products.bulkImagesZip(file, true, _photosMode()).done(function(r){
+      var matchedFotos = (r.matched||[]).reduce(function(s,m){ return s + m.count; }, 0);
+      msg.html('<strong>'+r.totalImages+'</strong> immagini · <span style="color:#2d7a4f">'+r.matchedProducts+' prodotti abbinati ('+matchedFotos+' foto)</span> · <span style="color:#c0453a">'+(r.unmatched||[]).length+' non abbinate</span>');
+      var rows = (r.matched||[]).map(function(m){
+        return '<tr><td style="font-weight:600">'+_photoEsc(m.id)+'</td><td>'+m.count+'</td><td style="color:var(--muted);font-size:.8rem">'+_photoEsc((m.files||[]).join(', '))+'</td></tr>';
+      }).join('');
+      var un = (r.unmatched||[]).map(function(u){ return '<tr><td colspan="2" style="color:#c0453a">'+_photoEsc(u.file)+'</td><td style="color:#c0453a;font-size:.8rem">'+_photoEsc(u.reason)+'</td></tr>'; }).join('');
+      $('#photosPreview').html('<table class="data" style="width:100%;font-size:.82rem"><thead><tr><th>Prodotto</th><th>Foto</th><th>File</th></tr></thead><tbody>'+rows+un+'</tbody></table>');
+      $('.js-photos-run').prop('disabled', matchedFotos === 0);
+    }).fail(function(x){ msg.html('<span style="color:#c0453a">Errore: '+((x.responseJSON&&x.responseJSON.error)||'ZIP non valido')+'</span>'); });
+  });
+  $(document).on('click','.js-photos-run', function(){
+    var file = _photosZip(), msg = $('#photosMsg'); if (!file) return;
+    var btn = $(this); btn.prop('disabled', true).text('Caricamento…');
+    AdminAPI.products.bulkImagesZip(file, false, _photosMode()).done(function(r){
+      msg.html('<strong style="color:#2d7a4f">Fatto:</strong> '+r.added+' foto su '+r.products+' prodotti'+(r.failed?', '+r.failed+' fallite':'')+((r.unmatched||[]).length?', '+r.unmatched.length+' non abbinate':'')+'.');
+      if (window.toast) toast(r.added+' foto caricate', 'success');
+      setTimeout(function(){ if (window.closeModal) closeModal(); if (window.renderView) renderView('products'); }, 1600);
+    }).fail(function(x){ msg.html('<span style="color:#c0453a">Errore: '+((x.responseJSON&&x.responseJSON.error)||'upload fallito')+'</span>'); btn.prop('disabled', false).text('Carica foto'); });
   });
 
   $(document).on('click','.js-new-product', function(){
