@@ -29,7 +29,7 @@
 </head>
 <body>
 
-<div class="announcement-bar">✦ &nbsp;Spedizione gratuita su ordini superiori a €50 &nbsp;✦&nbsp; Reso gratuito entro 30 giorni &nbsp;✦</div>
+<div class="announcement-bar">✦ &nbsp;Spedizione gratuita su ordini superiori a €50 &nbsp;✦&nbsp; Reso gratuito entro 40 giorni &nbsp;✦</div>
 <div class="demo-header">
   <a href="#" class="logo">Memi<span>.</span></a>
   <div class="acts">
@@ -79,6 +79,6 @@ window.MemiAPI={auth:{isLoggedIn:function(){return true;},logout:function(){},me
 var _origFetch=window.fetch;
 window.fetch=function(u){ if(String(u).indexOf('/api/products')>-1){ return _p({json:function(){return _p({products:[]});}}); } return _origFetch.apply(window,arguments); };
 </script>
-<script src="account-core.js?v=1"></script>
+<script src="account-core.js?v=2"></script>
 </body>
 </html>

@@ -683,6 +683,11 @@
     }
     .btn-ghost-dark:hover { color: var(--espresso); border-color: #c3d6a4; background: #c3d6a4; }
 
+    /* Footer trust bar — verde pastello solo su questa pagina (index) */
+    body .sf2-trust { background: #d9e6c5; border-bottom-color: #c3d6a4; }
+    body .sf2-trust-item { color: var(--espresso, #3B2B2B); }
+    body .sf2-trust-item svg { stroke: var(--espresso, #3B2B2B); }
+
     /* ============================================================
        7. TRIO EDITORIAL
        ============================================================ */
@@ -968,7 +973,7 @@
 
   <!-- ── ANNOUNCEMENT ── -->
   <div class="announcement-bar" role="status">
-    ✦ &nbsp;Spedizione gratuita su ordini superiori a €50 &nbsp;✦&nbsp; Reso gratuito entro 30 giorni &nbsp;✦
+    ✦ &nbsp;Spedizione gratuita su ordini superiori a €50 &nbsp;✦&nbsp; Reso gratuito entro 40 giorni &nbsp;✦
   </div>
 
   <!-- ── HEADER (injected by app.js) ── -->
@@ -1432,7 +1437,7 @@
 
   <!-- MEMI API client — must load before app.js -->
   <script src="api-client.js?v=5"></script>
-  <script src="app.js?v=17"></script>
+  <script src="app.js?v=18"></script>
 
   <!-- Dynamic "Nuovi Arrivi" — loads real products from the API; shows an
        empty message when the catalogue has none (no more hardcoded cards). -->

@@ -95,7 +95,7 @@ function renderProductPage(p) {
 '  <link rel="stylesheet" href="../../app.css" />\n' +
 '</head>\n' +
 '<body>\n\n' +
-'<div class="announcement-bar">✦ &nbsp;Spedizione gratuita su ordini superiori a €50 &nbsp;✦&nbsp; Reso gratuito entro 30 giorni &nbsp;✦</div>\n' +
+'<div class="announcement-bar">✦ &nbsp;Spedizione gratuita su ordini superiori a €50 &nbsp;✦&nbsp; Reso gratuito entro 40 giorni &nbsp;✦</div>\n' +
 '<div data-include="site-header"></div>\n\n' +
 '<div class="breadcrumb">\n' +
 '  <a href="../../index.html">Home</a>\n' +
@@ -132,12 +132,12 @@ sizeSection +
 '      </div>\n' +
 '      <div class="mini-perks">\n' +
 '        <div class="mini-perk"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Spedizione gratuita — consegna in 2–3 giorni lavorativi</div>\n' +
-'        <div class="mini-perk"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Reso gratuito entro 30 giorni</div>\n' +
+'        <div class="mini-perk"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Reso gratuito entro 40 giorni</div>\n' +
 '        <div class="mini-perk"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Pagamento sicuro — SSL crittografato</div>\n' +
 '      </div>\n' +
 '      <div class="accordions">\n' +
 '        <div class="accordion-item open"><button class="accordion-header" onclick="toggleAccordion(this)">Descrizione<svg class="accordion-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button><div class="accordion-body"><p>' + description + '</p></div></div>\n' +
-'        <div class="accordion-item"><button class="accordion-header" onclick="toggleAccordion(this)">Spedizione &amp; Resi<svg class="accordion-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button><div class="accordion-body"><ul><li>Spedizione standard gratuita su ordini ≥ €50 (2–3 giorni)</li><li>Spedizione express €8,90 (1 giorno lavorativo)</li><li>Reso gratuito entro 30 giorni dall’acquisto</li><li>Rimborso completo entro 5 giorni dalla ricezione del reso</li></ul></div></div>\n' +
+'        <div class="accordion-item"><button class="accordion-header" onclick="toggleAccordion(this)">Spedizione &amp; Resi<svg class="accordion-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button><div class="accordion-body"><ul><li>Spedizione standard gratuita su ordini ≥ €50 (2–3 giorni)</li><li>Spedizione express €8,90 (1 giorno lavorativo)</li><li>Reso gratuito entro 40 giorni dall’acquisto</li><li>Rimborso completo entro 5 giorni dalla ricezione del reso</li></ul></div></div>\n' +
 '      </div>\n' +
 '    </div>\n' +
 '  </div>\n' +
