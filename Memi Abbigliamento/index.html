@@ -773,25 +773,9 @@
     .video-feature-mute svg { width: 18px; height: 18px; stroke: currentColor; fill: none; }
 
     /* ============================================================
-       8. INSTAGRAM / SHOP THE LOOK
+       8. SHOP THE LOOK
        ============================================================ */
     .instagram-section { background: var(--cream); }
-    .insta-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-8); gap: var(--space-4); }
-    .insta-handle { display: flex; align-items: center; gap: var(--space-3); }
-    .insta-handle-avatar { width: 44px; height: 44px; border-radius: var(--radius-full); overflow: hidden; border: 2px solid var(--beige-dark); }
-    .insta-handle-text strong { display: block; font-size: var(--text-sm); font-weight: 600; color: var(--espresso); }
-    .insta-handle-text span   { font-size: var(--text-xs); color: var(--brown-light); }
-    .btn-secondary {
-      display: inline-flex; align-items: center; gap: var(--space-2);
-      font-size: var(--text-xs); font-weight: 500;
-      letter-spacing: var(--tracking-wide); text-transform: uppercase;
-      padding: var(--space-2) var(--space-4);
-      border: 1px solid var(--beige-dark); border-radius: var(--radius-full);
-      color: var(--brown-mid);
-      transition: border-color var(--dur-fast), color var(--dur-fast);
-      white-space: nowrap;
-    }
-    .btn-secondary:hover { border-color: var(--espresso); color: var(--espresso); }
     .insta-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -814,6 +798,91 @@
       padding: var(--space-2) var(--space-4); border-radius: var(--radius-full); box-shadow: var(--shadow-md);
     }
     .insta-item:hover .shop-look-btn { opacity: 1; transform: translateY(0) scale(1); }
+
+    /* ============================================================
+       8.5 INSTAGRAM LOOKBOOK
+       ============================================================ */
+    .ig-lookbook { background: var(--bg-base); }
+    .ig-lookbook-header { text-align: center; margin-bottom: var(--space-8); }
+    .ig-lookbook-eyebrow {
+      display: block;
+      font-size: var(--text-xs); font-weight: 500;
+      letter-spacing: var(--tracking-wider); text-transform: uppercase;
+      color: var(--brown-light);
+      margin-bottom: var(--space-3);
+    }
+    .ig-lookbook-title {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      color: var(--espresso);
+    }
+    .ig-lookbook-title em { font-style: italic; }
+    .ig-lookbook-handle {
+      display: inline-block;
+      margin-top: var(--space-3);
+      font-size: var(--text-sm);
+      letter-spacing: var(--tracking-wide);
+      color: var(--brown-mid);
+      transition: color var(--dur-fast);
+    }
+    .ig-lookbook-handle:hover { color: var(--espresso); }
+
+    /* Feed: 5 squares on desktop; snap-scrolling row (~2 visible) on mobile */
+    .ig-feed {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(46%, 1fr);
+      gap: 10px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: var(--space-2);
+    }
+    .ig-feed::-webkit-scrollbar { display: none; }
+    @media (min-width: 900px) {
+      .ig-feed {
+        grid-auto-flow: row;
+        grid-template-columns: repeat(5, 1fr);
+        overflow: visible;
+        padding-bottom: 0;
+      }
+    }
+    .ig-card {
+      position: relative;
+      display: block;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      border-radius: var(--radius-md);
+      background: var(--beige);
+      scroll-snap-align: start;
+    }
+    .ig-card img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform var(--dur-med) var(--ease-out);
+    }
+    .ig-card:hover img { transform: scale(1.05); }
+    .ig-card-overlay {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: var(--space-2);
+      background: rgba(26,18,16,.38);
+      color: var(--white);
+      opacity: 0;
+      transition: opacity var(--dur-med) var(--ease-out);
+    }
+    .ig-card:hover .ig-card-overlay,
+    .ig-card:focus-visible .ig-card-overlay { opacity: 1; }
+    .ig-icon { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+    .ig-card-overlay span {
+      font-size: 10px; font-weight: 500;
+      letter-spacing: 0.14em; text-transform: uppercase;
+    }
 
     /* ============================================================
        9. TRUST STRIP
@@ -1184,25 +1253,10 @@
   </section>
 
   <!-- ============================================================
-       7. SHOP THE LOOK / INSTAGRAM
+       7. SHOP THE LOOK
        ============================================================ -->
   <section class="section instagram-section" id="instagram">
     <div class="container">
-      <div class="insta-header reveal">
-        <div class="insta-handle">
-          <div class="insta-handle-avatar ph-blush">
-            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
-              <svg viewBox="0 0 40 40" fill="none" style="width:60%;opacity:.4;"><circle cx="20" cy="15" r="7" fill="white"/><path d="M5 38 C5 28 35 28 35 38" fill="white"/></svg>
-            </div>
-          </div>
-          <div class="insta-handle-text">
-            <strong>@memiabbigliamento</strong>
-            <span>Seguici su Instagram</span>
-          </div>
-        </div>
-        <a href="https://instagram.com/memiabbigliamento" class="btn-secondary" target="_blank" rel="noopener">Segui</a>
-      </div>
-
       <div class="section-header reveal" style="margin-bottom:var(--space-8);">
         <span class="section-eyebrow">Social</span>
         <h2 class="section-title">Shop <em>the Look</em></h2>
@@ -1233,6 +1287,56 @@
         <a class="insta-item" href="/look?look=2" aria-label="Shop Look 2">
           <img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=400&q=80" alt="Look 6" loading="lazy"/>
           <div class="insta-overlay"><span class="shop-look-btn"><svg style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Shop Look</span></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       7.6 INSTAGRAM LOOKBOOK
+       ============================================================ -->
+  <section class="section ig-lookbook" id="instagram-feed" aria-label="Seguici su Instagram">
+    <div class="container">
+      <div class="ig-lookbook-header reveal">
+        <span class="ig-lookbook-eyebrow">Dal nostro feed</span>
+        <h2 class="ig-lookbook-title">Seguici su <em>Instagram</em></h2>
+        <a class="ig-lookbook-handle" href="https://instagram.com/memiabbigliamento" target="_blank" rel="noopener">@memiabbigliamento</a>
+      </div>
+      <div class="ig-feed reveal">
+        <a class="ig-card" href="https://instagram.com/memiabbigliamento" target="_blank" rel="noopener" aria-label="Vedi su Instagram">
+          <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80" alt="Post Instagram — shopping in boutique" loading="lazy"/>
+          <div class="ig-card-overlay" aria-hidden="true">
+            <svg class="ig-icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+            <span>Vedi su Instagram</span>
+          </div>
+        </a>
+        <a class="ig-card" href="https://instagram.com/memiabbigliamento" target="_blank" rel="noopener" aria-label="Vedi su Instagram">
+          <img src="https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=600&q=80" alt="Post Instagram — look del giorno" loading="lazy"/>
+          <div class="ig-card-overlay" aria-hidden="true">
+            <svg class="ig-icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+            <span>Vedi su Instagram</span>
+          </div>
+        </a>
+        <a class="ig-card" href="https://instagram.com/memiabbigliamento" target="_blank" rel="noopener" aria-label="Vedi su Instagram">
+          <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80" alt="Post Instagram — editoriale" loading="lazy"/>
+          <div class="ig-card-overlay" aria-hidden="true">
+            <svg class="ig-icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+            <span>Vedi su Instagram</span>
+          </div>
+        </a>
+        <a class="ig-card" href="https://instagram.com/memiabbigliamento" target="_blank" rel="noopener" aria-label="Vedi su Instagram">
+          <img src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?auto=format&fit=crop&w=600&q=80" alt="Post Instagram — dettagli" loading="lazy"/>
+          <div class="ig-card-overlay" aria-hidden="true">
+            <svg class="ig-icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+            <span>Vedi su Instagram</span>
+          </div>
+        </a>
+        <a class="ig-card" href="https://instagram.com/memiabbigliamento" target="_blank" rel="noopener" aria-label="Vedi su Instagram">
+          <img src="https://images.unsplash.com/photo-1495385794356-15371f348c31?auto=format&fit=crop&w=600&q=80" alt="Post Instagram — street style" loading="lazy"/>
+          <div class="ig-card-overlay" aria-hidden="true">
+            <svg class="ig-icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+            <span>Vedi su Instagram</span>
+          </div>
         </a>
       </div>
     </div>
@@ -1326,8 +1430,8 @@
   </footer>
 
   <!-- MEMI API client — must load before app.js -->
-  <script src="api-client.js?v=4"></script>
-  <script src="app.js?v=16"></script>
+  <script src="api-client.js?v=5"></script>
+  <script src="app.js?v=17"></script>
 
   <!-- Dynamic "Nuovi Arrivi" — loads real products from the API; shows an
        empty message when the catalogue has none (no more hardcoded cards). -->
