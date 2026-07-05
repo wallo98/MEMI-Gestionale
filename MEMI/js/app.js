@@ -646,7 +646,7 @@ VIEWS.loyalty = function(){
   const ptsPerEuro = Number(cfg.pointsPerEuro)||0;
   const ptVal = Number(cfg.pointValueEur)||0;
   return `
-    ${pageHead("Fedeltà & Punti","I clienti accumulano punti (registrazione + acquisti) e li riscattano in sconti.",`<button class="btn btn-primary btn-sm js-save-loyalty">💾 Salva configurazione</button>`)}
+    ${pageHead("Fedeltà & Punti","I clienti accumulano punti (registrazione + acquisti) e li riscattano in sconti.",`<button class="btn btn-primary btn-sm js-save-loyalty"><i class="ti ti-device-floppy"></i> Salva configurazione</button>`)}
     <div class="grid grid-3" style="margin-bottom:16px">
       <div class="card kpi green"><span class="label">Punti in circolazione</span><span class="value">${sum.total_points||0}</span></div>
       <div class="card kpi pink"><span class="label">Membri</span><span class="value">${sum.members||0}</span></div>
@@ -1300,7 +1300,7 @@ function renderActiveChat(){
 
     <div class="ci-section">
       <h4>Azioni rapide</h4>
-      <button class="btn btn-soft btn-sm js-chat-discount" style="width:100%;margin-bottom:6px">🎁 Invia sconto -10%</button>
+      <button class="btn btn-soft btn-sm js-chat-discount" style="width:100%;margin-bottom:6px"><i class="ti ti-gift"></i> Invia sconto -10%</button>
       <button class="btn btn-soft btn-sm js-chat-goorder" data-order="${ord?ord.id:''}" style="width:100%;margin-bottom:6px">📦 Vai all'ordine</button>
       <button class="btn btn-ghost btn-sm js-chat-block" style="width:100%">🚫 Blocca cliente</button>
     </div>
@@ -1513,7 +1513,7 @@ VIEWS.settings = function(){
       <div><input type="${type}" class="settings-input" data-key="${key}" value="${(s[key]||'').replace(/"/g,'&quot;')}" placeholder="${placeholder||''}" style="width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:6px;font-family:inherit;font-size:13px"/></div>
     </div>`;
   }
-  return `${pageHead("Impostazioni","Configurazione del negozio.",`<button class="btn btn-primary btn-sm js-save-settings">💾 Salva</button>`)}
+  return `${pageHead("Impostazioni","Configurazione del negozio.",`<button class="btn btn-primary btn-sm js-save-settings"><i class="ti ti-device-floppy"></i> Salva</button>`)}
     <div class="grid grid-2" style="gap:16px">
       <div class="card">
         <h3 style="margin-bottom:16px">🏬 Generale</h3>
@@ -1839,7 +1839,7 @@ $(function(){
         </div>
         <div style="margin-top:18px;display:flex;gap:8px;justify-content:flex-end">
           <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal()">Annulla</button>
-          <button type="submit" class="btn btn-primary btn-sm">💾 Salva</button>
+          <button type="submit" class="btn btn-primary btn-sm"><i class="ti ti-device-floppy"></i> Salva</button>
         </div>
       </form>
     `);
@@ -1855,7 +1855,7 @@ $(function(){
         attivo: attivo,
         tracking_url_template: fd.tracking_url_template || null
       }).done(function(){ toast('Corriere aggiornato','success'); closeModal(); renderView('couriers'); })
-        .fail(function(){ toast('Errore aggiornamento corriere','error'); $btn.prop('disabled',false).text('💾 Salva'); });
+        .fail(function(){ toast('Errore aggiornamento corriere','error'); $btn.prop('disabled',false).html('<i class="ti ti-device-floppy"></i> Salva'); });
     });
   });
   $(document).on('click','.js-courier-track', function(){
@@ -1950,7 +1950,7 @@ $(function(){
         <div style="margin-top:18px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
           <button class="btn btn-ghost btn-sm js-print-order"><i class="ti ti-printer"></i> Stampa</button>
           ${dbId ? `<button class="btn btn-soft btn-sm js-open-ship-modal" data-id="${dbId}" data-order="${o.id}" data-payment="${o.pagamento}">🚚 Spedisci</button>` : ''}
-          ${dbId ? `<button class="btn btn-primary btn-sm js-save-order-status" data-id="${dbId}">💾 Salva stato</button>` : ''}
+          ${dbId ? `<button class="btn btn-primary btn-sm js-save-order-status" data-id="${dbId}"><i class="ti ti-device-floppy"></i> Salva stato</button>` : ''}
         </div>
       `;
     }
@@ -1982,7 +1982,7 @@ $(function(){
     $btn.prop('disabled', true).text('Salvataggio…');
     AdminAPI.orders.updateStatus(dbId, { order_status: stato })
       .done(function() { toast('Stato aggiornato', 'success'); closeModal(); renderView('orders'); })
-      .fail(function() { toast('Errore aggiornamento', 'error'); $btn.prop('disabled', false).text('💾 Salva stato'); });
+      .fail(function() { toast('Errore aggiornamento', 'error'); $btn.prop('disabled', false).html('<i class="ti ti-device-floppy"></i> Salva stato'); });
   });
 
   // Product detail
@@ -2146,7 +2146,7 @@ $(function(){
           ${productGalleryHtml()}
           <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
             <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal()">Chiudi</button>
-            <button type="submit" class="btn btn-primary btn-sm" data-id="${id}">💾 Salva modifiche</button>
+            <button type="submit" class="btn btn-primary btn-sm" data-id="${id}"><i class="ti ti-device-floppy"></i> Salva modifiche</button>
           </div>
         </form>
       `);
@@ -2173,7 +2173,7 @@ $(function(){
           toast('Prodotto aggiornato','success');
           closeModal();
           renderView('products');
-        }).fail(function(){ toast('Errore aggiornamento','error'); $btn.prop('disabled',false).text('💾 Salva modifiche'); });
+        }).fail(function(){ toast('Errore aggiornamento','error'); $btn.prop('disabled',false).html('<i class="ti ti-device-floppy"></i> Salva modifiche'); });
       });
     }).fail(function(){ toast('Errore caricamento prodotto','error'); });
   }
@@ -2824,7 +2824,7 @@ $(function(){
         <table style="width:100%;margin-bottom:16px"><thead><tr><th style="padding:4px 8px">Taglia</th><th style="padding:4px 8px">Stock</th></tr></thead><tbody>${rows}</tbody></table>
         <div style="display:flex;gap:8px;justify-content:flex-end">
           <button class="btn btn-ghost btn-sm" onclick="closeModal()">Annulla</button>
-          <button class="btn btn-primary btn-sm" id="saveStockBtn" data-id="${id}">💾 Salva stock</button>
+          <button class="btn btn-primary btn-sm" id="saveStockBtn" data-id="${id}"><i class="ti ti-device-floppy"></i> Salva stock</button>
         </div>
       `);
     }).fail(function(){ toast('Errore caricamento prodotto','error'); });
@@ -2846,7 +2846,7 @@ $(function(){
       dfd = dfd.then(function(){ return AdminAPI.products.updateStock(id,t.taglia,t.stock); });
     });
     dfd.done(function(){ toast('Stock aggiornato','success'); closeModal(); renderView('inventory'); })
-       .fail(function(){ toast('Errore aggiornamento stock','error'); $btn.prop('disabled',false).text('💾 Salva stock'); });
+       .fail(function(){ toast('Errore aggiornamento stock','error'); $btn.prop('disabled',false).html('<i class="ti ti-device-floppy"></i> Salva stock'); });
   });
 
   /* ═════════════════════════════════════════════
@@ -3226,7 +3226,7 @@ $(function(){
         toast('Impostazioni salvate', 'success');
       })
       .fail(function(){ toast('Errore salvataggio', 'error'); })
-      .always(function(){ $btn.prop('disabled', false).text('💾 Salva'); });
+      .always(function(){ $btn.prop('disabled', false).html('<i class="ti ti-device-floppy"></i> Salva'); });
   });
 
   /* ═════════════════════════════════════════════
@@ -3822,7 +3822,7 @@ $(function(){
     var $btn=$(this); $btn.prop('disabled',true).text('Salvataggio...');
     AdminAPI.loyalty.updateConfig(data)
       .done(function(){ toast('Configurazione fedeltà salvata','success'); renderView('loyalty'); })
-      .fail(function(x){ toast((x.responseJSON&&x.responseJSON.error)||'Errore','error'); $btn.prop('disabled',false).text('💾 Salva configurazione'); });
+      .fail(function(x){ toast((x.responseJSON&&x.responseJSON.error)||'Errore','error'); $btn.prop('disabled',false).html('<i class="ti ti-device-floppy"></i> Salva configurazione'); });
   });
   $(document).on('click','.js-adjust-points', function(){
     if(!apiReady()) return;
