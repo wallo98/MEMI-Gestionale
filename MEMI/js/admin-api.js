@@ -109,6 +109,22 @@
     deleteImage: function(id, url) {
       return request('DELETE', '/products/' + encodeURIComponent(id) + '/images', { url: url });
     },
+    // Bulk CSV import. dryRun=true → validate + preview only (no writes).
+    importCsv: function(file, dryRun) {
+      var fd = new FormData();
+      fd.append('file', file);
+      var token = getToken();
+      return $.ajax({
+        url:         API_BASE + '/admin/products/import' + (dryRun ? '?dryRun=1' : ''),
+        method:      'POST',
+        data:        fd,
+        processData: false,
+        contentType: false,
+        headers:     token ? { Authorization: 'Bearer ' + token } : {},
+        dataType:    'json',
+      });
+    },
+    importTemplateUrl: function() { return API_BASE + '/admin/products/import/template'; },
   };
 
   /* ═══════════════════════════════════════════════════════

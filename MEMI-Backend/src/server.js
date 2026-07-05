@@ -32,6 +32,7 @@ const authRoutes       = require('./routes/auth');
 const accountRoutes    = require('./routes/account');
 const adminAuthRoutes  = require('./routes/admin-auth');
 const productsRoutes   = require('./routes/products');
+const productsImportRoutes = require('./routes/products-import');
 const ordersRoutes     = require('./routes/orders');
 const customersRoutes  = require('./routes/customers');
 const discountsRoutes  = require('./routes/discounts');
@@ -187,6 +188,7 @@ app.use('/api/auth',              authRoutes);
 app.use('/api/auth',              accountRoutes);   // wishlist, addresses, newsletter (customer)
 app.use('/api/admin/auth',        adminAuthRoutes);
 app.use('/api/products',          productsRoutes);
+app.use('/api/admin/products',    productsImportRoutes);   // bulk CSV import (admin)
 app.use('/api/orders',            ordersRoutes);
 app.use('/api/admin/customers',   customersRoutes);
 app.use('/api/admin/discounts',   discountsRoutes);

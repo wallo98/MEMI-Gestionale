@@ -53,15 +53,18 @@ CREATE TABLE IF NOT EXISTS customers (
 -- Customer shipping addresses (Area Personale · Indirizzi).
 -- One customer can save several; exactly one is flagged is_default.
 CREATE TABLE IF NOT EXISTS customer_addresses (
-  id          INT AUTO_INCREMENT PRIMARY KEY,
-  customer_id INT NOT NULL,
-  label       VARCHAR(80)  NULL,
-  indirizzo   VARCHAR(255) NULL,
-  citta       VARCHAR(100) NULL,
-  cap         VARCHAR(10)  NULL,
-  paese       VARCHAR(100) DEFAULT 'Italia',
-  telefono    VARCHAR(30)  NULL,
-  is_default  TINYINT(1)   NOT NULL DEFAULT 0,
+  id              INT AUTO_INCREMENT PRIMARY KEY,
+  customer_id     INT NOT NULL,
+  label           VARCHAR(80)  NULL,
+  indirizzo       VARCHAR(255) NULL,   -- via / street name
+  numero_civico   VARCHAR(20)  NULL,   -- civic number
+  piano           VARCHAR(20)  NULL,   -- floor
+  nome_campanello VARCHAR(80)  NULL,   -- doorbell name
+  citta           VARCHAR(100) NULL,
+  cap             VARCHAR(10)  NULL,
+  paese           VARCHAR(100) DEFAULT 'Italia',
+  telefono        VARCHAR(30)  NULL,
+  is_default      TINYINT(1)   NOT NULL DEFAULT 0,
   created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   KEY idx_addr_customer (customer_id),

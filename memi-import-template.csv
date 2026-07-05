@@ -1,0 +1,3 @@
+id,name,categoria,colore,color_label,price,original_price,discount_pct,is_new,popularity,collections,description,status,sizes,image_urls
+vestito-lino-demo,Vestito in lino Demo,vestiti,blush,Rosa cipria,89.90,,0,1,10,shop-all|vestiti,Vestito in lino leggero dal taglio morbido.,attivo,S:5|M:8|L:3,https://esempio.it/vestito-fronte.jpg|https://esempio.it/vestito-retro.jpg
+blazer-sartoriale-demo,Blazer Sartoriale Demo,blazer,verde,Salvia,129.00,159.00,19,0,5,shop-all|blazer,Blazer sartoriale foderato.,attivo,S:2|M:4|L:2,https://esempio.it/blazer.jpg

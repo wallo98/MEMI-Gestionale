@@ -270,6 +270,10 @@ async function runMigrations(pool) {
     await ensureColumn(pool, 'newsletter_subscribers', 'customer_id', 'customer_id INT NULL');
     await ensureColumn(pool, 'newsletter_subscribers', 'frequenza',   "frequenza VARCHAR(20) NULL");
     await ensureColumn(pool, 'newsletter_subscribers', 'topics',      'topics JSON NULL');
+    // ── Addresses: granular Italian address fields (indirizzo = via/street) ──
+    await ensureColumn(pool, 'customer_addresses', 'numero_civico',   "numero_civico VARCHAR(20) NULL");
+    await ensureColumn(pool, 'customer_addresses', 'piano',           "piano VARCHAR(20) NULL");
+    await ensureColumn(pool, 'customer_addresses', 'nome_campanello', "nome_campanello VARCHAR(80) NULL");
     await ensureIndex(pool, 'order_items', 'idx_oi_product', 'product_id');
     await ensureIndex(pool, 'products', 'idx_products_cat_status', 'categoria, status');
     // Per-courier tracking deep-link template ({tracking} → the tracking number)

@@ -47,6 +47,7 @@
       'pwd.updated':'Password aggiornata ✓','pwd.update':'Aggiorna password','pwd.ph':'Minimo 8 caratteri','pwd.phc':'Ripeti la password',
       'addr.default':'Predefinito','addr.setdefault':'Rendi predefinito','addr.delete':'Elimina','addr.new':'Nuovo indirizzo',
       'addr.empty':'Nessun indirizzo salvato.','addr.label':'Etichetta (es. Casa, Ufficio)',
+      'addr.civico':'Numero civico','addr.piano':'Piano (opzionale)','addr.campanello':'Nome sul campanello (opzionale)','addr.via.ph':'Inizia a digitare la via…','addr.via.hint':'Cerca e seleziona la via, il resto si compila da solo.',
       'sizes.top':'Taglia top','sizes.bottom':'Taglia pantaloni/gonne','sizes.dress':'Taglia vestiti','sizes.shoe':'Numero di scarpe',
       'sizes.notes':'Note sulla vestibilità','sizes.notes.ph':'Es. preferisco vestibilità morbida…','sizes.pick':'Seleziona','sizes.intro':'Salviamo le tue taglie per suggerirti la misura giusta e velocizzare gli acquisti.',
       'pref.cats':'Categorie preferite','pref.colors':'Colori preferiti','pref.contact':'Come vuoi essere contattata','pref.email':'Email','pref.sms':'SMS','pref.lang':'Lingua preferita',
@@ -106,6 +107,7 @@
       'pwd.updated':'Password updated ✓','pwd.update':'Update password','pwd.ph':'Minimum 8 characters','pwd.phc':'Repeat the password',
       'addr.default':'Default','addr.setdefault':'Set as default','addr.delete':'Delete','addr.new':'New address',
       'addr.empty':'No saved addresses.','addr.label':'Label (e.g. Home, Office)',
+      'addr.civico':'Street number','addr.piano':'Floor (optional)','addr.campanello':'Doorbell name (optional)','addr.via.ph':'Start typing the street…','addr.via.hint':'Search and pick the street — the rest fills in automatically.',
       'sizes.top':'Top size','sizes.bottom':'Trousers/skirt size','sizes.dress':'Dress size','sizes.shoe':'Shoe size',
       'sizes.notes':'Fit notes','sizes.notes.ph':'E.g. I prefer a relaxed fit…','sizes.pick':'Select','sizes.intro':'We save your sizes to suggest the right fit and speed up checkout.',
       'pref.cats':'Favourite categories','pref.colors':'Favourite colours','pref.contact':'How you want to be contacted','pref.email':'Email','pref.sms':'SMS','pref.lang':'Preferred language',
@@ -493,7 +495,11 @@
       if (addrEditingId === a.id) return addrForm(a);
       return '<div class="addr-card' + (a.def?' is-default':'') + '">' +
         '<div class="addr-card-top"><span class="addr-label">' + esc(a.label||'—') + '</span>' + (a.def?'<span class="addr-default-badge">' + t('addr.default') + '</span>':'') + '</div>' +
-        '<p class="addr-lines">' + esc(a.indirizzo) + '<br>' + esc(a.cap) + ' ' + esc(a.citta) + '<br>' + esc(a.paese) + (a.telefono?'<br>' + esc(a.telefono):'') + '</p>' +
+        '<p class="addr-lines">' + esc([a.indirizzo, a.numero_civico].filter(Boolean).join(', ')) +
+          (a.piano ? '<br>' + t('addr.piano').replace(/ \(.*\)/,'') + ': ' + esc(a.piano) : '') +
+          '<br>' + esc(a.cap) + ' ' + esc(a.citta) + '<br>' + esc(a.paese) +
+          (a.nome_campanello ? '<br>' + t('addr.campanello').replace(/ \(.*\)/,'') + ': ' + esc(a.nome_campanello) : '') +
+          (a.telefono ? '<br>' + esc(a.telefono) : '') + '</p>' +
         '<div class="addr-actions">' +
           '<button class="ap-link-btn" data-addr-edit="' + esc(a.id) + '"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' + t('btn.edit') + '</button>' +
           (a.def?'':'<button class="ap-link-btn" data-addr-default="' + esc(a.id) + '">' + t('addr.setdefault') + '</button>') +
@@ -506,14 +512,24 @@
     return '<div class="addr-grid">' + cards + '</div>' + addBlock;
   }
   function addrForm(a){
-    a = a || { id:'new', label:'', indirizzo:'', citta:'', cap:'', paese:'Italia', telefono:'' };
+    a = a || { id:'new', label:'', indirizzo:'', numero_civico:'', piano:'', nome_campanello:'', citta:'', cap:'', paese:'Italia', telefono:'' };
     function v(x){ return esc(x||''); }
     return '<form class="profile-form addr-form" data-addr-id="' + esc(a.id) + '">' +
       '<div class="field-full"><label class="field-label">' + t('addr.label') + '</label><input class="field-input" name="label" value="' + v(a.label) + '" /></div>' +
-      '<div class="field-full"><label class="field-label">' + t('field.indirizzo') + '</label><input class="field-input" name="indirizzo" value="' + v(a.indirizzo) + '" /></div>' +
-      '<div><label class="field-label">' + t('field.citta') + '</label><input class="field-input" name="citta" value="' + v(a.citta) + '" /></div>' +
-      '<div><label class="field-label">' + t('field.cap') + '</label><input class="field-input" name="cap" value="' + v(a.cap) + '" /></div>' +
-      '<div><label class="field-label">' + t('field.paese') + '</label><input class="field-input" name="paese" value="' + v(a.paese) + '" /></div>' +
+      '<div class="field-full addr-ac-wrap">' +
+        '<label class="field-label">' + t('field.indirizzo') + '</label>' +
+        '<div class="addr-ac-field">' +
+          '<input class="field-input" name="indirizzo" id="addrVia" autocomplete="off" placeholder="' + t('addr.via.ph') + '" value="' + v(a.indirizzo) + '" />' +
+          '<div class="addr-suggest" id="addrSuggest" role="listbox"></div>' +
+        '</div>' +
+        '<span class="addr-ac-hint">' + t('addr.via.hint') + '</span>' +
+      '</div>' +
+      '<div><label class="field-label">' + t('addr.civico') + '</label><input class="field-input" name="numero_civico" value="' + v(a.numero_civico) + '" /></div>' +
+      '<div><label class="field-label">' + t('addr.piano') + '</label><input class="field-input" name="piano" value="' + v(a.piano) + '" /></div>' +
+      '<div class="field-full"><label class="field-label">' + t('addr.campanello') + '</label><input class="field-input" name="nome_campanello" value="' + v(a.nome_campanello) + '" /></div>' +
+      '<div><label class="field-label">' + t('field.citta') + '</label><input class="field-input" name="citta" id="addrCitta" value="' + v(a.citta) + '" /></div>' +
+      '<div><label class="field-label">' + t('field.cap') + '</label><input class="field-input" name="cap" id="addrCap" value="' + v(a.cap) + '" /></div>' +
+      '<div><label class="field-label">' + t('field.paese') + '</label><input class="field-input" name="paese" id="addrPaese" value="' + v(a.paese) + '" /></div>' +
       '<div><label class="field-label">' + t('field.tel') + '</label><input class="field-input" name="telefono" value="' + v(a.telefono) + '" /></div>' +
       '<div class="profile-form-footer"><button type="submit" class="btn-primary-solid">' + t('btn.save') + '</button>' +
         '<button type="button" class="btn-outline" data-addr-cancel="1">' + t('btn.cancel') + '</button></div>' +
@@ -749,7 +765,7 @@
       A.addresses.list().then(function(res){
         var arr = (res && res.addresses) || [];
         lset('memi_addresses', arr.map(function(r){
-          return { id:String(r.id), label:r.label, indirizzo:r.indirizzo, citta:r.citta, cap:r.cap, paese:r.paese, telefono:r.telefono, def:r.is_default===1 };
+          return { id:String(r.id), label:r.label, indirizzo:r.indirizzo, numero_civico:r.numero_civico, piano:r.piano, nome_campanello:r.nome_campanello, citta:r.citta, cap:r.cap, paese:r.paese, telefono:r.telefono, def:r.is_default===1 };
         }));
         if (currentPanel === 'indirizzi' && !addrEditingId) rerenderPanel();
       }).catch(function(){});
@@ -853,7 +869,7 @@
     });
 
     var af = el('apPanel') && el('apPanel').querySelector('.addr-form');
-    if (af) af.addEventListener('submit', function(e){ e.preventDefault(); saveAddress(af); });
+    if (af) { af.addEventListener('submit', function(e){ e.preventDefault(); saveAddress(af); }); wireAddrAutocomplete(af); }
 
     var sf = el('sizesForm');
     if (sf) sf.addEventListener('submit', function(e){
@@ -907,6 +923,71 @@
     btn.classList.toggle('on');
   }
 
+  /* ── Address autocomplete (OpenStreetMap / Photon — free, no API key) ──
+     Type-ahead street lookup biased to Italy. On pick, fills via + civico +
+     città + CAP + paese. Fully optional: if offline the fields stay manual. */
+  function wireAddrAutocomplete(form){
+    var via = el('addrVia'), box = el('addrSuggest');
+    if (!via || !box) return;
+    var timer = null, controller = null, feats = [], active = -1;
+    function close(){ box.innerHTML = ''; box.classList.remove('open'); active = -1; }
+    function pick(f){
+      if (!f || !f.properties) return;
+      var p = f.properties;
+      via.value = p.street || p.name || via.value;
+      function set(name, val){ var i = form.querySelector('[name="'+name+'"]'); if (i && val) i.value = val; }
+      set('numero_civico', p.housenumber);
+      set('citta', p.city || p.town || p.village || p.county || p.state);
+      set('cap', p.postcode);
+      set('paese', p.country || 'Italia');
+      close();
+    }
+    function fmt(p){
+      var line = [p.street || p.name, p.housenumber].filter(Boolean).join(' ');
+      var loc  = [p.postcode, p.city || p.town || p.village || p.county || p.state].filter(Boolean).join(' ');
+      return { line: line || (p.name||''), loc: loc };
+    }
+    function render(){
+      if (!feats.length){ close(); return; }
+      box.innerHTML = feats.map(function(f, i){
+        var o = fmt(f.properties);
+        return '<button type="button" class="addr-suggest-item' + (i===active?' active':'') + '" data-i="'+i+'">' +
+          '<svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
+          '<span class="al-main">' + esc(o.line) + (o.loc ? '<span class="al-sub">' + esc(o.loc) + '</span>' : '') + '</span></button>';
+      }).join('');
+      box.classList.add('open');
+    }
+    function query(q){
+      var url = 'https://photon.komoot.io/api/?lang=it&limit=6&bbox=6.6,35.4,18.6,47.1&q=' + encodeURIComponent(q);
+      try { if (controller) controller.abort(); } catch(_){}
+      controller = ('AbortController' in window) ? new AbortController() : null;
+      fetch(url, controller ? { signal: controller.signal } : {})
+        .then(function(r){ return r.json(); })
+        .then(function(res){
+          feats = (res.features || []).filter(function(f){ return f.properties && (f.properties.street || f.properties.name); }).slice(0, 6);
+          active = -1; render();
+        }).catch(function(){ /* offline / rate-limited → silent, manual entry works */ });
+    }
+    via.addEventListener('input', function(){
+      var q = via.value.trim();
+      clearTimeout(timer);
+      if (q.length < 3){ close(); return; }
+      timer = setTimeout(function(){ query(q); }, 300);
+    });
+    via.addEventListener('keydown', function(e){
+      if (!box.classList.contains('open')) return;
+      if (e.key === 'ArrowDown'){ e.preventDefault(); active = Math.min(active+1, feats.length-1); render(); }
+      else if (e.key === 'ArrowUp'){ e.preventDefault(); active = Math.max(active-1, 0); render(); }
+      else if (e.key === 'Enter' && active >= 0){ e.preventDefault(); pick(feats[active]); }
+      else if (e.key === 'Escape'){ close(); }
+    });
+    via.addEventListener('blur', function(){ setTimeout(close, 150); });
+    box.addEventListener('mousedown', function(e){
+      var btn = e.target.closest('.addr-suggest-item'); if (!btn) return;
+      e.preventDefault(); pick(feats[parseInt(btn.getAttribute('data-i'), 10)]);
+    });
+  }
+
   function addrApi(){ return window.MemiAPI && window.MemiAPI.auth && window.MemiAPI.auth.addresses; }
 
   function saveAddress(form){
@@ -923,7 +1004,7 @@
   function saveAddressLocal(id, data){
     var list = loadAddresses(loadedUser);
     if (id === 'new'){
-      list.push({ id:'a'+Date.now(), label:data.label||'Indirizzo', indirizzo:data.indirizzo, citta:data.citta, cap:data.cap, paese:data.paese, telefono:data.telefono, def:list.length===0 });
+      list.push({ id:'a'+Date.now(), label:data.label||'Indirizzo', indirizzo:data.indirizzo, numero_civico:data.numero_civico, piano:data.piano, nome_campanello:data.nome_campanello, citta:data.citta, cap:data.cap, paese:data.paese, telefono:data.telefono, def:list.length===0 });
     } else {
       list = list.map(function(a){ return a.id===id ? Object.assign(a, data) : a; });
     }

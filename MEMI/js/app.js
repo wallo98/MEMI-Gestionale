@@ -375,6 +375,7 @@ VIEWS.products = function(){
   return `
     ${pageHead("Prodotti","Gestisci catalogo, varianti, prezzi e magazzino.",`
       <button class="btn btn-ghost btn-sm js-export-products">📤 Esporta CSV</button>
+      <button class="btn btn-soft btn-sm js-import-products">📥 Importa CSV</button>
       <button class="btn btn-primary btn-sm js-new-product">+ Nuovo prodotto</button>
     `)}
     <div class="card" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
@@ -2366,6 +2367,49 @@ $(function(){
   /* ═══════════════════════════════════════════════════
      ⭐ NEW PRODUCT — create modal
      ═══════════════════════════════════════════════════ */
+  /* ── Bulk CSV import ── */
+  $(document).on('click','.js-import-products', function(){
+    var tpl = (window.AdminAPI && AdminAPI.products.importTemplateUrl) ? AdminAPI.products.importTemplateUrl() : '/api/admin/products/import/template';
+    openModal('Importa prodotti (CSV)',
+      '<p style="color:var(--muted);font-size:.88rem;line-height:1.6;margin-bottom:12px">' +
+        'Carica un CSV con i prodotti. Le taglie vanno in <code>sizes</code> come <code>S:5|M:8|L:3</code>, le collezioni in <code>collections</code> separate da <code>|</code>, e le immagini come URL pubblici in <code>image_urls</code> (separati da <code>|</code>). ' +
+        '<a href="' + tpl + '" style="color:var(--accent,#6b6ba3);text-decoration:underline">Scarica il template</a>.' +
+      '</p>' +
+      '<input type="file" id="importFile" accept=".csv,text/csv" style="margin-bottom:12px;display:block"/>' +
+      '<div id="importMsg" style="font-size:.85rem;margin-bottom:8px;min-height:18px"></div>' +
+      '<div id="importPreview" style="max-height:320px;overflow:auto"></div>' +
+      '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">' +
+        '<button class="btn btn-soft btn-sm js-import-preview">Anteprima</button>' +
+        '<button class="btn btn-primary btn-sm js-import-run" disabled>Importa</button>' +
+      '</div>'
+    );
+  });
+  function _importFile(){ var f = document.getElementById('importFile'); return f && f.files && f.files[0]; }
+  $(document).on('click','.js-import-preview', function(){
+    var file = _importFile(), msg = $('#importMsg');
+    if (!file){ msg.html('<span style="color:#c0453a">Seleziona un file CSV.</span>'); return; }
+    msg.text('Analisi in corso…'); $('#importPreview').empty(); $('.js-import-run').prop('disabled', true);
+    AdminAPI.products.importCsv(file, true).done(function(r){
+      msg.html('<strong>'+r.total+'</strong> righe · <span style="color:#2d7a4f">'+r.create+' nuovi</span> · <span style="color:#3a5bd9">'+r.update+' aggiornati</span> · <span style="color:#c0453a">'+r.errors+' errori</span>');
+      var rows = (r.preview||[]).map(function(p){
+        var col = p.action==='error' ? '#c0453a' : (p.action==='update' ? '#3a5bd9' : '#2d7a4f');
+        return '<tr><td>'+p.row+'</td><td>'+(p.id||'—')+'</td><td>'+(p.name||'—')+'</td>' +
+               '<td style="color:'+col+';font-weight:600">'+p.action+'</td><td style="color:#c0453a">'+((p.errors||[]).join(', '))+'</td></tr>';
+      }).join('');
+      $('#importPreview').html('<table class="data" style="width:100%;font-size:.82rem"><thead><tr><th>Riga</th><th>ID</th><th>Nome</th><th>Azione</th><th>Errori</th></tr></thead><tbody>'+rows+'</tbody></table>');
+      $('.js-import-run').prop('disabled', (r.create + r.update) === 0);
+    }).fail(function(x){ msg.html('<span style="color:#c0453a">Errore: '+((x.responseJSON&&x.responseJSON.error)||'CSV non valido')+'</span>'); });
+  });
+  $(document).on('click','.js-import-run', function(){
+    var file = _importFile(), msg = $('#importMsg'); if (!file) return;
+    var btn = $(this); btn.prop('disabled', true).text('Import in corso…');
+    AdminAPI.products.importCsv(file, false).done(function(r){
+      msg.html('<strong style="color:#2d7a4f">Import completato:</strong> '+r.created+' creati, '+r.updated+' aggiornati, '+r.errors+' errori. Immagini: '+r.imagesOk+' ok'+(r.imagesFail?', '+r.imagesFail+' fallite':'')+'.');
+      if (window.toast) toast('Import: '+(r.created+r.updated)+' prodotti', 'success');
+      setTimeout(function(){ if (window.closeModal) closeModal(); if (window.renderView) renderView('products'); }, 1600);
+    }).fail(function(x){ msg.html('<span style="color:#c0453a">Errore: '+((x.responseJSON&&x.responseJSON.error)||'import fallito')+'</span>'); btn.prop('disabled', false).text('Importa'); });
+  });
+
   $(document).on('click','.js-new-product', function(){
     openModal('Nuovo prodotto', `
       <form id="newProductForm">

@@ -61,19 +61,23 @@ router.put('/wishlist', requireCustomer, async (req, res) => {
 function cleanAddr(b) {
   const s = (v) => (typeof v === 'string' ? v.trim() : '') || null;
   return {
-    label:     s(b.label),
-    indirizzo: s(b.indirizzo),
-    citta:     s(b.citta),
-    cap:       s(b.cap),
-    paese:     s(b.paese) || 'Italia',
-    telefono:  s(b.telefono),
+    label:           s(b.label),
+    indirizzo:       s(b.indirizzo),        // via / street
+    numero_civico:   s(b.numero_civico),
+    piano:           s(b.piano),
+    nome_campanello: s(b.nome_campanello),
+    citta:           s(b.citta),
+    cap:             s(b.cap),
+    paese:           s(b.paese) || 'Italia',
+    telefono:        s(b.telefono),
   };
 }
 
 router.get('/addresses', requireCustomer, async (req, res) => {
   try {
     const [rows] = await pool.execute(
-      `SELECT id, label, indirizzo, citta, cap, paese, telefono, is_default
+      `SELECT id, label, indirizzo, numero_civico, piano, nome_campanello,
+              citta, cap, paese, telefono, is_default
        FROM customer_addresses WHERE customer_id = ?
        ORDER BY is_default DESC, id ASC`,
       [req.customer.id]
@@ -100,9 +104,9 @@ router.post('/addresses', requireCustomer, async (req, res) => {
       await conn.execute('UPDATE customer_addresses SET is_default = 0 WHERE customer_id = ?', [req.customer.id]);
     }
     const [result] = await conn.execute(
-      `INSERT INTO customer_addresses (customer_id, label, indirizzo, citta, cap, paese, telefono, is_default)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [req.customer.id, a.label, a.indirizzo, a.citta, a.cap, a.paese, a.telefono, makeDefault ? 1 : 0]
+      `INSERT INTO customer_addresses (customer_id, label, indirizzo, numero_civico, piano, nome_campanello, citta, cap, paese, telefono, is_default)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [req.customer.id, a.label, a.indirizzo, a.numero_civico, a.piano, a.nome_campanello, a.citta, a.cap, a.paese, a.telefono, makeDefault ? 1 : 0]
     );
     if (makeDefault) await syncDefaultToProfile(conn, req.customer.id, a);
     await conn.commit();
@@ -123,9 +127,10 @@ router.put('/addresses/:id', requireCustomer, async (req, res) => {
   try {
     const [result] = await pool.execute(
       `UPDATE customer_addresses
-       SET label = ?, indirizzo = ?, citta = ?, cap = ?, paese = ?, telefono = ?
+       SET label = ?, indirizzo = ?, numero_civico = ?, piano = ?, nome_campanello = ?,
+           citta = ?, cap = ?, paese = ?, telefono = ?
        WHERE id = ? AND customer_id = ?`,
-      [a.label, a.indirizzo, a.citta, a.cap, a.paese, a.telefono, id, req.customer.id]
+      [a.label, a.indirizzo, a.numero_civico, a.piano, a.nome_campanello, a.citta, a.cap, a.paese, a.telefono, id, req.customer.id]
     );
     if (result.affectedRows === 0) return res.status(404).json({ error: 'Indirizzo non trovato' });
     // Keep the profile's single address mirror in sync if this is the default one.
@@ -176,7 +181,7 @@ router.put('/addresses/:id/default', requireCustomer, async (req, res) => {
   try {
     await conn.beginTransaction();
     const [[row]] = await conn.execute(
-      'SELECT id, label, indirizzo, citta, cap, paese, telefono FROM customer_addresses WHERE id = ? AND customer_id = ?',
+      'SELECT id, label, indirizzo, numero_civico, citta, cap, paese, telefono FROM customer_addresses WHERE id = ? AND customer_id = ?',
       [id, req.customer.id]
     );
     if (!row) { await conn.rollback(); return res.status(404).json({ error: 'Indirizzo non trovato' }); }
@@ -197,9 +202,12 @@ router.put('/addresses/:id/default', requireCustomer, async (req, res) => {
 // Mirror the default address onto customers.* so checkout pre-fill keeps working.
 async function syncDefaultToProfile(execer, customerId, a) {
   try {
+    // Combine "via" + civic number into the profile's single address line so
+    // checkout pre-fill (which reads customers.indirizzo) gets a complete address.
+    const street = [a.indirizzo, a.numero_civico].filter(Boolean).join(', ') || a.indirizzo || null;
     await execer.execute(
       'UPDATE customers SET indirizzo = ?, citta = ?, cap = ?, paese = ? WHERE id = ?',
-      [a.indirizzo || null, a.citta || null, a.cap || null, a.paese || 'Italia', customerId]
+      [street, a.citta || null, a.cap || null, a.paese || 'Italia', customerId]
     );
   } catch (_) { /* non-fatal mirror */ }
 }
