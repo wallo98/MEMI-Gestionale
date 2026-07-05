@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
@@ -87,16 +87,23 @@
     }
     .about-hero-content {
       position: absolute;
-      top: 0; left: 0; right: 0;
+      left: 0; right: 0;
       z-index: 2;
-      /* The rod in the photo sits at ~36% of the cover crop, so the wrapper
-         spans exactly the clear wall band above it and centers the grouped
-         text (eyebrow + title + paragraph) inside that band — the block
-         fills the empty space evenly instead of hugging the very top, and
-         never reaches the clothes below. min-height lets the band grow
-         downward instead of clipping if the text needs more room on short
-         viewports; the vh-clamped title keeps that overflow rare. */
-      height: 36%;
+      /* Measured on the source photo (1920x1280): the hanging rod dips to
+         ~39% of the image height, which the top-anchored cover crop puts at
+         ~46% of the viewport on 16:9 desktops and ~39% on tall phone crops
+         (portrait override below). The band starts just under the sticky
+         header and ends just above the rod (top + height ≈ 50%), so
+         flex-centering the grouped subtitle + title + paragraph inside it
+         lands the block in the middle of the empty wall — clear of both the
+         header above and the rod/clothes below. No translate shifts.
+         min-height lets the band grow downward instead of clipping if the
+         text outgrows it on very short viewports; the vh-clamped title
+         keeps that overflow rare.
+         
+         TO ADJUST POSITION: Change the 'top' property below. Larger values (e.g. 15rem, 35vh) push it lower. */
+      top: clamp(3rem, 6vh, 5rem);
+      height: 44%;
       min-height: max-content;
       display: flex;
       flex-direction: column;
@@ -105,15 +112,26 @@
       text-align: center;
       padding: clamp(1.25rem, 3vh, 2.5rem) var(--space-6);
     }
+    @media (orientation: portrait) {
+      /* Portrait cover-crop shows the full image height, so the rod dip sits
+         higher (~39% of the hero). Shorter offset + band keep the block
+         centered in the smaller wall area and off the rod.
+         
+         TO ADJUST POSITION ON MOBILE: Change the 'top' property below. */
+      .about-hero-content {
+        top: clamp(8rem, 18vh, 12rem);
+        height: 32%;
+      }
+    }
     .about-hero-eyebrow {
-      font-size: var(--text-xs);
+      font-size: clamp(0.95rem, 1.5vw, 1.15rem);
       letter-spacing: var(--tracking-wider);
       text-transform: uppercase;
       color: rgba(255,255,255,.7);
       font-weight: 500;
-      /* vh-scaled gaps let the group spread to fill the band on tall
-         screens and tighten on short ones — text sizes stay untouched */
-      margin-bottom: clamp(0.75rem, 1.6vh, 1.5rem);
+      /* vh-scaled gaps let the group spread a little on tall screens and
+         tighten on short ones — text sizes stay untouched */
+      margin-bottom: clamp(1rem, 2.2vh, 2rem);
       opacity: 0;
       animation: fadeUp 0.8s ease-out 0.3s forwards;
     }
@@ -121,20 +139,20 @@
       font-family: var(--font-serif);
       /* vh term keeps the two-line title short enough on laptops/short
          windows that the paragraph below still clears the rod */
-      font-size: clamp(2rem, min(5vw, 6.5vh), 4.25rem);
+      font-size: clamp(3.2rem, min(8vw, 10vh), 6.2rem);
       font-weight: 300;
-      line-height: 1.0;
+      line-height: 1.1;
       color: var(--white);
       letter-spacing: -0.04em;
-      margin-bottom: clamp(1rem, 2.2vh, 2rem);
+      margin-bottom: clamp(1.25rem, 2.5vh, 2.5rem);
       opacity: 0;
       animation: fadeUp 0.9s ease-out 0.45s forwards;
     }
     .about-hero-title em { font-style: italic; }
     .about-hero-sub {
-      font-size: var(--text-sm);
+      font-size: clamp(1.1rem, 2vw, 1.4rem);
       color: rgba(255,255,255,.8);   /* was .55 — extra contrast insurance */
-      max-width: 500px;
+      max-width: 650px;
       line-height: 1.6;
       opacity: 0;
       animation: fadeUp 0.7s ease-out 0.65s forwards;
