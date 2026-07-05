@@ -64,6 +64,17 @@ while IFS= read -r -d '' f; do
 done < <(find "Memi Abbigliamento" MEMI -name "*.html" -not -path "*/node_modules/*" -print0)
 if [ "$BAD" -eq 0 ]; then echo "  ✓ all HTML files end with </html>"; else FAIL=1; fi
 
+sec "9. Backend module load check (catches boot-time ReferenceErrors)"
+# node --check misses runtime errors like using a schema that was never imported.
+# Actually require every route module (sharp stubbed) the way server.js would.
+LOADFAIL=0
+for rf in MEMI-Backend/src/routes/*.js; do
+  if ! NODE_PATH="$NP" node -r ./verify/stub-sharp.cjs -e "require('./$rf')" >/dev/null 2>&1; then
+    echo "  ✗ fails to load: $rf"; LOADFAIL=1
+  fi
+done
+if [ "$LOADFAIL" -eq 0 ]; then echo "  ✓ all backend route modules load cleanly"; else FAIL=1; fi
+
 echo
 if [ "$FAIL" -eq 0 ]; then echo "✅  ALL VERIFICATION PASSED"; else echo "❌  VERIFICATION FAILED"; fi
 exit $FAIL

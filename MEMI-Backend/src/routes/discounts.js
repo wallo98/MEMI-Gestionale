@@ -12,7 +12,7 @@
 const router = require('express').Router();
 const { pool }         = require('../db');
 const { requireAdmin } = require('../middleware/auth');
-const { validateBody, createDiscountSchema } = require('../validation');
+const { validateBody, createDiscountSchema, updateDiscountSchema } = require('../validation');
 const { logAdminAction } = require('../audit');
 
 const ALLOWED_TIPI  = ['percentuale', 'fisso', 'spedizione'];

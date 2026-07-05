@@ -341,3 +341,11 @@ orders. These are new features, not fixes — best tackled during/after the Reac
   bcrypt, audited) + 🔑 button in the admin sidebar footer (works for both admin and staff roles) opening
   a modal with confirmation field.
 - Bookkeeping: 6 new contract checks, smoke-test 401 assertion, docs/api.md + integrations.md updated.
+
+### 2026-07-05 — hotfix: deploy 3b5e147 boot crash
+- Phase C introduced `validateBody(updateDiscountSchema)` / `(updateGiftcardSchema)` in discounts.js /
+  giftcards.js without extending their existing `require('../validation')` imports → ReferenceError at
+  module load → backend container unhealthy → Coolify deploy failed (and old containers were already
+  removed, so the API was down until redeploy). Imports fixed; boot verified locally.
+- **New guard**: `verify/run.sh` section 9 now actually `require()`s every backend route module (with
+  `verify/stub-sharp.cjs` preload) — `node --check` alone cannot catch missing-import runtime errors.

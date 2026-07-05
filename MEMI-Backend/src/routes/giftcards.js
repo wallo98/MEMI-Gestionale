@@ -13,7 +13,7 @@ const router = require('express').Router();
 const { pool }         = require('../db');
 const { requireAdmin } = require('../middleware/auth');
 const { sendGiftCardDelivery } = require('../email');
-const { validateBody, createGiftcardSchema } = require('../validation');
+const { validateBody, createGiftcardSchema, updateGiftcardSchema } = require('../validation');
 const { logAdminAction } = require('../audit');
 
 function genCode() {
