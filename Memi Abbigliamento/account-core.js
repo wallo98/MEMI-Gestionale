@@ -446,6 +446,8 @@
   /* ══════════════════ PROFILE (read-only → edit) ══════════════════ */
   var profileEditing = false;
   var sizesEditing = false;
+  var prefsEditing = false;
+  var newsEditing = false;
   function dataRow(label, val){ return '<div class="ap-datarow"><span class="ap-datalabel">' + label + '</span><span class="ap-dataval">' + (esc(val)||'—') + '</span></div>'; }
   function renderProfile(user){
     if (!profileEditing){
@@ -577,6 +579,22 @@
   var PREF_COLORS = [ {k:'rosa',c:'#F3D1D6'},{k:'verde',c:'#CCE2CB'},{k:'viola',c:'#C5BEE2'},{k:'crema',c:'#F7F5F0'},{k:'nero',c:'#3B2B2B'} ];
   function renderPrefs(){
     var p = lget('memi_prefs', { categories:[], colors:[], email:true, sms:false });
+    // Display mode — read-only summary + Edit (mirrors "I miei dati").
+    if (!prefsEditing){
+      var catNames = (p.categories||[]).map(function(c){ return c.charAt(0).toUpperCase()+c.slice(1); }).join(', ');
+      var swatches = (p.colors||[]).length
+        ? (p.colors||[]).map(function(k){ var o=PREF_COLORS.filter(function(x){return x.k===k;})[0]; return '<span title="' + esc(k) + '" style="width:20px;height:20px;border-radius:50%;display:inline-block;border:1px solid var(--beige,#DBDBEE);background:' + ((o&&o.c)||'#eee') + '"></span>'; }).join('')
+        : '';
+      var contact = t('pref.email') + ' ' + (p.email?'✓':'✗') + ' · ' + t('pref.sms') + ' ' + (p.sms?'✓':'✗');
+      return '<p class="ap-intro">' + t('pref.intro') + '</p>' +
+        '<div class="ap-block">' +
+          dataRow(t('pref.cats'), catNames) +
+          '<div class="ap-datarow"><span class="ap-datalabel">' + t('pref.colors') + '</span><span class="ap-dataval" style="display:flex;gap:6px;align-items:center">' + (swatches || '—') + '</span></div>' +
+          dataRow(t('pref.contact'), contact) +
+          '<div class="ap-actions"><button class="btn-primary-solid" id="prefEditBtn">' + EDIT_ICON + t('btn.edit') + '</button></div>' +
+        '</div>';
+    }
+    // Edit mode — interactive chips + toggles.
     var cats = PREF_CATS.map(function(c){
       var on = (p.categories||[]).indexOf(c)>-1;
       return '<button type="button" class="chip-toggle' + (on?' on':'') + '" data-pref-cat="' + c + '">' + c.charAt(0).toUpperCase()+c.slice(1) + '</button>';
@@ -592,7 +610,9 @@
         '<h3 style="font-size:1rem;margin-top:1.25rem">' + t('pref.contact') + '</h3>' +
         '<label class="switch-row"><input type="checkbox" id="prefEmail"' + (p.email?' checked':'') + '> ' + t('pref.email') + '</label>' +
         '<label class="switch-row"><input type="checkbox" id="prefSms"' + (p.sms?' checked':'') + '> ' + t('pref.sms') + '</label>' +
-        '<div class="profile-form-footer" style="padding-top:1rem"><button type="button" class="btn-primary-solid" id="prefSaveBtn">' + t('btn.save') + '</button><span id="prefMsg" class="ap-msg"></span></div>' +
+        '<div class="profile-form-footer" style="padding-top:1rem"><button type="button" class="btn-primary-solid" id="prefSaveBtn">' + t('btn.save') + '</button>' +
+          '<button type="button" class="btn-outline" id="prefCancelBtn">' + t('btn.cancel') + '</button>' +
+          '<span id="prefMsg" class="ap-msg"></span></div>' +
       '</div>';
   }
 
@@ -600,6 +620,19 @@
   var NEWS_TOPICS = ['novita','saldi','editoriali','eventi'];
   function renderNewsletter(user){
     var n = lget('memi_news', { subscribed:true, freq:'biweekly', topics:['novita','saldi'] });
+    var FREQ = { weekly:t('news.freq.weekly'), biweekly:t('news.freq.biweekly'), monthly:t('news.freq.monthly') };
+    // Display mode — read-only summary + Edit (mirrors "I miei dati").
+    if (!newsEditing){
+      var topicNames = (n.topics||[]).map(function(k){ return t('news.t.'+k); }).join(', ');
+      return '<p class="ap-intro">' + t('news.intro') + '</p>' +
+        '<div class="ap-block">' +
+          dataRow(t('news.sub'), n.subscribed ? t('news.subscribed') : t('news.unsub')) +
+          (n.subscribed ? dataRow(t('news.freq'), FREQ[n.freq] || FREQ.biweekly) : '') +
+          (n.subscribed ? '<div class="ap-datarow"><span class="ap-datalabel">' + t('news.topics') + '</span><span class="ap-dataval">' + (topicNames || '—') + '</span></div>' : '') +
+          '<div class="ap-actions"><button class="btn-primary-solid" id="newsEditBtn">' + EDIT_ICON + t('btn.edit') + '</button></div>' +
+        '</div>';
+    }
+    // Edit mode.
     var topics = NEWS_TOPICS.map(function(k){
       var on = (n.topics||[]).indexOf(k)>-1;
       return '<button type="button" class="chip-toggle' + (on?' on':'') + '" data-news-topic="' + k + '">' + t('news.t.'+k) + '</button>';
@@ -615,7 +648,9 @@
           '<select class="field-input" id="newsFreq" style="max-width:260px;margin-bottom:1.1rem">' + opt('weekly',t('news.freq.weekly')) + opt('biweekly',t('news.freq.biweekly')) + opt('monthly',t('news.freq.monthly')) + '</select>' +
           '<h3 style="font-size:1rem">' + t('news.topics') + '</h3><div class="chip-row">' + topics + '</div>' +
         '</div>' +
-        '<div class="profile-form-footer" style="padding-top:1.1rem"><button type="button" class="btn-primary-solid" id="newsSaveBtn">' + t('btn.save') + '</button><span id="newsMsg" class="ap-msg"></span></div>' +
+        '<div class="profile-form-footer" style="padding-top:1.1rem"><button type="button" class="btn-primary-solid" id="newsSaveBtn">' + t('btn.save') + '</button>' +
+          '<button type="button" class="btn-outline" id="newsCancelBtn">' + t('btn.cancel') + '</button>' +
+          '<span id="newsMsg" class="ap-msg"></span></div>' +
       '</div>';
   }
 
@@ -841,6 +876,10 @@
     if (e.target.closest('#profileCancelBtn')){ profileEditing = false; rerenderPanel(); return; }
     if (e.target.closest('#sizesEditBtn')){ sizesEditing = true; rerenderPanel(); return; }
     if (e.target.closest('#sizesCancelBtn')){ sizesEditing = false; rerenderPanel(); return; }
+    if (e.target.closest('#prefEditBtn')){ prefsEditing = true; rerenderPanel(); return; }
+    if (e.target.closest('#prefCancelBtn')){ prefsEditing = false; rerenderPanel(); return; }
+    if (e.target.closest('#newsEditBtn')){ newsEditing = true; rerenderPanel(); return; }
+    if (e.target.closest('#newsCancelBtn')){ newsEditing = false; rerenderPanel(); return; }
     var pc = e.target.closest('[data-pref-cat]'); if (pc){ togglePref('categories', pc.getAttribute('data-pref-cat'), pc); return; }
     var pcol = e.target.closest('[data-pref-color]'); if (pcol){ togglePref('colors', pcol.getAttribute('data-pref-color'), pcol); return; }
     var ntp = e.target.closest('[data-news-topic]'); if (ntp){ ntp.classList.toggle('on'); return; }
@@ -907,7 +946,10 @@
       var p = lget('memi_prefs', {});
       p.email = el('prefEmail').checked; p.sms = el('prefSms').checked;
       lset('memi_prefs', p);
-      apiSave(el('prefMsg'), window.MemiAPI && window.MemiAPI.auth.savePreferences && window.MemiAPI.auth.savePreferences(p));
+      var pr = window.MemiAPI && window.MemiAPI.auth.savePreferences && window.MemiAPI.auth.savePreferences(p);
+      apiSave(el('prefMsg'), pr);
+      if (pr && pr.then) pr.then(function(){ setTimeout(function(){ prefsEditing = false; rerenderPanel(); }, 700); });
+      else setTimeout(function(){ prefsEditing = false; rerenderPanel(); }, 700);
     });
 
     var ntg = el('newsToggleBtn');
@@ -920,8 +962,11 @@
       if (el('newsFreq')) n.freq = el('newsFreq').value;
       var topics = []; (el('apPanel').querySelectorAll('[data-news-topic].on')||[]).forEach(function(b){ topics.push(b.getAttribute('data-news-topic')); });
       n.topics = topics; lset('memi_news', n);
-      apiSave(el('newsMsg'), window.MemiAPI && window.MemiAPI.auth.newsletter &&
-        window.MemiAPI.auth.newsletter.save({ subscribed:n.subscribed !== false, frequenza:n.freq, topics:topics }));
+      var pr = window.MemiAPI && window.MemiAPI.auth.newsletter &&
+        window.MemiAPI.auth.newsletter.save({ subscribed:n.subscribed !== false, frequenza:n.freq, topics:topics });
+      apiSave(el('newsMsg'), pr);
+      if (pr && pr.then) pr.then(function(){ setTimeout(function(){ newsEditing = false; rerenderPanel(); }, 700); });
+      else setTimeout(function(){ newsEditing = false; rerenderPanel(); }, 700);
     });
   }
 
