@@ -35,7 +35,7 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;}
   border:1px solid var(--beige);border-radius:var(--radius-lg);padding:1.5rem 1.35rem;
   text-align:center;}
 .ap-avatar{width:66px;height:66px;border-radius:50%;margin:0 auto .8rem;
-  background:linear-gradient(150deg,var(--lavender),var(--blush));display:flex;
+  background:linear-gradient(150deg,var(--brand-violet-mid,#8F8FC1),var(--brand-violet-dark,#6B6BA3));display:flex;
   align-items:center;justify-content:center;font-family:var(--font-serif);
   font-size:1.7rem;color:#fff;font-weight:400;box-shadow:var(--shadow-sm);}
 .ap-side-name{font-family:var(--font-serif);font-size:1.3rem;font-weight:400;
@@ -129,13 +129,13 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;}
 
 /* ═══ Fidelity card ═══ */
 .fcard{position:relative;border-radius:var(--radius-lg);padding:1.5rem 1.6rem;color:#fff;
-  background:linear-gradient(135deg,#C5BEE2 0%,#D9BED6 42%,#F3D1D6 100%);
+  background:linear-gradient(135deg,var(--brand-violet-dark,#6B6BA3) 0%,var(--brand-violet-deep,#5C5C94) 100%);
   box-shadow:var(--shadow-md);overflow:hidden;aspect-ratio:1.586/1;min-height:200px;
   display:flex;flex-direction:column;justify-content:space-between;}
 .fcard::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;
   border-radius:50%;background:rgba(255,255,255,.16);}
 .fcard::before{content:"";position:absolute;left:-30px;bottom:-50px;width:150px;height:150px;
-  border-radius:50%;background:rgba(255,255,255,.10);}
+  border-radius:50%;background:var(--brand-mint,#D5E4C3);opacity:.22;}
 .fcard-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;}
 .fcard-logo{font-family:var(--font-serif);font-size:1.5rem;font-weight:400;letter-spacing:.04em;}
 .fcard-logo span{color:rgba(255,255,255,.7);}
@@ -165,7 +165,7 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;}
 .ap-tier-prog-bar{height:9px;border-radius:var(--radius-full);background:var(--bg-soft);
   overflow:hidden;margin:.55rem 0 .5rem;}
 .ap-tier-prog-fill{height:100%;border-radius:var(--radius-full);
-  background:linear-gradient(90deg,var(--lavender),var(--blush));transition:width .8s var(--ease-out);}
+  background:linear-gradient(90deg,var(--brand-violet-mid,#8F8FC1),var(--brand-mint-mid,#9CB37F));transition:width .8s var(--ease-out);}
 .ap-tier-prog-txt{font-size:.8rem;color:var(--brown-mid);}
 .ap-tier-prog-txt strong{color:var(--espresso);}
 
@@ -343,7 +343,7 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;}
 .tier-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
 @media(max-width:720px){.tier-cards{grid-template-columns:1fr;}}
 .tier-card{background:#fff;border:1px solid var(--beige);border-radius:var(--radius-lg);padding:1.35rem 1.4rem;}
-.tier-card.active{border-color:var(--lavender);box-shadow:var(--shadow-sm);background:linear-gradient(180deg,var(--lavender-light),#fff 55%);}
+.tier-card.active{border-color:var(--brand-violet-mid,#8F8FC1);box-shadow:var(--shadow-sm);background:linear-gradient(180deg,var(--brand-mint-light,#EAF1E0),#fff 60%);}
 .tier-card-head{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.9rem;}
 .tier-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
 .tier-card-name{font-family:var(--font-serif);font-size:1.3rem;color:var(--espresso);}

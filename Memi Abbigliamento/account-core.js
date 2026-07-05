@@ -172,9 +172,9 @@
 
   /* ── Tiers (flower theme) + benefits ────────────────── */
   var TIERS = [
-    { key:'petalo',  name:'Petalo',   min:0,   color:'#C4A8B0' },
-    { key:'fiore',   name:'Fiore',    min:200, color:'#A89BC4' },
-    { key:'giardino',name:'Giardino', min:500, color:'#85A884' }
+    { key:'petalo',  name:'Petalo',   min:0,   color:'#8F8FC1' },
+    { key:'fiore',   name:'Fiore',    min:200, color:'#6B6BA3' },
+    { key:'giardino',name:'Giardino', min:500, color:'#5F7A3F' }
   ];
   var BENEFITS = {
     it: {

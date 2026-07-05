@@ -6,8 +6,17 @@
   <title>DEMO Area Personale</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="tokens.css?v=2" />
-  <link rel="stylesheet" href="account.css?v=2" />
+  <link rel="stylesheet" href="account.css?v=3" />
   <style>
+    /* DEMO-ONLY: preview the new 2-colour palette (violet + mint) without
+       touching the shared tokens.css. Mirrors the live token values. */
+    :root{
+      --brand-violet:#F1F0F8;--brand-mint:#D5E4C3;--brand-violet-dark:#6B6BA3;--brand-mint-dark:#5F7A3F;
+      --brand-violet-light:#F1F0F8;--brand-mint-light:#EAF1E0;--brand-violet-mid:#8F8FC1;--brand-mint-mid:#9CB37F;--brand-violet-deep:#5C5C94;
+      --bg-soft:#F1F0F8;--blush:#F1F0F8;--blush-light:#F1F0F8;--blush-dark:#6B6BA3;
+      --sage:#D5E4C3;--sage-light:#EAF1E0;--sage-dark:#5F7A3F;--lavender:#F1F0F8;--lavender-light:#F1F0F8;
+      --beige:#DBDBEE;--beige-dark:#BEBEDD;--cream-dark:#E9E9F3;--lavender-dark:#6B6BA3;
+    }
     .demo-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1px solid var(--beige);}
     .demo-header .logo{font-family:var(--font-serif);font-size:1.6rem;letter-spacing:.05em;}
     .demo-header .logo span{color:var(--blush-dark);}
