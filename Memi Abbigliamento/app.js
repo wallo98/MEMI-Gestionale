@@ -146,12 +146,10 @@
       '<div class="header-actions">' +
         '<button class="icon-btn" aria-label="Cerca"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>' +
         '<button class="icon-btn" aria-label="Carrello"><svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span class="cart-badge" style="display:none">0</span></button>' +
-        '<div class="lang-switch" role="group" aria-label="Lingua del sito">' +
-          '<button type="button" class="lang-opt" data-lang="it">IT</button>' +
-          '<span class="lang-sep" aria-hidden="true">/</span>' +
-          '<button type="button" class="lang-opt" data-lang="en">EN</button>' +
-        '</div>' +
       '</div>';
+    // NOTE: EN/IT language switch removed until real translations exist — the
+    // storefront is Italian-only HTML, so the toggle had nothing to swap to.
+    // The .lang-switch CSS + wireLangSwitch() remain dormant for easy re-add.
 
     const headerHtml =
       '<header class="site-header" id="siteHeader">' +
@@ -159,7 +157,7 @@
           '<button class="burger" aria-label="Apri menu" aria-expanded="false"><span></span><span></span><span></span></button>' +
           '<div class="nav-left-group">' + desktopNavLeft + desktopNavRight + '</div>' +
           '<a href="/" class="logo" aria-label="Memi Abbigliamento — Home">' +
-            '<img src="/logo.svg" alt="Memì" class="logo-img" />' +
+            '<img src="/favicon.svg" alt="Memì" class="logo-img" />' +
           '</a>' +
           '<div class="nav-right-group">' + headerActions + '</div>' +
         '</div>' +
@@ -404,7 +402,7 @@
   </div>
   <div class="sf2-inner">
     <div class="sf2-brand">
-      <a href="/" class="sf2-logo" aria-label="Memi Abbigliamento — Home"><img src="/logo.svg" alt="Memì" class="sf2-logo-img" /></a>
+      <a href="/" class="sf2-logo" aria-label="Memi Abbigliamento — Home"><img src="/favicon.svg" alt="Memì" class="sf2-logo-img" /></a>
       <p class="sf2-tagline">Moda femminile curata, italiana.</p>
       <div class="sf2-social">
         <a href="https://instagram.com/memiabbigliamento" aria-label="Instagram" target="_blank" rel="noopener">
@@ -482,7 +480,7 @@
         .sf2-inner{max-width:1280px;margin:0 auto;padding:3.25rem 2rem 3.5rem;display:grid;grid-template-columns:1fr 2fr;gap:4rem;align-items:start;}
         @media(max-width:800px){.sf2-inner{grid-template-columns:1fr;gap:2.5rem;}}
         .sf2-logo{display:inline-block;margin-bottom:.55rem;line-height:0;text-decoration:none;}
-        .sf2-logo-img{height:58px;width:auto;display:block;}
+        .sf2-logo-img{height:58px;width:58px;border-radius:50%;object-fit:cover;display:block;}
         /* prev footer lockup (revert): .sf2-logo{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:#3B2B2B;letter-spacing:.06em;display:inline-flex;align-items:center;gap:.55rem} .sf2-logo-badge{width:40px;height:40px;border-radius:11px;box-shadow:0 2px 10px rgba(107,107,163,.2)} */
         .sf2-logo em{color:var(--blush-dark,#6B6BA3);font-style:normal;}
         .sf2-tagline{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--brown-light,#9e8a8a);margin-bottom:1.75rem;}
@@ -638,7 +636,7 @@
     document.body.insertAdjacentHTML('beforeend', `
       <nav class="mobile-nav-drawer" id="mobileNavDrawer" role="navigation" aria-label="Menu principale">
         <div class="mobile-nav-header">
-          <a href="/" class="mobile-nav-logo"><img src="/logo.svg" alt="Memì" class="mobile-nav-logo-img" /></a>
+          <a href="/" class="mobile-nav-logo"><img src="/favicon.svg" alt="Memì" class="mobile-nav-logo-img" /></a>
           <button class="mobile-nav-close" id="mobileNavClose" aria-label="Chiudi menu">
             <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -658,11 +656,6 @@
           }).join('')}
         </div>
         <div class="mobile-nav-footer">
-          <div class="mobile-nav-lang lang-switch" role="group" aria-label="Lingua del sito">
-            <button type="button" class="lang-opt" data-lang="it">IT</button>
-            <span class="lang-sep" aria-hidden="true">/</span>
-            <button type="button" class="lang-opt" data-lang="en">EN</button>
-          </div>
           <div class="mobile-nav-social">
             <a href="https://instagram.com/memiabbigliamento" aria-label="Instagram" target="_blank" rel="noopener">
               <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
@@ -1130,11 +1123,11 @@
          logo at any size. Gentle lift on hover. */
       .logo { display: inline-flex; align-items: center; text-decoration: none; line-height: 0; }
       .logo-img {
-        height: 46px; width: auto; display: block;
+        height: 46px; width: 46px; border-radius: 50%; object-fit: cover; display: block;
         transition: transform 300ms cubic-bezier(.34,1.56,.64,1), opacity 200ms ease;
       }
       .logo:hover .logo-img { transform: scale(1.04); opacity: .85; }
-      @media (min-width: 900px) { .logo-img { height: 56px; } }
+      @media (min-width: 900px) { .logo-img { height: 56px; width: 56px; } }
       /* Mobile: wrapper is transparent so the burger layout is unchanged */
       .nav-left-group { display: contents; }
 
@@ -1162,11 +1155,11 @@
          uncrowded on phones. */
       @media (max-width: 899px) {
         .header-actions .lang-switch { display: none; }
-        .logo-img { height: 40px; }
+        .logo-img { height: 40px; width: 40px; }
       }
       .mobile-nav-lang.lang-switch { margin: 4px 0 16px; }
       .mobile-nav-lang .lang-opt { font-size: 14px; padding: 6px 6px; }
-      .mobile-nav-logo-img { height: 36px; width: auto; display: block; }
+      .mobile-nav-logo-img { height: 36px; width: 36px; border-radius: 50%; object-fit: cover; display: block; }
 
       /* ── Centered word-mark header (Toteme-style) ───────────────
          3-column grid: equal-width flexible side columns keep the
