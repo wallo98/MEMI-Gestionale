@@ -1790,9 +1790,10 @@
     const btn  = document.getElementById('authHeaderBtn');
     if (!btn) return;
     if (user) {
+      const label = user.name || user.email || '';
       btn.classList.add('user-logged');
-      btn.textContent = user.name.charAt(0).toUpperCase();
-      btn.setAttribute('aria-label', 'Il mio account — ' + user.name);
+      btn.textContent = (label || '?').charAt(0).toUpperCase();
+      btn.setAttribute('aria-label', 'Il mio account — ' + label);
     } else {
       btn.classList.remove('user-logged');
       btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
@@ -1957,9 +1958,15 @@
     document.getElementById('accountLogoutBtn')?.addEventListener('click', function() {
       authLogout();
       closeAccountDrawer();
-      updateAuthUI();
-      showAuthToast("Hai effettuato il logout.");
+      // On disconnect, always send the customer to the home page (fresh load) —
+      // never leave them sitting on a now-logged-out profile/account view.
+      window.location.href = 'index.html';
     });
+
+    // On every page load, reflect the logged-in state in the header so the
+    // account initial (e.g. "K") persists across refreshes, not just right
+    // after login.
+    updateAuthUI();
 
     // If the visitor is already logged in on page load, reconcile their
     // wishlist with the account copy so it follows them across devices.
